@@ -1,2 +1,2 @@
-# My online Shop
-## personal project
+# Online Shopping Website
+## Software Engineering UET
