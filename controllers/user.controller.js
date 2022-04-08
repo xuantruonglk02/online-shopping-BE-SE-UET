@@ -1,12 +1,16 @@
 const jwt = require('jsonwebtoken');
 
-exports.getUserId = (token) => {
+function getUserId(token) {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   return decoded.userId;
 }
 
-exports.getCartId = (token) => {
+function getCartId(token) {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   return decoded.cartId;
 }
 
+module.exports = {
+  getUserId,
+  getCartId
+}
