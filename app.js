@@ -4,25 +4,22 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
-const flash = require('connect-flash');
 // const dotenv = require('dotenv').config();
 const dotenv = require('dotenv').config({ path: '.env.localhost' });
 
 // routers
 const indexRouter = require('./routes/index.router');
-const authenticationRouter = require('./routes/authentication.router');
+const authRouter = require('./routes/auth.router');
+const userRouter = require('./routes/user.router');
+const cartRouter = require('./routes/cart.router');
 
 const app = express();
 
-// // view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'ejs');
-
+app.set('trust proxy', 1);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.SECRET_KEY,
   resave: false,
@@ -31,8 +28,27 @@ app.use(session({
     secure: false
   }
 }));
-app.use(flash());
-app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+app.use(function(req, res, next) {
+
+  // Website you wish to allow to connect
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,authorization');
+
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+
+  // Pass to next layer of middleware
+  next();
+});
 
 app.use((req, res, next) => {
   if (!req.session.returnTo) {
@@ -49,7 +65,9 @@ app.use((req, res, next) => {
 
 // routing
 app.use('/', indexRouter);
-app.use('/auth', authenticationRouter);
+app.use('/auth', authRouter);
+app.use('/user', userRouter);
+app.use('/cart', cartRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -64,7 +82,8 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  // res.render('error');
+  res.end('error');
 });
 
 module.exports = app;
