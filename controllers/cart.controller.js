@@ -11,12 +11,12 @@ function getAllProductsInCart(req, res) {
         return res.json({ success: 0 });
       }
 
-      res.json(results);
+      res.json({ results: results });
     });
 }
 
 /**
- * productId
+ * productId : body
  */
 function addProduct(req, res) {
   if (!req.body.productId || isNaN(req.body.productId)) {
@@ -39,18 +39,17 @@ function addProduct(req, res) {
 }
 
 /**
- * list: [{
- *  productId,
- *  amount
- * }]
+ * list: [{productId,amount}] : body
  */
 function updateCart(req, res) {
   if (!req.body.list) { return res.json({ success: 0 }); }
   try {
     req.body.list = JSON.parse(req.body.list);
   } catch (err) {
-    console.log(err);
-    if (err) { return res.json({ success: 0 }); }
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
   }
   if (!req.body.list.length) { return res.json({ success: 1 }); }
 
@@ -74,14 +73,17 @@ function updateCart(req, res) {
   const params = req.body.list.reduce((p,c) => p.concat([c.productId, c.amount]), []);
 
   connection.query(query, params, (err, results, fields) => {
-    if (err) { return res.json({ success: 0 }); }
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
 
     res.json({ success: 1 });
   });
 }
 
 /**
- * productId
+ * productId : body
  */
 function removeProduct(req, res) {
   if (!req.body.productId || isNaN(req.body.productId) || req.body.productId < 1) {
@@ -94,7 +96,10 @@ function removeProduct(req, res) {
   connection.query('DELETE FROM cart_has_product WHERE cart_id=? AND product_id=?',
     [cartId, req.body.productId],
     (err, results, fields) => {
-      if (err) { return res.json({ success: 0 }); }
+      if (err) {
+        console.log(err);
+        return res.json({ success: 0 });
+      }
       
       res.json({ success: 1 });
     });

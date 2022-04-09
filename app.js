@@ -3,7 +3,6 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const session = require('express-session');
 // const dotenv = require('dotenv').config();
 const dotenv = require('dotenv').config({ path: '.env.localhost' });
 
@@ -12,6 +11,7 @@ const indexRouter = require('./routes/index.router');
 const authRouter = require('./routes/auth.router');
 const userRouter = require('./routes/user.router');
 const cartRouter = require('./routes/cart.router');
+const productRouter = require('./routes/product.router');
 
 const app = express();
 
@@ -20,54 +20,47 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({
-  secret: process.env.SECRET_KEY,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false
-  }
-}));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-app.use(function(req, res, next) {
+// app.use(function(req, res, next) {
 
-  // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', '*');
+//   // Website you wish to allow to connect
+//   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  // Request methods you wish to allow
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+//   // Request methods you wish to allow
+//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
-  // Request headers you wish to allow
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,authorization');
+//   // Request headers you wish to allow
+//   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,authorization');
 
-  // Set to true if you need the website to include cookies in the requests sent
-  // to the API (e.g. in case you use sessions)
-  res.setHeader('Access-Control-Allow-Credentials', true);
+//   // Set to true if you need the website to include cookies in the requests sent
+//   // to the API (e.g. in case you use sessions)
+//   res.setHeader('Access-Control-Allow-Credentials', true);
 
-  // Pass to next layer of middleware
-  next();
-});
+//   // Pass to next layer of middleware
+//   next();
+// });
 
-app.use((req, res, next) => {
-  if (!req.session.returnTo) {
-    req.session.returnTo = '/';
-  } else if (req.method === 'GET'
-    && !req.originalUrl.match(/\/auth\//)
-    && !req.originalUrl.match(/\/css\//)
-    && !req.originalUrl.match(/\/js\//)
-    && !req.originalUrl.match(/(\.ico)$|(\.ico\/)$/)) {
-    req.session.returnTo = req.originalUrl;
-  }
-  next();
-});
+// app.use((req, res, next) => {
+//   if (!req.session.returnTo) {
+//     req.session.returnTo = '/';
+//   } else if (req.method === 'GET'
+//     && !req.originalUrl.match(/\/auth\//)
+//     && !req.originalUrl.match(/\/css\//)
+//     && !req.originalUrl.match(/\/js\//)
+//     && !req.originalUrl.match(/(\.ico)$|(\.ico\/)$/)) {
+//     req.session.returnTo = req.originalUrl;
+//   }
+//   next();
+// });
 
 // routing
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/cart', cartRouter);
+app.use('/product', productRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

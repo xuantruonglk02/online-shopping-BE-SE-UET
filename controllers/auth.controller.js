@@ -5,8 +5,8 @@ const jwt = require('jsonwebtoken');
 const connection = require('../models/database');
 
 /**
- * username
- * password
+ * username : body
+ * password : body
  */
 function loginPost(req, res) {
   if (!req.body.username || !req.body.password) {
@@ -34,15 +34,14 @@ function loginPost(req, res) {
         expiresIn: 60 * 60 * 24
       });
       res.status(200).json({ accessToken: token });
-      // res.redirect(req.session.returnTo);
     });
 }
 
 /**
- * name
- * email
- * number
- * password
+ * name : body
+ * email : body
+ * number : body
+ * password : body
  */
 function signupPost(req, res) {
   if (!req.body.name || !req.body.number || !req.body.password
@@ -86,7 +85,6 @@ function signupPost(req, res) {
               expiresIn: 60 * 60 * 24
             });
             res.status(200).json({ accessToken: token });
-            // res.redirect(req.session.returnTo);
           });
       });
     });
