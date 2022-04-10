@@ -11,7 +11,7 @@ function getAllProductsInCart(req, res) {
         return res.json({ success: 0 });
       }
 
-      res.json({ results: results });
+      res.json({ success: 1, results: results });
     });
 }
 
@@ -22,6 +22,7 @@ function addProduct(req, res) {
   if (!req.body.productId || isNaN(req.body.productId)) {
     return res.json({ success: 0 });
   }
+
   req.body.productId = parseInt(req.body.productId);
 
   const cartId = userController.getCartId(req.headers['x-access-token']);
@@ -42,7 +43,10 @@ function addProduct(req, res) {
  * list: [{productId,amount}] : body
  */
 function updateCart(req, res) {
-  if (!req.body.list) { return res.json({ success: 0 }); }
+  if (!req.body.list) {
+    return res.json({ success: 0 });
+  }
+
   try {
     req.body.list = JSON.parse(req.body.list);
   } catch (err) {
@@ -51,13 +55,16 @@ function updateCart(req, res) {
       return res.json({ success: 0 });
     }
   }
-  if (!req.body.list.length) { return res.json({ success: 1 }); }
+  if (!req.body.list.length) {
+    return res.json({ success: 1 });
+  }
 
   for (let i = 0; i < req.body.list.length; i++) {
     if (isNaN(req.body.list[i].productId) || req.body.list[i].productId < 1
       || isNaN(req.body.list[i].amount) || req.body.list[i].amount < 1) {
       return res.json({ success: 0 });
     }
+
     req.body.list[i].productId = parseInt(req.body.list[i].productId);
     req.body.list[i].amount = parseInt(req.body.list[i].amount);
   }
@@ -89,6 +96,7 @@ function removeProduct(req, res) {
   if (!req.body.productId || isNaN(req.body.productId) || req.body.productId < 1) {
     return res.json({ success: 0 });
   }
+
   req.body.productId = parseInt(req.body.productId);
 
   const cartId = userController.getCartId(req.headers['x-access-token']);

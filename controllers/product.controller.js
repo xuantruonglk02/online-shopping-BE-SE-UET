@@ -10,7 +10,7 @@ function getProductById(req, res) {
       return res.json({ success: 0 });
     }
 
-    res.json({ result: results.length ? results[0] : {} });
+    res.json({ success: 1, result: results.length ? results[0] : {} });
   });
 }
 
@@ -20,8 +20,7 @@ function getProductById(req, res) {
  * quantity : body
  */
 function getProductsByLine(req, res) {
-  if (!req.body.begin || isNaN(req.body.begin)
-    || !req.body.quantity || isNaN(req.body.quantity)) {
+  if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
     return res.json({ success: 0 });
   }
 
@@ -36,7 +35,7 @@ function getProductsByLine(req, res) {
         return res.json({ success: 0 });
       }
 
-      res.json({ results: results });
+      res.json({ success: 1, results: results });
     });
 }
 
@@ -46,8 +45,7 @@ function getProductsByLine(req, res) {
  * quantity : body
  */
 function getProductsByClass(req, res) {
-  if (!req.body.begin || isNaN(req.body.begin)
-    || !req.body.quantity || isNaN(req.body.quantity)) {
+  if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
     return res.json({ success: 0 });
   }
 
@@ -62,7 +60,7 @@ function getProductsByClass(req, res) {
         return res.json({ success: 0 });
       }
 
-      res.json({ results: results });
+      res.json({ success: 1, results: results });
     });
 }
 
@@ -71,8 +69,7 @@ function getProductsByClass(req, res) {
  * quantity : body
  */
 function getNewProducts(req, res) {
-  if (!req.body.begin || isNaN(req.body.begin)
-    || !req.body.quantity || isNaN(req.body.quantity)) {
+  if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
     return res.json({ success: 0 });
   }
 
@@ -87,7 +84,7 @@ function getNewProducts(req, res) {
         return res.json({ success: 0 });
       }
 
-      res.json({ results: results });
+      res.json({ success: 1, results: results });
     });
 }
 
