@@ -12,6 +12,9 @@ router.get('/signup', (req, res) => {
 });
 router.post('/login', authController.login);
 router.post('/signup/register-email', authController.registerEmail);
+router.get('/signup/create-account', (req, res) => {
+  res.json(req.query);
+});
 router.post('/signup/create-account', authController.createAccount);
 
 module.exports = router;

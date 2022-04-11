@@ -16,7 +16,7 @@ function verificationEmailOptions(_to, _token) {
     to: _to,
     subject: `Đây là thư xác minh tài khoản email của bạn.`,
     text: `Đây là thư xác minh tài khoản email của bạn.`,
-    html: `<p>Nhấn vào <a href="http://localhost:3000/auth/signup/create-account/${_token}">đường dẫn</a> này để xác nhận.</p>`
+    html: `<p>Nhấn vào <a href="http://localhost:3000/auth/signup/create-account?token=${_token}">đường dẫn</a> này để xác nhận.</p>`
   }
 }
 

@@ -62,7 +62,7 @@ function registerEmail(req, res) {
       return res.json({ success: 0, msg: 'Email đã tồn tại' });
     }
 
-    crypto.randomBytes(60, (err, buffer) => {
+    crypto.randomBytes(30, (err, buffer) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
