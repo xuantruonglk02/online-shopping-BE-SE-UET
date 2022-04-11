@@ -3,10 +3,8 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-const nodemailer = require('../config/nodemailer.config');
+const transporter = require('../config/nodemailer.config').transporter;
 const connection = require('../models/database');
-
-const transporter = nodemailer.transporter;
 
 /**
  * username : body

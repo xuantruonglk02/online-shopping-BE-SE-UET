@@ -14,6 +14,19 @@ function getCartId(token) {
   return decoded.cartId;
 }
 
+function getUserInformation(req, res) {
+  const userId = getUserId(req.headers['x-access-token']);
+
+  connection.query('SELECT * FROM user WHERE id=?', [userId], (err, results, fields) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+
+    res.json(results[0]);
+  });
+}
+
 /**
  * name : body
  * password : body
@@ -217,6 +230,7 @@ function updateAddress(req, res) {
 module.exports = {
   getUserId,
   getCartId,
+  getUserInformation,
   changeName,
   changeEmail,
   changeNumber,
