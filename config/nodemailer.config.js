@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-exports.verificationEmailOptions = function (_to, _token) {
+function verificationEmailOptions(_to, _token) {
   return {
     from: `MyOnShopp <${process.env.SERVICE_EMAIL_ADDRESS}>`,
     to: _to,
@@ -20,7 +20,7 @@ exports.verificationEmailOptions = function (_to, _token) {
   }
 }
 
-exports.orderEmailOptions = function (_to, _id) {
+function orderEmailOptions(_to, _id) {
   return {
     from: `MyOnShopp <${process.env.SERVICE_EMAIL_ADDRESS}>`,
     to: _to,
@@ -30,12 +30,8 @@ exports.orderEmailOptions = function (_to, _id) {
   }
 }
 
-exports.sendMail = (options, cb) => {
-  transporter.sendMail(options, (err, data) => {
-    if (err) {
-      return cb(err, null);
-    } else {
-      return cb(null, data);
-    }
-  });
+module.exports = {
+  transporter,
+  verificationEmailOptions,
+  orderEmailOptions
 }
