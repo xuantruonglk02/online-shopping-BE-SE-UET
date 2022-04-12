@@ -15,7 +15,7 @@ function login(req, res) {
     return res.json({ success: 0 });
   }
 
-  connection.query('SELECT id, cart_id, password FROM user WHERE ? IN (number, email)',
+  connection.query('SELECT id, cart_id, password, role FROM user WHERE ? IN (number, email)',
     [req.body.username],
     async (err, results, fields) => {
       if (err) {
@@ -32,7 +32,7 @@ function login(req, res) {
         return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
       }
       
-      const token = jwt.sign({ userId: results[0].id, cartId: results[0].cart_id }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ userId: results[0].id, cartId: results[0].cart_id, role: results[0].role }, process.env.JWT_SECRET, {
         expiresIn: 60 * 60 * 24
       });
       res.json({ success: 1, accessToken: token });
@@ -140,15 +140,15 @@ function createAccount(req, res) {
     
             const cartId = results.insertId;
     
-            connection.query('INSERT INTO user(cart_id, name, number, email, password) VALUES (?,?,?,?,?)',
-              [cartId, req.body.name, req.body.number, req.body.email, hash],
+            connection.query('INSERT INTO user(cart_id, name, number, email, password, role) VALUES (?,?,?,?,?,?)',
+              [cartId, req.body.name, req.body.number, req.body.email, hash, 'user'],
               (err, results, fields) => {
                 if (err) {
                   console.log(err);
                   return res.json({ success: 0 });
                 }
                 
-                const token = jwt.sign({ userId: results.insertId, cartId: cartId }, process.env.JWT_SECRET, {
+                const token = jwt.sign({ userId: results.insertId, cartId: cartId, role: 'user' }, process.env.JWT_SECRET, {
                   expiresIn: 60 * 60 * 24
                 });
                 res.json({ success: 1, accessToken: token });
