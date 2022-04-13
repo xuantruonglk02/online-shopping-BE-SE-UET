@@ -19,7 +19,7 @@ function getProductById(req, res) {
  * begin : body
  * quantity : body
  */
-function getProductsByLine(req, res) {
+function getAllProductsByLine(req, res) {
   if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
     return res.json({ success: 0 });
   }
@@ -44,7 +44,7 @@ function getProductsByLine(req, res) {
  * begin : body
  * quantity : body
  */
-function getProductsByClass(req, res) {
+function getAllProductsByClass(req, res) {
   if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
     return res.json({ success: 0 });
   }
@@ -88,9 +88,48 @@ function getNewProducts(req, res) {
     });
 }
 
+function getAllProductClasses(req, res) {
+  connection.query('SELECT * FROM product_class', (err, results, fields) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+
+    res.json({ success: 1, results: results });
+  });
+}
+
+function getAllProductLines(req, res) {
+  connection.query('SELECT * FROM product_line', (err, results, fields) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+
+    res.json({ success: 1, results: results });
+  });
+}
+
+/**
+ * classId : params
+ */
+function getAllProductLinesByClass(req, res) {
+  connection.query('SELECT * FROM product_line WHERE class_id=?', [req.params.classId], (err, results, fields) => {
+      if (err) {
+        console.log(err);
+        return res.json({ success: 0 });
+      }
+
+      res.json({ success: 1, results: results });
+    });
+}
+
 module.exports = {
   getProductById,
-  getProductsByLine,
-  getProductsByClass,
-  getNewProducts
+  getAllProductsByLine,
+  getAllProductsByClass,
+  getNewProducts,
+  getAllProductClasses,
+  getAllProductLines,
+  getAllProductLinesByClass
 }
