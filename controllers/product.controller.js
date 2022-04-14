@@ -124,6 +124,63 @@ function getAllProductLinesByClass(req, res) {
     });
 }
 
+/**
+ * key : body
+ * begin : body
+ * quantity : body
+ * 
+ * classId : body
+ * lineId : body
+ * sortBy : body : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
+ */
+function searchProductsByKeyword(req, res) {
+  if (!req.body.key || !req.body.begin || !req.body.quantity
+    || isNaN(req.body.begin) || isNaN(req.body.quantity)) {
+    return res.json({ success: 0 });
+  }
+  req.body.begin = parseInt(req.body.begin);
+  req.body.quantity = parseInt(req.body.quantity);
+
+  let query = 'SELECT * FROM product WHERE name LIKE CONCAT("%",?,"%")';
+  let params = [req.body.key];
+  if (req.body.classId) {
+    query += ' AND class_id=?';
+    params.push(req.body.classId);
+  }
+  if (req.body.lineId) {
+    query += ' AND line_id=?';
+    params.push(req.body.lineId);
+  }
+  switch (req.body.sortBy) {
+    case 'priceASC':
+      query += ' ORDER BY price ASC';
+      break;
+    case 'priceDESC':
+      query += ' ORDER BY price DESC';
+      break;
+    case 'soldDESC':
+      query += ' ORDER BY sold DESC';
+      break;
+    case 'aoRatingDESC':
+      query += ' ORDER BY amount_of_rating DESC';
+      break;
+    case 'ratingDESC':
+      query += ' ORDER BY rating DESC';
+      break;
+  }
+  query += ' LIMIT ?,?';
+  params.push(req.body.begin, req.body.quantity);
+
+  connection.query(query, params, (err, results, fields) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+
+    res.json(results);
+  });
+}
+
 module.exports = {
   getProductById,
   getAllProductsByLine,
@@ -131,5 +188,6 @@ module.exports = {
   getNewProducts,
   getAllProductClasses,
   getAllProductLines,
-  getAllProductLinesByClass
+  getAllProductLinesByClass,
+  searchProductsByKeyword
 }
