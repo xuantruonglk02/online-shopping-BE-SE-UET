@@ -18,6 +18,8 @@ function getProductById(req, res) {
  * lineId : params
  * begin : body
  * quantity : body
+ * 
+ * sortBy : body : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
 function getAllProductsByLine(req, res) {
   if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
@@ -27,8 +29,29 @@ function getAllProductsByLine(req, res) {
   req.body.begin = parseInt(req.body.begin);
   req.body.quantity = parseInt(req.body.quantity);
 
-  connection.query('SELECT * FROM product WHERE line_id=? ORDER BY create_at DESC LIMIT ?,?',
-    [req.params.lineId, req.body.begin, req.body.quantity],
+  let query = 'SELECT * FROM product WHERE line_id=?'
+  switch (req.body.sortBy) {
+    case 'priceASC':
+      query += ' ORDER BY price ASC';
+      break;
+    case 'priceDESC':
+      query += ' ORDER BY price DESC';
+      break;
+    case 'soldDESC':
+      query += ' ORDER BY sold DESC';
+      break;
+    case 'aoRatingDESC':
+      query += ' ORDER BY amount_of_rating DESC';
+      break;
+    case 'ratingDESC':
+      query += ' ORDER BY rating DESC';
+      break;
+    default:
+      query += ' ORDER BY create_at DESC';
+  }
+  query += ' LIMIT ?,?';
+
+  connection.query(query, [req.params.lineId, req.body.begin, req.body.quantity],
     (err, results, fields) => {
       if (err) {
         console.log(err);
@@ -43,6 +66,8 @@ function getAllProductsByLine(req, res) {
  * classId : params
  * begin : body
  * quantity : body
+ * 
+ * sortBy : body : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
 function getAllProductsByClass(req, res) {
   if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
@@ -52,8 +77,29 @@ function getAllProductsByClass(req, res) {
   req.body.begin = parseInt(req.body.begin);
   req.body.quantity = parseInt(req.body.quantity);
 
-  connection.query('SELECT * FROM product WHERE class_id=? ORDER BY create_at DESC LIMIT ?,?',
-    [req.params.classId, req.body.begin, req.body.quantity],
+  let query = 'SELECT * FROM product WHERE class_id=?'
+  switch (req.body.sortBy) {
+    case 'priceASC':
+      query += ' ORDER BY price ASC';
+      break;
+    case 'priceDESC':
+      query += ' ORDER BY price DESC';
+      break;
+    case 'soldDESC':
+      query += ' ORDER BY sold DESC';
+      break;
+    case 'aoRatingDESC':
+      query += ' ORDER BY amount_of_rating DESC';
+      break;
+    case 'ratingDESC':
+      query += ' ORDER BY rating DESC';
+      break;
+    default:
+      query += ' ORDER BY create_at DESC';
+  }
+  query += ' LIMIT ?,?';
+
+  connection.query(query, [req.params.classId, req.body.begin, req.body.quantity],
     (err, results, fields) => {
       if (err) {
         console.log(err);
@@ -134,10 +180,10 @@ function getAllProductLinesByClass(req, res) {
  * sortBy : body : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
 function searchProductsByKeyword(req, res) {
-  if (!req.body.key || !req.body.begin || !req.body.quantity
-    || isNaN(req.body.begin) || isNaN(req.body.quantity)) {
+  if (!req.body.key || !req.body.begin || !req.body.quantity || isNaN(req.body.begin) || isNaN(req.body.quantity)) {
     return res.json({ success: 0 });
   }
+
   req.body.begin = parseInt(req.body.begin);
   req.body.quantity = parseInt(req.body.quantity);
 
@@ -167,6 +213,8 @@ function searchProductsByKeyword(req, res) {
     case 'ratingDESC':
       query += ' ORDER BY rating DESC';
       break;
+    default:
+      query += ' ORDER BY create_at DESC';
   }
   query += ' LIMIT ?,?';
   params.push(req.body.begin, req.body.quantity);
@@ -177,7 +225,7 @@ function searchProductsByKeyword(req, res) {
       return res.json({ success: 0 });
     }
 
-    res.json(results);
+    res.json({ success: 1, results: results });
   });
 }
 
