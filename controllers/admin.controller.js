@@ -146,9 +146,33 @@ function addCategory(req, res) {
   });
 }
 
+/**
+ * begin : body
+ * quantity : body
+ */
+function getBills(req, res) {
+  if (!req.body.begin || !req.body.quantity) {
+    return res.json({ success: 0 });
+  }
+
+  req.body.begin = parseInt(req.body.begin);
+  req.body.quantity = parseInt(req.body.quantity);
+
+  connection.query('SELECT * FROM bill LIMIT ?,?', [req.body.begin, req.body.quantity],
+    (err, results, fields) => {
+      if (err) {
+        console.log(err);
+        return res.json({ success: 0 });
+      }
+
+      res.json({ success: 1, results: results });
+    });
+}
+
 module.exports = {
   addProduct,
   modifyProduct,
   removeProduct,
-  addCategory
+  addCategory,
+  getBills
 }
