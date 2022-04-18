@@ -19,16 +19,52 @@ function addProduct(req, res) {
   req.body.price = parseInt(req.body.price);
   req.body.amount = parseInt(req.body.amount);
 
-  connection.query('INSERT INTO product (line_id, class_id, name, price, amount, description, thumbnail) VALUES (?,?,?,?,?,?,?)',
-    [req.body.lineId, req.body.classId, req.body.name, req.body.price, req.body.amount, req.body.description, req.body.thumbnail],
-    (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        return res.json({ success: 0 });
-      }
+  connection.beginTransaction((err) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
 
-      res.json({ success: 1 });
-    });
+    connection.query('INSERT INTO product (line_id, class_id, name, price, amount, description, thumbnail) VALUES (?,?,?,?,?,?,?)',
+      [req.body.lineId, req.body.classId, req.body.name, req.body.price, req.body.amount, req.body.description, req.body.thumbnail],
+      (err, results, fields) => {
+        if (err) {
+          console.log(err);
+          return connection.rollback(() => {
+            return res.json({ success: 0 });
+          });
+        }
+
+        connection.query('UPDATE product_line SET amount=amount+1 WHERE id=?', [req.body.lineId], (err, results, fields) => {
+          if (err) {
+            console.log(err);
+            return connection.rollback(() => {
+              return res.json({ success: 0 });
+            });
+          }
+
+          connection.query('UPDATE product_class SET amount=amount+1 WHERE id=?', [req.body.classId], (err, results, fields) => {
+            if (err) {
+              console.log(err);
+              return connection.rollback(() => {
+                return res.json({ success: 0 });
+              });
+            }
+
+            connection.commit((err) => {
+              if (err) {
+                console.log(err);
+                return connection.rollback(() => {
+                  return res.json({ success: 0 });
+                });
+              }
+              
+              res.json({ success: 1 });
+            });
+          });
+        });
+      });
+  });
 }
 
 /**
