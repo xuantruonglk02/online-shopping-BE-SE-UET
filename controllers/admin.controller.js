@@ -19,53 +19,15 @@ function addProduct(req, res) {
   req.body.price = parseInt(req.body.price);
   req.body.amount = parseInt(req.body.amount);
 
-  connection.beginTransaction((err) => {
-    if (err) {
-      console.log(err);
-      return res.json({ success: 0 });
-    }
-
-    connection.query('INSERT INTO product (line_id, class_id, name, price, amount, description, thumbnail) VALUES (?,?,?,?,?,?,?)',
-      [req.body.lineId, req.body.classId, req.body.name, req.body.price, req.body.amount, req.body.description, req.body.thumbnail],
-      (err, results) => {
-        if (err) {
-          console.log(err);
-          return connection.rollback(() => {
-            return res.json({ success: 0 });
-          });
-        }
-
-        connection.query('UPDATE product_line SET amount=amount+? WHERE id=?',
-          [req.body.amount, req.body.lineId], (err, results) => {
-            if (err) {
-              console.log(err);
-              return connection.rollback(() => {
-                return res.json({ success: 0 });
-              });
-            }
-
-            connection.query('UPDATE product_class SET amount=amount+? WHERE id=?',
-              [req.body.amount, req.body.classId], (err, results) => {
-                if (err) {
-                  console.log(err);
-                  return connection.rollback(() => {
-                    return res.json({ success: 0 });
-                  });
-                }
-
-                connection.commit((err) => {
-                  if (err) {
-                    console.log(err);
-                    return connection.rollback(() => {
-                      return res.json({ success: 0 });
-                    });
-                  }
-                
-                  res.json({ success: 1 });
-                });
-              });
-          });
-      });
+  connection.query('INSERT INTO product (line_id, class_id, name, price, amount, description, thumbnail) VALUES (?,?,?,?,?,?,?)',
+    [req.body.lineId, req.body.classId, req.body.name, req.body.price, req.body.amount, req.body.description, req.body.thumbnail],
+    (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.json({ success: 0 });
+      }
+  
+      res.json({ success: 1 });
   });
 }
 
@@ -119,7 +81,7 @@ function modifyProduct(req, res) {
   query += ' WHERE id=?';
   params.push(req.body.productId);
 
-  connection.query(query, params, (err, results, fields) => {
+  connection.query(query, params, (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
