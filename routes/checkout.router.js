@@ -12,5 +12,6 @@ router.post('/:productId', authMiddleware.verifyToken, checkoutController.checko
 router.get('/', authMiddleware.verifyToken, (req, res) => {
   res.end('checkout for cart');
 });
+router.post('/', authMiddleware.verifyToken, checkoutController.checkoutForCart);
 
 module.exports = router;

@@ -75,7 +75,7 @@ function updateCart(req, res) {
   }
   query += ' ELSE amount END) WHERE cart_id=' + cartId;
 
-  const params = req.body.list.reduce((p,c) => p.concat([c.productId, c.amount]), []);
+  const params = req.body.list.reduce((p, c) => p.concat([c.productId, c.amount]), []);
 
   connection.query(query, params, (err, results) => {
     if (err) {
