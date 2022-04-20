@@ -99,7 +99,7 @@ function removeProduct(req, res) {
     return res.json({ success: 0 });
   }
 
-  connection.query('DELETE FROM product WHERE id=?', [req.body.productId], (err, results, fields) => {
+  connection.query('DELETE FROM product WHERE id=?', [req.body.productId], (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -136,7 +136,7 @@ function addCategory(req, res) {
     return res.json({ success: 0 });
   }
 
-  connection.query(query, params, (err, results, fields) => {
+  connection.query(query, params, (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -158,15 +158,14 @@ function getBills(req, res) {
   req.body.begin = parseInt(req.body.begin);
   req.body.quantity = parseInt(req.body.quantity);
 
-  connection.query('SELECT * FROM bill LIMIT ?,?', [req.body.begin, req.body.quantity],
-    (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        return res.json({ success: 0 });
-      }
+  connection.query('SELECT * FROM bill LIMIT ?,?', [req.body.begin, req.body.quantity], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
 
-      res.json({ success: 1, results: results });
-    });
+    res.json({ success: 1, results: results });
+  });
 }
 
 module.exports = {

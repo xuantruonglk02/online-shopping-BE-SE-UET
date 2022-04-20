@@ -4,15 +4,14 @@ const userController = require('./user.controller');
 function getAllProductsInCart(req, res) {
   const cartId = userController.getCartId(req.headers['x-access-token']);
 
-  connection.query('SELECT product_id, amount FROM cart_has_product WHERE cart_id=?', [cartId],
-    (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        return res.json({ success: 0 });
-      }
+  connection.query('SELECT product_id, amount FROM cart_has_product WHERE cart_id=?', [cartId], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
 
-      res.json({ success: 1, results: results });
-    });
+    res.json({ success: 1, results: results });
+  });
 }
 
 /**
@@ -28,8 +27,7 @@ function addProduct(req, res) {
   const cartId = userController.getCartId(req.headers['x-access-token']);
 
   connection.query('INSERT INTO cart_has_product(cart_id, product_id, amount) values (?,?,1)',
-    [cartId, req.body.productId],
-    (err, results, fields) => {
+    [cartId, req.body.productId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -79,7 +77,7 @@ function updateCart(req, res) {
 
   const params = req.body.list.reduce((p,c) => p.concat([c.productId, c.amount]), []);
 
-  connection.query(query, params, (err, results, fields) => {
+  connection.query(query, params, (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -102,8 +100,7 @@ function removeProduct(req, res) {
   const cartId = userController.getCartId(req.headers['x-access-token']);
 
   connection.query('DELETE FROM cart_has_product WHERE cart_id=? AND product_id=?',
-    [cartId, req.body.productId],
-    (err, results, fields) => {
+    [cartId, req.body.productId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });

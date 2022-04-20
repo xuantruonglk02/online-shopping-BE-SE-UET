@@ -4,7 +4,7 @@ const connection = require('../models/database');
  * id : params
  */
 function getProductById(req, res) {
-  connection.query('SELECT * FROM product WHERE id=?', [req.params.id], (err, results, fields) => {
+  connection.query('SELECT * FROM product WHERE id=?', [req.params.id], (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -51,15 +51,14 @@ function getAllProductsByLine(req, res) {
   }
   query += ' LIMIT ?,?';
 
-  connection.query(query, [req.params.lineId, req.body.begin, req.body.quantity],
-    (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        return res.json({ success: 0 });
-      }
+  connection.query(query, [req.params.lineId, req.body.begin, req.body.quantity], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
 
-      res.json({ success: 1, results: results });
-    });
+    res.json({ success: 1, results: results });
+  });
 }
 
 /**
@@ -99,15 +98,14 @@ function getAllProductsByClass(req, res) {
   }
   query += ' LIMIT ?,?';
 
-  connection.query(query, [req.params.classId, req.body.begin, req.body.quantity],
-    (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        return res.json({ success: 0 });
-      }
+  connection.query(query, [req.params.classId, req.body.begin, req.body.quantity], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
 
-      res.json({ success: 1, results: results });
-    });
+    res.json({ success: 1, results: results });
+  });
 }
 
 /**
@@ -123,8 +121,7 @@ function getNewProducts(req, res) {
   req.body.quantity = parseInt(req.body.quantity);
 
   connection.query('SELECT * FROM product ORDER BY create_at DESC LIMIT ?,?',
-    [req.body.begin, req.body.quantity],
-    (err, results, fields) => {
+    [req.body.begin, req.body.quantity], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -135,7 +132,7 @@ function getNewProducts(req, res) {
 }
 
 function getAllProductClasses(req, res) {
-  connection.query('SELECT * FROM product_class', (err, results, fields) => {
+  connection.query('SELECT * FROM product_class', (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -146,7 +143,7 @@ function getAllProductClasses(req, res) {
 }
 
 function getAllProductLines(req, res) {
-  connection.query('SELECT * FROM product_line', (err, results, fields) => {
+  connection.query('SELECT * FROM product_line', (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -160,14 +157,14 @@ function getAllProductLines(req, res) {
  * classId : params
  */
 function getAllProductLinesByClass(req, res) {
-  connection.query('SELECT * FROM product_line WHERE class_id=?', [req.params.classId], (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        return res.json({ success: 0 });
-      }
+  connection.query('SELECT * FROM product_line WHERE class_id=?', [req.params.classId], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
 
-      res.json({ success: 1, results: results });
-    });
+    res.json({ success: 1, results: results });
+  });
 }
 
 /**
@@ -219,7 +216,7 @@ function searchProductsByKeyword(req, res) {
   query += ' LIMIT ?,?';
   params.push(req.body.begin, req.body.quantity);
 
-  connection.query(query, params, (err, results, fields) => {
+  connection.query(query, params, (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });

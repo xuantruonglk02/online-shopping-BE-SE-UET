@@ -16,8 +16,7 @@ function login(req, res) {
   }
 
   connection.query('SELECT id, cart_id, password, role FROM user WHERE ? IN (number, email)',
-    [req.body.username],
-    async (err, results, fields) => {
+    [req.body.username], async (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -50,7 +49,7 @@ function registerEmail(req, res) {
     return res.json({ success: 0, msg: 'Email không hợp lệ' });
   }
 
-  connection.query('SELECT COUNT(id) AS exist FROM user WHERE email=?', [req.body.email], (err, results, fields) => {
+  connection.query('SELECT COUNT(id) AS exist FROM user WHERE email=?', [req.body.email], (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -73,7 +72,7 @@ function registerEmail(req, res) {
         }
       });
 
-      connection.query('INSERT INTO verify_email(email, token) VALUES (?,?)', [req.body.email, token], (err, results, fields) => {
+      connection.query('INSERT INTO verify_email(email, token) VALUES (?,?)', [req.body.email, token], (err, results) => {
         if (err) {
           console.log(err);
           return res.json({ success: 0 });
@@ -104,7 +103,7 @@ function createAccount(req, res) {
   }
 
   connection.query('SELECT create_at FROM verify_email WHERE email=? AND token=?',
-    [req.body.email, req.body.token], (err, results, fields) => {
+    [req.body.email, req.body.token], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -118,8 +117,7 @@ function createAccount(req, res) {
       }
 
       connection.query('SELECT COUNT(id) AS exist FROM user WHERE email=? OR number=?',
-        [req.body.email, req.body.number],
-        async (err, results, fields) => {
+        [req.body.email, req.body.number], async (err, results) => {
           if (err) {
             console.log(err);
             return res.json({ success: 0 });
@@ -132,7 +130,7 @@ function createAccount(req, res) {
           const salt = await bcrypt.genSalt(12);
           const hash = await bcrypt.hash(req.body.password, salt);
     
-          connection.query('INSERT INTO cart VALUES(DEFAULT, DEFAULT)', (err, results, fields) => {
+          connection.query('INSERT INTO cart VALUES(DEFAULT, DEFAULT)', (err, results) => {
             if (err) {
               console.log(err);
               return res.json({ success: 0 });
@@ -142,7 +140,7 @@ function createAccount(req, res) {
     
             connection.query('INSERT INTO user(cart_id, name, number, email, password, role) VALUES (?,?,?,?,?,?)',
               [cartId, req.body.name, req.body.number, req.body.email, hash, 'user'],
-              (err, results, fields) => {
+              (err, results) => {
                 if (err) {
                   console.log(err);
                   return res.json({ success: 0 });
@@ -154,7 +152,7 @@ function createAccount(req, res) {
                 res.json({ success: 1, accessToken: token });
 
                 connection.query('DELETE FROM verify_email WHERE email=? AND token=?',
-                  [req.body.email, token], (err, results, fields) => {});
+                  [req.body.email, token], (err, results) => {});
               });
           });
         });

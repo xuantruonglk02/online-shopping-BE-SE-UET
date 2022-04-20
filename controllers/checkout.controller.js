@@ -12,7 +12,7 @@ function checkoutForAProduct(req, res) {
 
   req.body.amount = parseInt(req.body.amount);
 
-  connection.query('SELECT amount FROM product WHERE id=?', [req.params.productId], (err, results, fields) => {
+  connection.query('SELECT amount FROM product WHERE id=?', [req.params.productId], (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -25,9 +25,8 @@ function checkoutForAProduct(req, res) {
       return res.json({ success: 0, msg: 'Hàng trong kho không đủ' });
     }
 
-    const oldAmount = results[0].amount;
     const userId = userController.getUserId(req.headers['x-access-token']);
-    connection.query('INSERT INTO bill (user_id) VALUES (?)', [userId], (err, results, fields) => {
+    connection.query('INSERT INTO bill (user_id) VALUES (?)', [userId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -35,20 +34,13 @@ function checkoutForAProduct(req, res) {
 
       const billId = results.insertId;
       connection.query('INSERT INTO bill_has_product (bill_id, product_id, amount) VALUES (?,?,?)',
-        [billId, req.params.productId, req.body.amount], (err, results, fields) => {
+        [billId, req.params.productId, req.body.amount], (err, results) => {
           if (err) {
             console.log(err);
             return res.json({ success: 0 });
           }
 
-          connection.query('UPDATE product SET amount=? WHERE id=?',
-            [oldAmount - req.body.amount, req.params.productId], (err, results, fields) => {
-              if (err) {
-                console.log(err);
-              }
-
-              res.json({ success: 1 });
-            });
+          res.json({ success: 1 });
         });
     });
   });
