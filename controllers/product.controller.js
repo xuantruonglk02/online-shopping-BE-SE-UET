@@ -1,4 +1,5 @@
 const connection = require('../models/database');
+const { getUserId } = require('./user.controller');
 
 /**
  * id : params
@@ -226,6 +227,72 @@ function searchProductsByKeyword(req, res) {
   });
 }
 
+/**
+ * productId : params
+ */
+function getAllRatingsOfProduct(req, res) {
+  connection.query('SELECT r.star, r.comment, r.create_at, GROUP_CONCAT(ri.url) AS urls, u.name '
+    + 'FROM rating r '
+    + 'INNER JOIN user u ON r.user_id=u.id '
+    + 'LEFT JOIN rating_image ri ON r.id=ri.rating_id '
+    + 'WHERE r.product_id=? '
+    + 'GROUP BY r.id '
+    + 'ORDER BY r.create_at DESC',
+    [req.params.productId], (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.json({ success: 0 });
+      }
+
+      res.json({ success: 1, results: results });
+    });
+}
+
+/**
+ * productId : params
+ * star : body
+ * comment : body
+ * urls: [url] : body
+ */
+function insertUserRating(req, res) {
+  if (!req.body.star || !req.body.comment || !req.body.urls) {
+    return res.json({ success: 0 });
+  }
+  try {
+    req.body.urls = JSON.parse(req.body.urls);
+  } catch (err) {
+    return res.json({ success: 0 });
+  }
+
+  req.body.star = parseInt(req.body.star);
+
+  const userId = getUserId(req.headers['x-access-token']);
+  connection.query('INSERT INTO rating (user_id, product_id, star, comment) VALUES (?,?,?,?)',
+    [userId, req.params.productId, req.body.star, req.body.comment], (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.json({ success: 0 });
+      }
+
+      if (!req.body.urls.length) {
+        return res.json({ success: 1 });
+      }
+
+      let ratingId = results.insertId;
+      let query = 'INSERT INTO rating_image (rating_id, url) VALUES '
+        + '(?,?),'.repeat(req.body.urls.length).slice(0, -1);
+      let params = req.body.urls.reduce((p, c) => p.concat([ratingId, c]), []);
+      connection.query(query, params, (err, results) => {
+        if (err) {
+          console.log(err);
+          return res.json({ success: 0 });
+        }
+
+        res.json({ success: 1 });
+      });
+    });
+}
+
 module.exports = {
   getProductById,
   getAllProductsByLine,
@@ -234,5 +301,7 @@ module.exports = {
   getAllProductClasses,
   getAllProductLines,
   getAllProductLinesByClass,
-  searchProductsByKeyword
+  searchProductsByKeyword,
+  getAllRatingsOfProduct,
+  insertUserRating
 }
