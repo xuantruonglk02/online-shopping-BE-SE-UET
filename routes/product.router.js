@@ -14,9 +14,9 @@ router.post('/category/class/:classId', productController.getAllProductLinesByCl
 router.post('/search', productController.searchProductsByKeyword);
 router.post('/:productId/rating', productController.getAllRatingsOfProduct);
 router.post('/:productId/rate', authMiddleware.verifyToken, productController.insertUserRating);
-router.get('/:id', (req, res) => {
-  res.end('product ' + req.params.id);
+router.get('/:productId', (req, res) => {
+  res.end('product ' + req.params.productId);
 });
-router.post('/:id', productController.getProductById);
+router.post('/:productId', productController.getProductById);
 
 module.exports = router;

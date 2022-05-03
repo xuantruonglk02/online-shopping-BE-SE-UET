@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 
-const connection = require('../models/database');
+const { connection } = require('../models/database');
 
 function getUserId(token) {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -17,7 +17,7 @@ function getCartId(token) {
 function getUserInformation(req, res) {
   const userId = getUserId(req.headers['x-access-token']);
 
-  connection.query('SELECT * FROM user WHERE id=?', [userId], (err, results) => {
+  connection.query('SELECT name, number, email, address FROM users WHERE user_id=?', [userId], (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -38,7 +38,7 @@ function changeName(req, res) {
 
   const userId = getUserId(req.headers['x-access-token']);
 
-  connection.query('SELECT password FROM user WHERE id=?', [userId], async (err, results) => {
+  connection.query('SELECT password FROM users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -49,7 +49,7 @@ function changeName(req, res) {
       return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
     }
 
-    connection.query('UPDATE user SET name=? WHERE id=?', [req.body.name, userId], (err, results) => {
+    connection.query('UPDATE users SET name=? WHERE user_id=?', [req.body.name, userId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -74,7 +74,7 @@ function changeEmail(req, res) {
 
   const userId = getUserId(req.headers['x-access-token']);
 
-  connection.query('SELECT password FROM user WHERE id=?', [userId], async (err, results) => {
+  connection.query('SELECT password FROM users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -85,7 +85,7 @@ function changeEmail(req, res) {
       return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
     }
 
-    connection.query('SELECT COUNT(id) AS exist FROM user WHERE email=?', [req.body.email], (err, results) => {
+    connection.query('SELECT COUNT(user_id) AS exist FROM users WHERE email=?', [req.body.email], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -95,7 +95,7 @@ function changeEmail(req, res) {
         return res.json({ success: 0, msg: 'Email đã tồn tại' });
       }
 
-      connection.query('UPDATE user SET email=? WHERE id=?', [req.body.email, userId], (err, results) => {
+      connection.query('UPDATE users SET email=? WHERE user_id=?', [req.body.email, userId], (err, results) => {
         if (err) {
           console.log(err);
           return res.json({ success: 0 });
@@ -121,7 +121,7 @@ function changeNumber(req, res) {
 
   const userId = getUserId(req.headers['x-access-token']);
 
-  connection.query('SELECT password FROM user WHERE id=?', [userId], async (err, results) => {
+  connection.query('SELECT password FROM users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -132,7 +132,7 @@ function changeNumber(req, res) {
       return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
     }
 
-    connection.query('SELECT COUNT(id) AS exist FROM user WHERE number=?', [req.body.number], (err, results) => {
+    connection.query('SELECT COUNT(user_id) AS exist FROM users WHERE number=?', [req.body.number], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -142,7 +142,7 @@ function changeNumber(req, res) {
         return res.json({ success: 0, msg: 'Số điện thoại đã tồn tại' });
       }
 
-      connection.query('UPDATE user SET number=? WHERE id=?', [req.body.number, userId], (err, results) => {
+      connection.query('UPDATE users SET number=? WHERE user_id=?', [req.body.number, userId], (err, results) => {
         if (err) {
           console.log(err);
           return res.json({ success: 0 });
@@ -165,7 +165,7 @@ function changePassword(req, res) {
 
   const userId = getUserId(req.headers['x-access-token']);
 
-  connection.query('SELECT password FROM user WHERE id=?', [userId], async (err, results) => {
+  connection.query('SELECT password FROM users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -183,7 +183,7 @@ function changePassword(req, res) {
     const salt = await bcrypt.genSalt(12);
     const hash = await bcrypt.hash(req.body.newPassword, salt);
 
-    connection.query('UPDATE user SET password=? WHERE id=?', [hash, userId], (err, results) => {
+    connection.query('UPDATE users SET password=? WHERE user_id=?', [hash, userId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -205,7 +205,7 @@ function updateAddress(req, res) {
 
   const userId = getUserId(req.headers['x-access-token']);
 
-  connection.query('SELECT password FROM user WHERE id=?', [userId], async (err, results) => {
+  connection.query('SELECT password FROM users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -216,7 +216,7 @@ function updateAddress(req, res) {
       return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
     }
 
-    connection.query('UPDATE user SET address=? WHERE id=?', [req.body.address, userId], (err, results) => {
+    connection.query('UPDATE users SET address=? WHERE user_id=?', [req.body.address, userId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });

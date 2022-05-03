@@ -17,16 +17,17 @@ function verifyToken(req, res, next) {
 
 function isAdmin(req, res, next) {
   const token = req.headers['x-access-token'];
-  
+
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.redirect('/auth/login');
     }
-    if (decoded.role !== 'admin') {
+
+    if (decoded.admin === 1) {
+      next();
+    } else {
       return res.redirect('/');
     }
-
-    next();
   });
 }
 

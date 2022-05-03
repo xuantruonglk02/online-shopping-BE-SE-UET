@@ -10,4 +10,18 @@ connection.connect((err) => {
   console.log('Connected to database.');
 });
 
-module.exports = connection;
+function commitTransaction(connection, res) {
+  connection.commit((err) => {
+    if (err) {
+      console.log(err);
+      return connection.rollback(() => { return res.json({ success: 0 }); });
+    }
+
+    res.json({ success: 1 });
+  });
+}
+
+module.exports = {
+  connection,
+  commitTransaction
+};
