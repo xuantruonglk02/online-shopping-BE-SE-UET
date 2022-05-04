@@ -8,10 +8,11 @@ const router = express.Router();
 router.get('/:productId', authMiddleware.verifyToken, (req, res) => {
   res.end('checkout for a product');
 });
-router.post('/:productId', authMiddleware.verifyToken, checkoutController.checkoutForAProduct);
 router.get('/', authMiddleware.verifyToken, (req, res) => {
   res.end('checkout for cart');
 });
+
+router.post('/:productId', authMiddleware.verifyToken, checkoutController.checkoutForAProduct);
 router.post('/', authMiddleware.verifyToken, checkoutController.checkoutForCart);
 
 module.exports = router;

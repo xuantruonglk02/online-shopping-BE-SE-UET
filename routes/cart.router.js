@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/', authMiddleware.verifyToken, (req, res) => {
   res.render('cart');
 });
+
 router.post('/all', authMiddleware.verifyToken, cartController.getAllProductsInCart);
 router.post('/add', authMiddleware.verifyToken, cartController.addProduct);
 router.post('/update', authMiddleware.verifyToken, cartController.updateCart);

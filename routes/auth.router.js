@@ -10,11 +10,12 @@ router.get('/login', (req, res) => {
 router.get('/signup', (req, res) => {
   res.render('signup');
 });
-router.post('/login', authController.login);
-router.post('/signup/register-email', authController.registerEmail);
 router.get('/signup/create-account', (req, res) => {
   res.json(req.query);
 });
+
+router.post('/login', authController.login);
+router.post('/signup/register-email', authController.registerEmail);
 router.post('/signup/create-account', authController.createAccount);
 
 module.exports = router;

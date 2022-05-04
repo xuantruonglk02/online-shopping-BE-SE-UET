@@ -1,0 +1,321 @@
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+ul {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+header {
+    background-color:gray;
+    text-align: center;
+    padding: 10px;
+    width: 1475px;
+}
+
+nav {
+    background-color:darkgray;
+    width: 1475px;
+}
+
+.list {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    height: 30px;
+}
+
+.list2 {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+}
+
+nav ul li, a {
+    color: black;
+    font-size: 100%;
+}
+
+.menu {
+    margin: auto;
+    max-width: 1200px;
+}
+
+#slide {
+    width: 1475px;
+    overflow: hidden;
+    margin-top: 0;
+}
+
+#images {
+    width: 9999px;
+    float: left;
+    transition: all 1s;
+}
+
+#last {
+    margin-left: 100px;
+}
+
+.description {
+    text-align: center;
+    margin-top: 5px;
+}
+
+.price {
+    text-align: center;
+    margin-top: 5px;
+    color: red;
+}
+
+.trans:hover > img {
+    transform: translateY(-20px);
+}
+
+.trans > img {
+    transition: all 0.3s ease;
+}
+
+.search-image {
+    margin-left: -4px;
+}
+
+.search-list {
+    display: none;
+    border: 2px solid white;
+    background-color: white;
+    padding-left: 0;
+    width: 370px;
+}
+
+.search-text {
+    padding: 2px 2px;
+    cursor: pointer;
+}
+
+.search-text:hover {
+    background-color: gainsboro;
+}
+
+.cart {
+    margin-top: 50px;
+    margin-left: 0;
+    margin-right: 40%;
+    margin-bottom: 50px;
+    border-radius: 10px;
+    width: 500px;
+}
+
+.label {
+    margin-left: 30px;
+
+}
+
+.input {
+    margin-left: 45px;
+    border-radius: 5px;
+    width: 300px;
+}
+
+.input1 {
+    margin-left: 60px;
+    border-radius: 5px;
+    width: 300px;
+}
+
+.input2 {
+    margin-left: 23px;
+    border-radius: 5px;
+    width: 300px;
+}
+
+.input3 {
+    margin-left: 99px;
+    border-radius: 5px;
+}
+
+.mid {
+    text-align: center;
+}
+
+.submit {
+    background-color: rgb(84, 84, 84);
+    color: white;
+    border-radius: 7px;
+    border-color: rgb(167, 165, 165);
+    margin-left: 200px;
+    width: 100px;
+    height: 30px;
+}
+
+.submit:hover {
+    background-color: #3acb41;
+}
+
+.add {
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    margin-left: 80px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.add:hover {
+    background-color: tomato;
+}
+
+.product {
+    text-align: center;
+    margin-top: 50px;
+    margin-left: 10px;
+    margin-right: 40%;
+    margin-bottom: 50px;
+    border: 2px solid gray;
+    border-radius: 10px;
+    width: 480px;
+    background-color:whitesmoke;
+    border-color: rgb(167, 165, 165);   
+}
+
+.section-cart {
+    position: fixed;
+    height: 100vh;
+    width: 520px;
+    right: -100%;
+    top: 0;
+    background-color: rgb(177, 169, 152);
+    overflow-y: scroll;
+    transition: all 0.5s ease;
+}
+
+.section-cart-name {
+    text-align: center;
+}
+
+.fa-xmark {
+    margin-top: 10px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.fa-cart-shopping {
+    cursor: pointer;
+}
+
+.uet {
+    margin-left: 420px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 40px;
+}
+
+.member{
+    margin-left: 100px;
+    margin-top: 30px;
+    width: 500px;
+    height: 650px;
+}
+
+.cart-tab {
+    margin-left: 400px;
+}
+
+.member-ul {
+    display: flex;
+    margin-left: 50px;
+}
+
+.member-ul-li {
+    width: 100px;
+    height: 110px;
+    margin-left: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.member-ul-li:hover {
+    border-style: solid;
+}
+
+.jeans2-name {
+    margin-left: -15%;
+    margin-top: -10%;
+}
+
+.cart-jeans {
+    width: 520px;
+    padding: 20px;
+    border: 5px solid;
+    margin: 0;
+    background-color: black;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cart-jeans:hover {
+    background-color: #3acb41;
+}
+
+.member2-ul-li {
+    width: 250px;
+    height: 350px;
+    margin-left: 60px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.description2 {
+    margin-left: 100px;
+    margin-top: 5px;
+}
+
+.price2 {
+    margin-left: 150px;
+    margin-top: 5px;
+    color: red;
+}
+
+.login {
+    width: 350px;
+    height: 300px;
+    padding: 20px;
+    border: 1px solid;
+    border-radius: 10px;
+    margin: 0;
+    text-align: center;
+}
+
+.login-section {
+    margin-left: 500px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.login input {
+    width: 250px;
+    height: 40px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.login button {
+    width: 250px;
+    height: 40px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #45a049;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login button:hover {
+    background-color: tomato;
+}

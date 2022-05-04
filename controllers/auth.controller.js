@@ -32,9 +32,9 @@ function login(req, res) {
       }
       
       const token = jwt.sign({ userId: results[0].user_id, cartId: results[0].cart_id, admin: results[0].admin }, process.env.JWT_SECRET, {
-        expiresIn: 60 * 60 * 24
+        expiresIn: 24 * 60 * 60 * 1000
       });
-      res.cookie('x-access-token', token, { maxAge: 60 * 60 * 24, httpOnly: true });
+      res.cookie('x-access-token', token, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
       res.json({ success: 1, accessToken: token });
     });
 }

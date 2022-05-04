@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 function verifyToken(req, res, next) {
-  const token = req.headers['x-access-token'];
+  const token = req.cookies['x-access-token'];
   if (!token) {
     return res.redirect('/auth/login');
   }
@@ -16,7 +16,7 @@ function verifyToken(req, res, next) {
 }
 
 function isAdmin(req, res, next) {
-  const token = req.headers['x-access-token'];
+  const token = req.cookies['x-access-token'];
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {

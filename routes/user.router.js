@@ -5,6 +5,10 @@ const userController = require('../controllers/user.controller');
 
 const router = express.Router();
 
+router.get('/account', authMiddleware.verifyToken, (req, res) => {
+  res.end('hello');
+});
+
 router.post('/account', authMiddleware.verifyToken, userController.getUserInformation);
 router.post('/setting/change-name', authMiddleware.verifyToken, userController.changeName);
 router.post('/setting/change-email', authMiddleware.verifyToken, userController.changeEmail);

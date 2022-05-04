@@ -2,20 +2,20 @@ const { connection } = require('../models/database');
 const { getUserId } = require('./user.controller');
 
 /**
- * productId : params
+ * productId
+ * callback
  */
-function getProductById(req, res) {
+function getProductById(productId, callback) {
   let query = 'SELECT product_id, name, price, sold, quantity_of_rating, rating, description, thumbnail,'
     + ' (SELECT CONCAT("[",GROUP_CONCAT(CONCAT(\'"\',url,\'"\')),"]") FROM preview_images WHERE product_id=? GROUP BY product_id) AS urls,'
     + ' (SELECT CONCAT("[",GROUP_CONCAT(CONCAT(\'{"sizeId":\',size_id,\',"quantity":\',quantity,"}")),"]") FROM product_has_size WHERE product_id=? GROUP BY product_id) AS sizes'
     + ' FROM products WHERE product_id=?';
-  connection.query(query, [req.params.productId, req.params.productId, req.params.productId], (err, results) => {
+  connection.query(query, [productId, productId, productId], (err, results) => {
     if (err) {
-      console.log(err);
-      return res.json({ success: 0 });
+      return callback(err, null);
     }
 
-    res.json({ success: 1, result: results.length ? results[0] : {} });
+    callback(null, results[0]);
   });
 }
 
@@ -300,11 +300,11 @@ module.exports = {
   getProductById,
   getAllProductsByLine,
   getAllProductsByClass,
-  getNewProducts,
   getAllProductClasses,
   getAllProductLines,
   getAllProductLinesByClass,
-  searchProductsByKeyword,
   getAllRatingsOfProduct,
+  getNewProducts,
+  searchProductsByKeyword,
   insertUserRating
 }

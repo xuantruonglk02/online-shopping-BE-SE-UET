@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('layouts/head') %>
+</head>
+
+<body>
+  <%- include('layouts/header') %>
+
+  <%- include('layouts/navbar') %>
+
+  <%- include('layouts/slider') %>
+
+  <%- JSON.stringify(product) %>
+
+  <section>
+    <table style="width: 90%;">
+      <tr style="height: 40px">
+        <td><img class="member" src="<%= product.thumbnail %>"></td>
+        <td>
+          <div class="jeans2-name">
+            <h1><%= product.name %></h1><br>
+            <h2 style="color: red;"><%= product.price %></h3><br>
+
+            <pre><%= product.description %></pre>
+              <p>------------------------------------------------------------------------------------------------</p>
+              <h3>Mô tả</h3><br>
+              <p>- Chất liệu: Jeans cotton</p><br>
+              <p>- Đặc tính: có độ thấm hút mồ hôi và hút ẩm cao, thoáng mát.</p><br>
+              <p>- Màu sắc: đen</p><br>
+              <p>- Kiểu dáng: tepered</p><br>
+              <h3>+ Hướng dẫn sử dụng:</h3><br>
+              <p>- Giặt ở nhiệt độ bình thường, với đồ có màu tương tự.</p><br>
+              <p>- Không được dùng hóa chất tẩy.</p><br>
+              <p>- Hạn chế sử dụng máy sấy, ủi ở nhiệt độ bình thường.</p><br>
+              <h3>Sản phẩm đã có mặt ở toàn bộ các cửa hàng trên hệ thống.</h3><br><br>
+              <div class="cart-jeans"><i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <ul class="member-ul">
+            <% if (product.urls == null) { product.urls = "[]"; } %>
+            <% let previewImages = JSON.parse(product.urls) %>
+            <% for (let i = 0; i < previewImages.length; i++) { %>
+              <li><img class="member-ul-li" src="<%= previewImages[i] %>" onclick="document.querySelector('.member').src = this.src"></li>
+            <% } %>
+          </ul>
+        </td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h1 style="text-align: center;">Sản phẩm liên quan</h1><br>
+    <ul class="member-ul">
+      <li>
+        <a href="jeans1.html">
+          <div class="trans"><img class="member2-ul-li" src="/images/jeans1.jpg"></div>
+        </a>
+        <p class="description2">Quần jeans nam QJDOL008</p>
+        <h3 class="price2">450.000₫</h3>
+      </li>
+      <li>
+        <a href="jeans2.html">
+          <div class="trans"><img class="member2-ul-li" src="/images/jeans2.jpg"></div>
+        </a>
+        <p class="description2">Quần jeans nam QJDTK241</p>
+        <h3 class="price2">495.000₫</h3>
+      </li>
+      <li>
+        <a href="jeans3.html">
+          <div class="trans"><img class="member2-ul-li" src="/images/jeans3.jpg"></div>
+        </a>
+        <p class="description2">Quần jeans nam QJDTK240</p>
+        <h3 class="price2">520.000₫</h3>
+      </li>
+      <li>
+        <a href="jeans4.html">
+          <div class="trans"><img class="member2-ul-li" src="/images/jeans4.jpg"></div>
+        </a>
+        <p class="description2">Quần jeans nam QJDTK239</p>
+        <h3 class="price2">490.000₫</h3>
+      </li>
+    </ul>
+  </section>
+  
+  <%- include('layouts/cart') %>
+
+  <%- include('layouts/footer') %>
+
+  <%- include('layouts/script') %>
+</body>
+
+</html>

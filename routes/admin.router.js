@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/', authMiddleware.verifyToken, authMiddleware.isAdmin, (req, res) => {
   res.end('admin');
 });
+
 router.post('/add-product', authMiddleware.verifyToken, authMiddleware.isAdmin, adminController.addProduct);
 router.post('/modify-product', authMiddleware.verifyToken, authMiddleware.isAdmin, adminController.modifyProduct);
 router.post('/remove-product', authMiddleware.verifyToken, authMiddleware.isAdmin, adminController.removeProduct);
