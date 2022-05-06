@@ -18,7 +18,7 @@ function checkoutForAProduct(req, res) {
   }
   if (req.body.quantity < 1) { return res.json({ success: 0 }); }
 
-  connection.query('SELECT quantity FROM product_has_size WHERE product_id=? AND size_id=?',
+  connection.query('SELECT quantity FROM Product_has_Size WHERE product_id=? AND size_id=?',
     [req.params.productId, req.body.sizeId], (err, results) => {
       if (err) {
         console.log(err);
@@ -33,7 +33,7 @@ function checkoutForAProduct(req, res) {
       }
 
       const userId = getUserId(req.headers['x-access-token']);
-      connection.query('SELECT name, number, address FROM users WHERE user_id=?', [userId], (err, results) => {
+      connection.query('SELECT name, number, address FROM Users WHERE user_id=?', [userId], (err, results) => {
         if (err) {
           console.log(err);
           return res.json({ success: 0 });
@@ -44,7 +44,7 @@ function checkoutForAProduct(req, res) {
         }
 
         const userName = results[0].name, userNumber = results[0].number, userAddress = results[0].address;
-        connection.query('INSERT INTO bills (user_id, user_name, user_number, user_address) VALUES (?,?,?,?)',
+        connection.query('INSERT INTO Bills (user_id, user_name, user_number, user_address) VALUES (?,?,?,?)',
           [userId, userName, userNumber, userAddress], (err, results) => {
             if (err) {
               console.log(err);
@@ -52,7 +52,7 @@ function checkoutForAProduct(req, res) {
             }
       
             const billId = results.insertId;
-            connection.query('INSERT INTO bill_has_product (bill_id, product_id, size_id, quantity) VALUES (?,?,?,?)',
+            connection.query('INSERT INTO Bill_has_Product (bill_id, product_id, size_id, quantity) VALUES (?,?,?,?)',
               [billId, req.params.productId, req.body.sizeId, req.body.quantity], (err, results) => {
                 if (err) {
                   console.log(err);
@@ -90,7 +90,7 @@ function checkoutForCart(req, res) {
     if (req.body.list[i].quantity < 1) { return res.json({ success: 0 }); }
   }
   
-  let query = 'SELECT product_id, size_id FROM product_has_size WHERE'
+  let query = 'SELECT product_id, size_id FROM Product_has_Size WHERE'
     + ' (product_id=? AND size_id=? AND quantity<?) OR'.repeat(req.body.list.length).slice(0, -3);
   let params = req.body.list.reduce((p, c) => p.concat([c.productId, c.sizeId, c.quantity]), []);
   connection.query(query, params, (err, results) => {
@@ -104,7 +104,7 @@ function checkoutForCart(req, res) {
     }
     
     const userId = getUserId(req.headers['x-access-token']);
-    connection.query('SELECT name, number, address FROM users WHERE user_id=?', [userId], (err, results) => {
+    connection.query('SELECT name, number, address FROM Users WHERE user_id=?', [userId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -115,7 +115,7 @@ function checkoutForCart(req, res) {
       }
 
       const userName = results[0].name, userNumber = results[0].number, userAddress = results[0].address;
-      connection.query('INSERT INTO bills (user_id, user_name, user_number, user_address) VALUES (?,?,?,?)',
+      connection.query('INSERT INTO Bills (user_id, user_name, user_number, user_address) VALUES (?,?,?,?)',
         [userId, userName, userNumber, userAddress], (err, results) => {
           if (err) {
             console.log(err);
@@ -123,7 +123,7 @@ function checkoutForCart(req, res) {
           }
 
           const billId = results.insertId;
-          let query = 'INSERT INTO bill_has_product (bill_id, product_id, size_id, quantity) VALUES'
+          let query = 'INSERT INTO Bill_has_Product (bill_id, product_id, size_id, quantity) VALUES'
             + ' (?,?,?,?),'.repeat(req.body.list.length).slice(0, -1);
           let params = req.body.list.reduce((p, c) => p.concat([billId, c.productId, c.sizeId, c.quantity]), []);
           connection.query(query, params, (err, results) => {

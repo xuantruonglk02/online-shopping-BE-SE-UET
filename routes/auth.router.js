@@ -5,7 +5,7 @@ const authController = require('../controllers/auth.controller');
 const router = express.Router();
 
 router.get('/login', (req, res) => {
-  res.render('login');
+  res.render('login', { title: 'Login' });
 });
 router.get('/signup', (req, res) => {
   res.render('signup');

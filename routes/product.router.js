@@ -14,7 +14,10 @@ router.get('/:productId', (req, res, next) => {
     }
 
     result.price = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(result.price);
-    res.render('product', { product: result });
+    res.render('product', {
+      title: result.name,
+      product: result
+    });
   });
 });
 

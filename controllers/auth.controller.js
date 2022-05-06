@@ -15,7 +15,7 @@ function login(req, res) {
     return res.json({ success: 0 });
   }
 
-  connection.query('SELECT user_id, cart_id, password, admin FROM users WHERE ? IN (number, email)',
+  connection.query('SELECT user_id, cart_id, password, admin FROM Users WHERE ? IN (number, email)',
     [req.body.username], async (err, results) => {
       if (err) {
         console.log(err);
@@ -50,7 +50,7 @@ function registerEmail(req, res) {
     return res.json({ success: 0, msg: 'Email không hợp lệ' });
   }
 
-  connection.query('SELECT COUNT(user_id) AS exist FROM users WHERE email=?', [req.body.email], (err, results) => {
+  connection.query('SELECT COUNT(user_id) AS exist FROM Users WHERE email=?', [req.body.email], (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -73,7 +73,7 @@ function registerEmail(req, res) {
         }
       });
 
-      connection.query('INSERT INTO verify_email (email, token) VALUES (?,?)', [req.body.email, token], (err, results) => {
+      connection.query('INSERT INTO Verify_Email (email, token) VALUES (?,?)', [req.body.email, token], (err, results) => {
         if (err) {
           console.log(err);
           return res.json({ success: 0 });
@@ -103,7 +103,7 @@ function createAccount(req, res) {
     return res.json({ success: 0, msg: 'Số điện thoại không hợp lệ' });
   }
 
-  connection.query('SELECT create_at FROM verify_email WHERE email=? AND token=?',
+  connection.query('SELECT create_at FROM Verify_Email WHERE email=? AND token=?',
     [req.body.email, req.body.token], (err, results) => {
       if (err) {
         console.log(err);
@@ -117,7 +117,7 @@ function createAccount(req, res) {
         return res.json({ success: 0, msg: 'Token đã hết hạn' });
       }
 
-      connection.query('SELECT COUNT(user_id) AS exist FROM users WHERE email=? OR number=?',
+      connection.query('SELECT COUNT(user_id) AS exist FROM Users WHERE email=? OR number=?',
         [req.body.email, req.body.number], async (err, results) => {
           if (err) {
             console.log(err);
@@ -131,7 +131,7 @@ function createAccount(req, res) {
           const salt = await bcrypt.genSalt(12);
           const hash = await bcrypt.hash(req.body.password, salt);
     
-          connection.query('INSERT INTO carts VALUES(DEFAULT, DEFAULT)', (err, results) => {
+          connection.query('INSERT INTO Carts VALUES(DEFAULT, DEFAULT)', (err, results) => {
             if (err) {
               console.log(err);
               return res.json({ success: 0 });
@@ -139,7 +139,7 @@ function createAccount(req, res) {
     
             const cartId = results.insertId;
     
-            connection.query('INSERT INTO users (cart_id, name, number, email, password) VALUES (?,?,?,?,?)',
+            connection.query('INSERT INTO Users (cart_id, name, number, email, password) VALUES (?,?,?,?,?)',
               [cartId, req.body.name, req.body.number, req.body.email, hash],
               (err, results) => {
                 if (err) {
@@ -153,7 +153,7 @@ function createAccount(req, res) {
                 res.cookie('x-access-token', token, { maxAge: 60 * 60 * 24, httpOnly: true });
                 res.json({ success: 1, accessToken: token });
 
-                connection.query('DELETE FROM verify_email WHERE email=? AND token=?',
+                connection.query('DELETE FROM Verify_Email WHERE email=? AND token=?',
                   [req.body.email, token], (err, results) => {});
               });
           });

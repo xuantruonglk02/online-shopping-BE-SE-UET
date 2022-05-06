@@ -6,7 +6,7 @@ const cartController = require('../controllers/cart.controller');
 const router = express.Router();
 
 router.get('/', authMiddleware.verifyToken, (req, res) => {
-  res.render('cart');
+  res.render('cart', { title: 'Cart' });
 });
 
 router.post('/all', authMiddleware.verifyToken, cartController.getAllProductsInCart);

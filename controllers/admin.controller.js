@@ -28,7 +28,7 @@ function addProduct(req, res) {
       return res.json({ success: 0 });
     }
 
-    connection.query('INSERT INTO products (line_id, class_id, name, price, description, thumbnail) VALUES (?,?,?,?,?,?)',
+    connection.query('INSERT INTO Products (line_id, class_id, name, price, description, thumbnail) VALUES (?,?,?,?,?,?)',
       [req.body.lineId, req.body.classId, req.body.name, req.body.price, req.body.description, req.body.thumbnail],
       (err, results) => {
         if (err) {
@@ -37,7 +37,7 @@ function addProduct(req, res) {
         }
     
         const productId = results.insertId;
-        let query = 'INSERT INTO product_has_size (product_id,size_id,quantity) VALUES '
+        let query = 'INSERT INTO Product_has_Size (product_id,size_id,quantity) VALUES '
           + '(?,?,?),'.repeat(req.body.sizes.length).slice(0, -1);
         let params = req.body.sizes.reduce((p, c) => p.concat([productId, c.sizeId, c.quantity]), []);
         connection.query(query, params, (err, results) => {
@@ -65,7 +65,7 @@ function modifyProduct(req, res) {
     return res.json({ success: 0 });
   }
 
-  let query = 'UPDATE products SET', params = [];
+  let query = 'UPDATE Products SET', params = [];
   if (req.body.name) {
     query += ' name=?,';
     params.push(req.body.name);
@@ -105,13 +105,13 @@ function modifyProduct(req, res) {
       }
 
       if (req.body.sizes) {
-        connection.query('DELETE FROM product_has_size WHERE product_id=?', [req.body.productId], (err, results) => {
+        connection.query('DELETE FROM Product_has_Size WHERE product_id=?', [req.body.productId], (err, results) => {
           if (err) {
             console.log(err);
             return res.json({ success: 0 });
           }
 
-          let query = 'INSERT INTO product_has_size (product_id,size_id,quantity) VALUES '
+          let query = 'INSERT INTO Product_has_Size (product_id,size_id,quantity) VALUES '
             + '(?,?,?),'.repeat(req.body.sizes.length).slice(0, -1);
           let params = req.body.sizes.reduce((p, c) => p.concat([req.body.productId, c.sizeId, c.quantity]), []);
           connection.query(query, params, (err, results) => {
@@ -140,7 +140,7 @@ function removeProduct(req, res) {
     return res.json({ success: 0 });
   }
 
-  connection.query('DELETE FROM products WHERE product_id=?', [req.body.productId], (err, results) => {
+  connection.query('DELETE FROM Products WHERE product_id=?', [req.body.productId], (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -162,7 +162,7 @@ function addCategory(req, res) {
 
   let query, params;
   if (req.body.type === 'class') {
-    query = 'INSERT INTO product_classes (name) VALUES (?)';
+    query = 'INSERT INTO Product_Classes (name) VALUES (?)';
     params = [req.body.name];
 
   } else if (req.body.type === 'line') {
@@ -170,7 +170,7 @@ function addCategory(req, res) {
       return res.json({ success: 0 });
     }
 
-    query = 'INSERT INTO product_lines (class_id, name) VALUES (?,?)';
+    query = 'INSERT INTO Product_Lines (class_id, name) VALUES (?,?)';
     params = [req.body.classId, req.body.name];
   
   } else {
@@ -199,7 +199,7 @@ function getBills(req, res) {
   req.body.begin = parseInt(req.body.begin);
   req.body.quantity = parseInt(req.body.quantity);
 
-  connection.query('SELECT * FROM bills ORDER BY create_at DESC LIMIT ?,?', [req.body.begin, req.body.quantity], (err, results) => {
+  connection.query('SELECT * FROM Bills ORDER BY create_at DESC LIMIT ?,?', [req.body.begin, req.body.quantity], (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });

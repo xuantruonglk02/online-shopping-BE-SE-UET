@@ -2,12 +2,12 @@ const { connection, commitTransaction } = require('../models/database');
 const { getCartId } = require('./user.controller');
 
 function getAllProductsInCart(req, res) {
-  const cartId = getCartId(req.headers['x-access-token']);
+  const cartId = getCartId(req.cookies['x-access-token']);
 
   let query = 'SELECT p.product_id, p.name, p.price, p.thumbnail, s.size_id, s.text, chp.quantity '
-    + 'FROM cart_has_product chp '
-    + 'INNER JOIN products p ON chp.product_id = p.product_id '
-    + 'INNER JOIN sizes s ON chp.size_id = s.size_id '
+    + 'FROM Cart_has_Product chp '
+    + 'INNER JOIN Products p ON chp.product_id = p.product_id '
+    + 'INNER JOIN Sizes s ON chp.size_id = s.size_id '
     + 'WHERE chp.cart_id=? ';
   connection.query(query, [cartId], (err, results) => {
     if (err) {
@@ -28,9 +28,9 @@ function addProduct(req, res) {
     return res.json({ success: 0 });
   }
 
-  const cartId = getCartId(req.headers['x-access-token']);
+  const cartId = getCartId(req.cookies['x-access-token']);
 
-  connection.query('INSERT INTO cart_has_product (cart_id, product_id, size_id) values (?,?,?)',
+  connection.query('INSERT INTO Cart_has_Product (cart_id, product_id, size_id) values (?,?,?)',
     [cartId, req.body.productId, req.body.sizeId], (err, results) => {
       if (err) {
         console.log(err);
@@ -68,7 +68,7 @@ function updateCart(req, res) {
     if (req.body.list[i].quantity < 1) { return res.json({ success: 0 }); }
   }
 
-  const cartId = getCartId(req.headers['x-access-token']);
+  const cartId = getCartId(req.cookies['x-access-token']);
 
   connection.beginTransaction((err) => {
     if (err) {
@@ -76,13 +76,13 @@ function updateCart(req, res) {
       return res.json({ success: 0 });
     }
 
-    connection.query('DELETE FROM cart_has_product WHERE cart_id=?', [cartId], (err, results) => {
+    connection.query('DELETE FROM Cart_has_Product WHERE cart_id=?', [cartId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
       }
 
-      let query = 'INSERT INTO cart_has_product (cart_id, product_id, size_id, quantity) VALUES '
+      let query = 'INSERT INTO Cart_has_Product (cart_id, product_id, size_id, quantity) VALUES '
         + '(?,?,?,?),'.repeat(req.body.list.length).slice(0, -1);
       let params = req.body.list.reduce((p, c) => p.concat([cartId, c.productId, c.sizeId, c.quantity]), []);
       connection.query(query, params, (err, results) => {
@@ -105,9 +105,9 @@ function removeProduct(req, res) {
     return res.json({ success: 0 });
   }
 
-  const cartId = getCartId(req.headers['x-access-token']);
+  const cartId = getCartId(req.cookies['x-access-token']);
 
-  connection.query('DELETE FROM cart_has_product WHERE cart_id=? AND product_id=?',
+  connection.query('DELETE FROM Cart_has_Product WHERE cart_id=? AND product_id=?',
     [cartId, req.body.productId], (err, results) => {
       if (err) {
         console.log(err);
