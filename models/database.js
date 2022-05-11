@@ -2,13 +2,38 @@ const mysql = require('mysql');
 
 const config = require('../config/database.config');
 
-const connection = mysql.createConnection(config);
-connection.connect((err) => {
-  if (err) {
-    throw err;
-  }
-  console.log('Connected to database.');
-});
+connect();
+
+var connection;
+var interval;
+
+function connect() {
+  connection = mysql.createConnection(config);
+  connection.connect((err) => {
+    if (err) {
+      throw err;
+    }
+    console.log('Connected to database.');
+  });
+
+  interval = setInterval(() => {
+    connection.query('SELECT 1 FROM Users WHERE false');
+  }, 50);
+
+  connection.on('error', (err) => {
+    console.log('[database]', err);
+    if (err.code == 'PROTOCOL_CONNECTION_LOST') {
+      clearInterval(interval);
+
+      setTimeout(() => {
+        console.log('Reconnecting to database...');
+        connect();
+      }, 10000);
+    } else {                                        
+      throw err;                                  
+    }
+  });
+}
 
 function commitTransaction(connection, res) {
   connection.commit((err) => {
