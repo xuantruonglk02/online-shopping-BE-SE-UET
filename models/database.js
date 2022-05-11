@@ -18,7 +18,8 @@ function connect() {
 
   interval = setInterval(() => {
     connection.query('SELECT 1 FROM Users WHERE false');
-  }, 50);
+    console.log(1);
+  }, 50000);
 
   connection.on('error', (err) => {
     console.log('[database]', err);
