@@ -22,16 +22,11 @@ function connect() {
 
   connection.on('error', (err) => {
     console.log('[database]', err);
-    if (err.code == 'PROTOCOL_CONNECTION_LOST') {
-      clearInterval(interval);
-
-      setTimeout(() => {
-        console.log('Reconnecting to database...');
-        connect();
-      }, 10000);
-    } else {                                        
-      throw err;                                  
-    }
+    clearInterval(interval);
+    setTimeout(() => {
+      console.log('Reconnecting to database...');
+      connect();
+    }, 10000);
   });
 }
 
