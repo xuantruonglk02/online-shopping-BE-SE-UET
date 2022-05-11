@@ -11,14 +11,13 @@ function connect() {
   connection = mysql.createConnection(config);
   connection.connect((err) => {
     if (err) {
-      throw err;
+      return console.log(err);
     }
     console.log('Connected to database.');
   });
 
   interval = setInterval(() => {
     connection.query('SELECT 1 FROM Users WHERE false');
-    console.log(1);
   }, 50000);
 
   connection.on('error', (err) => {
