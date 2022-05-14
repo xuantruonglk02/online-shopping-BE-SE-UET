@@ -5,14 +5,14 @@ const checkoutController = require('../controllers/checkout.controller');
 
 const router = express.Router();
 
-router.get('/:productId', authMiddleware.verifyToken, (req, res) => {
+router.get('/:productId', authMiddleware.verifyTokenGET, (req, res) => {
   res.end('checkout for a product');
 });
-router.get('/', authMiddleware.verifyToken, (req, res) => {
+router.get('/', authMiddleware.verifyTokenGET, (req, res) => {
   res.end('checkout for cart');
 });
 
-router.post('/:productId', authMiddleware.verifyToken, checkoutController.checkoutForAProduct);
-router.post('/', authMiddleware.verifyToken, checkoutController.checkoutForCart);
+router.post('/:productId', authMiddleware.verifyTokenPOST, checkoutController.checkoutForAProduct);
+router.post('/', authMiddleware.verifyTokenPOST, checkoutController.checkoutForCart);
 
 module.exports = router;

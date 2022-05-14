@@ -1,3 +1,50 @@
+$(document).ready(function () {
+  $(window).scroll(function () {
+    if ($(this).scrollTop() != 0) {
+      $('.header').addClass('header-fixed');
+    } else {
+      $('.header').removeClass('header-fixed');
+    }
+  });
+
+  $('.nav-item.dropdown').hover(function () {
+    showDropdownMenu($(this).find('.dropdown-menu'));
+  }, function () {
+    hideDropdownMenu($(this).find('.dropdown-menu'));
+  });
+
+  $('html').click(function () {
+    hideDropdownMenu($('.hd-cart-icon-ctn.dropdown .dropdown-menu'));
+  });
+
+  $('.dropdown-menu.cart-dropdown').click(function (e) {
+    e.stopPropagation();
+  });
+
+  $('.hd-cart-icon-ctn.dropdown').click(function (e) {
+    if ($(this).find('.dropdown-menu').css('display') == 'none') {
+      e.stopPropagation();
+      showDropdownMenu($(this).find('.dropdown-menu'));
+    } else {
+      hideDropdownMenu($(this).find('.dropdown-menu'));
+    }
+  });
+});
+
+function showDropdownMenu(e) {
+  e.css('display', 'block');
+  e.removeClass('fadeOutUp');
+  e.addClass('fadeInDown');
+}
+
+function hideDropdownMenu(e) {
+  e.css('display', 'none');
+  e.removeClass('fadeInDown');
+  e.addClass('fadeOutUp');
+}
+
+// ----------------------------------------------------------------------------
+
 var run = document.getElementById("images");
 var x = 0;
 

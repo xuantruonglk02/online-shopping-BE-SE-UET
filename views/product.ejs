@@ -8,8 +8,6 @@
 <body>
   <%- include('layouts/header') %>
 
-  <%- include('layouts/navbar') %>
-
   <%- include('layouts/slider') %>
 
   <%- JSON.stringify(product) %>
@@ -23,19 +21,21 @@
             <h1><%= product.name %></h1><br>
             <h2 style="color: red;"><%= product.price %></h3><br>
 
+            <p>------------------------------------------------------------------------------------------------</p>
+            
             <pre><%= product.description %></pre>
-              <p>------------------------------------------------------------------------------------------------</p>
-              <h3>Mô tả</h3><br>
-              <p>- Chất liệu: Jeans cotton</p><br>
-              <p>- Đặc tính: có độ thấm hút mồ hôi và hút ẩm cao, thoáng mát.</p><br>
-              <p>- Màu sắc: đen</p><br>
-              <p>- Kiểu dáng: tepered</p><br>
-              <h3>+ Hướng dẫn sử dụng:</h3><br>
-              <p>- Giặt ở nhiệt độ bình thường, với đồ có màu tương tự.</p><br>
-              <p>- Không được dùng hóa chất tẩy.</p><br>
-              <p>- Hạn chế sử dụng máy sấy, ủi ở nhiệt độ bình thường.</p><br>
-              <h3>Sản phẩm đã có mặt ở toàn bộ các cửa hàng trên hệ thống.</h3><br><br>
-              <div class="cart-jeans"><i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng</div>
+
+            <h3>Mô tả</h3><br>
+            <p>- Chất liệu: Jeans cotton</p><br>
+            <p>- Đặc tính: có độ thấm hút mồ hôi và hút ẩm cao, thoáng mát.</p><br>
+            <p>- Màu sắc: đen</p><br>
+            <p>- Kiểu dáng: tepered</p><br>
+            <h3>+ Hướng dẫn sử dụng:</h3><br>
+            <p>- Giặt ở nhiệt độ bình thường, với đồ có màu tương tự.</p><br>
+            <p>- Không được dùng hóa chất tẩy.</p><br>
+            <p>- Hạn chế sử dụng máy sấy, ủi ở nhiệt độ bình thường.</p><br>
+            <h3>Sản phẩm đã có mặt ở toàn bộ các cửa hàng trên hệ thống.</h3><br><br>
+            <div class="cart-jeans"><i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng</div>
           </div>
         </td>
       </tr>
@@ -86,8 +86,6 @@
       </li>
     </ul>
   </section>
-  
-  <%- include('layouts/cart') %>
 
   <%- include('layouts/footer') %>
 
