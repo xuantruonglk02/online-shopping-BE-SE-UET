@@ -172,6 +172,22 @@ function getAllProductLinesByClass(req, res) {
   });
 }
 
+function getAllCategories(req, res) {
+  connection.query(`SELECT pc.class_id, pc.name, `
+    + `CONCAT("[",GROUP_CONCAT(CONCAT('{"lineId":"',pl.line_id,'","name":"',pl.name,'"}')),"]") AS product_lines `
+    + `FROM Product_Classes pc `
+    + `INNER JOIN Product_Lines pl ON pc.class_id = pl.class_id `
+    + `GROUP BY pc.class_id `
+    + `ORDER BY pc.create_at`, (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.json({ success: 0 });
+      }
+  
+      res.json({ success: 1, results: results });
+    });
+}
+
 /**
  * key : body
  * begin : body
@@ -300,6 +316,7 @@ module.exports = {
   getProductById,
   getAllProductsByLine,
   getAllProductsByClass,
+  getAllCategories,
   getAllProductClasses,
   getAllProductLines,
   getAllProductLinesByClass,

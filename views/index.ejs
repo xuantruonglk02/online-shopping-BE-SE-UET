@@ -8,8 +8,6 @@
 <body>
   <%- include('layouts/header') %>
 
-  <%- include('layouts/navbar') %>
-
   <%- include('layouts/slider') %>
 
   <section id="products">
@@ -22,30 +20,26 @@
         }, (data) => {
           if (!data.success) {
 
-          } else {
-            console.log(data.results);
-            let ins = '';
-            for (let i = 0; i < data.results.length; i++) {
-              if (i % 4 == 0) ins += '<div class="menu"><ul class="list2">';
-              ins += '<li>'
-                + '<a href="/product/' + data.results[i].product_id + '">'
-                + '<div class="trans"><img src="' + data.results[i].thumbnail + '" alt="" style="width: 90%;"></div>'
-                + '</a>'
-                + '<a href="/product/' + data.results[i].product_id + '">'
-                + '<p class="description">' + data.results[i].name + '</p>'
-                + '</a>'
-                + '<h3 class="price">' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format( data.results[i].price) + '</h3>'
-                + '</li>';
-              if (i % 4 == 3 || i == data.results.length - 1) ins += '</ul></div>';
-            }
-            $('#products').append(ins);
           }
+          let ins = '';
+          for (let i = 0; i < data.results.length; i++) {
+            if (i % 4 == 0) ins += '<div class="menu"><ul class="list2">';
+            ins += '<li>'
+              + '<a href="/product/' + data.results[i].product_id + '">'
+              + '<div class="trans"><img src="' + data.results[i].thumbnail + '" alt="" style="width: 90%;"></div>'
+              + '</a>'
+              + '<a href="/product/' + data.results[i].product_id + '">'
+              + '<p class="description">' + data.results[i].name + '</p>'
+              + '</a>'
+              + '<h3 class="price">' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(data.results[i].price) + '</h3>'
+              + '</li>';
+            if (i % 4 == 3 || i == data.results.length - 1) ins += '</ul></div>';
+          }
+          $('#products').append(ins);
         });
       });
     </script>
   </section>
-
-  <%- include('layouts/cart') %>
   
   <%- include('layouts/footer') %>
 

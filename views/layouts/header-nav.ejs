@@ -1,0 +1,40 @@
+<div class="header-nav">
+  <div class="hd-nav-ctn">
+    <ul class="row">
+      <li class="nav-item"><a class="nav-text" href="/">Trang Chủ</a></li>
+      <li class="nav-item"><a class="nav-text" href="#">Giới Thiệu</a></li>
+      <li class="nav-item dropdown">
+        <a class="nav-text" href="#" onclick="return false;">Sản Phẩm</a>
+        <ul class="dropdown-menu row" role="menu">
+          <li>
+            <div class="row col-menus-ctn" id="product-categories-ctn"></div>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(document).ready(() => {
+    $.post('/product/category/all', (data) => {
+      if (!data.success) {
+
+      }
+      for (let i = 0; i < data.results.length; i++) {
+        let div = '<div><ul>';
+        let lines = JSON.parse(data.results[i].product_lines);
+        for (let j = 0; j < lines.length; j++) {
+          div += '<li><a href="/product/category/line/' + lines[j].lineId + '">' + lines[j].name + '</a></li>';
+        }
+        div += '</ul></div>'
+        $('#product-categories-ctn').append(
+          '<div class="col-menu">'
+          + '<h2 class="col-menu-title">'
+          + '<a href="/product/category/class/' + data.results[i].class_id + '">' + data.results[i].name + '</a>'
+          + '</h2>' + div + '</div>'
+        );
+      }
+    });
+  });
+</script>

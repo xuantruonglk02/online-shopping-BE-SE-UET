@@ -1,10 +1,41 @@
 const { connection, commitTransaction } = require('../models/database');
 const { getCartId } = require('./user.controller');
 
-function getAllProductsInCart(req, res) {
+function getQuantityOfProducts(req, res) {
   const cartId = getCartId(req.cookies['x-access-token']);
 
-  let query = 'SELECT p.product_id, p.name, p.price, p.thumbnail, s.size_id, s.text, chp.quantity '
+  connection.query('SELECT quantity FROM Carts WHERE cart_id=?', [cartId], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+
+    res.json({ success: 1, result: results[0] });
+  });
+}
+
+function getAllProductsForCartMenu(req, res) {
+  const cartId = getCartId(req.cookies['x-access-token']);
+
+  let query = 'SELECT p.product_id, p.name, p.price, p.thumbnail '
+    + 'FROM Cart_has_Product chp '
+    + 'INNER JOIN Products p ON chp.product_id = p.product_id '
+    + 'WHERE chp.cart_id=? '
+    + 'GROUP BY chp.product_id';
+  connection.query(query, [cartId], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+
+    res.json({ success: 1, results: results });
+  });
+}
+
+function getAllProducts(req, res) {
+  const cartId = getCartId(req.cookies['x-access-token']);
+
+  let query = 'SELECT p.product_id, p.name, p.price, p.thumbnail, s.size_id, chp.quantity '
     + 'FROM Cart_has_Product chp '
     + 'INNER JOIN Products p ON chp.product_id = p.product_id '
     + 'INNER JOIN Sizes s ON chp.size_id = s.size_id '
@@ -119,7 +150,9 @@ function removeProduct(req, res) {
 }
 
 module.exports = {
-  getAllProductsInCart,
+  getQuantityOfProducts,
+  getAllProductsForCartMenu,
+  getAllProducts,
   addProduct,
   updateCart,
   removeProduct

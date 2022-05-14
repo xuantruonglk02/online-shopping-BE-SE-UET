@@ -1,0 +1,279 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,500,600,600i,700,700i,800,800i');
+@import url('https://fonts.googleapis.com/css?family=Quattrocento+Sans:400,400i,700,700i');
+
+body {
+  font-family: 'Quattrocento Sans', sans-serif;
+  margin: 0;
+}
+ul {
+  list-style-type: none;
+}
+
+ul, li, h1, h2, h3, h4, h5 {
+  margin: 0;
+  padding: 0;
+}
+
+header a {
+  text-decoration: none;
+  color: black;
+}
+
+@-webkit-keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-20px);
+    -ms-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@-webkit-keyframes fadeOutUp {
+  0% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(-20px);
+    -ms-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes fadeOutUp {
+  0% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(-20px);
+    -ms-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+}
+
+.fadeInDown {
+  -webkit-animation-name: fadeInDown;
+  animation-name: fadeInDown;
+}
+
+.fadeOutUp {
+  -webkit-animation-name: fadeOutUp;
+  animation-name: fadeOutUp;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.header-fixed {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 99999;
+}
+
+.header {
+  background-color: white;
+  /* border-top: 5px solid black; */
+}
+
+.hd-logo-ctn {
+  margin: 10px 70px 10px 70px;
+}
+
+.logo {
+  height: 80px;
+}
+
+.header-nav, .hd-nav-ctn {
+  width: 100%;
+}
+
+.nav-text {
+  margin: 0 20px 0 20px;
+}
+
+.nav-text {
+  font-size: 20px;
+  font-weight: 600;
+}
+.nav-text:hover {
+  color: rgb(211, 59, 51);
+}
+
+.hd-search-ctn {
+  border: 2px solid black;
+  border-radius: 25px;
+  padding: 10px;
+}
+
+#search-field {
+  font-size: 18px;
+  border: 0;
+  outline: 0;
+  margin-right: 10px;
+}
+
+.header-icons {
+  margin: 0 70px 0 40px;
+}
+
+.header-icon {
+  font-size: 20px;
+  color: black;
+  margin: 0 15px 0 15px;
+}
+.header-icon:hover {
+  color: rgb(211, 59, 51);
+}
+
+.hd-cart-icon-ctn a {
+  position: relative;
+}
+
+.cart-number {
+  position: absolute;
+  top: 15px;
+  right: 5px;
+}
+
+.dropdown > a {
+  padding: 30px 0 30px 0;
+}
+
+.dropdown-menu {
+  background-color: white;
+  display: none;
+  position: absolute;
+  border: 1px solid rgb(224, 224, 224);
+  margin: 30px 0 0 0;
+  animation-duration: 500ms;
+}
+
+.col-menus-ctn {
+  align-items: inherit;
+}
+
+.col-menu {
+  margin: 20px 0 10px 0;
+  padding: 0 90px 0 30px;
+  border-left: 1px solid rgb(224, 224, 224);
+}
+
+.col-menu-title {
+  margin-bottom: 10px;
+}
+.col-menu-title a {
+  color: rgb(31, 31, 31);
+}
+
+.col-menu li {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+.col-menu li a {
+  color: rgb(111, 111, 111);
+}
+.col-menu a:hover {
+  color: rgb(211, 59, 51);
+}
+
+.col-menus-ctn .col-menu:first-child {
+  border-left: none;
+}
+
+.cart-dropdown {
+  right: 20px;
+}
+
+.cart-menu {
+  margin: 20px 0 10px 0;
+}
+
+.cart-menu-content h2 {
+  margin: 0 0 20px 20px;
+}
+
+.cart-menu-products {
+  margin: 0 20px 20px 20px;
+}
+
+.cart-menu-products .row div:not(:last-child) {
+  margin-right: 10px;
+}
+
+.cart-menu-thumb-ctn img {
+  width: 70px;
+  height: 70px;
+}
+
+.cart-menu-name-ctn {
+  max-width: 200px;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cart-menu-name-ctn span:hover {
+  color: rgb(211, 59, 51);
+}
+
+.cart-menu-price-ctn {
+  color: rgb(211, 59, 51);
+  margin-left: auto;
+}
+
+.cart-menu-bottom {
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cart-menu-total {
+  margin: 0 30px 0 20px;
+}
+.cart-menu-total h3 {
+  margin-right: 10px;
+}
+
+.view-cart-btn {
+  background-color: black;
+  color: white;
+  margin-right: 20px;
+  padding: 10px;
+}
+.view-cart-btn:hover {
+  background-color: rgb(211, 59, 51);
+}

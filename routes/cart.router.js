@@ -5,13 +5,15 @@ const cartController = require('../controllers/cart.controller');
 
 const router = express.Router();
 
-router.get('/', authMiddleware.verifyToken, (req, res) => {
+router.get('/', authMiddleware.verifyTokenGET, (req, res) => {
   res.render('cart', { title: 'Cart' });
 });
 
-router.post('/all', authMiddleware.verifyToken, cartController.getAllProductsInCart);
-router.post('/add', authMiddleware.verifyToken, cartController.addProduct);
-router.post('/update', authMiddleware.verifyToken, cartController.updateCart);
-router.post('/remove', authMiddleware.verifyToken, cartController.removeProduct);
+router.post('/quantity', authMiddleware.verifyTokenPOST, cartController.getQuantityOfProducts);
+router.post('/menu', authMiddleware.verifyTokenPOST, cartController.getAllProductsForCartMenu);
+router.post('/all', authMiddleware.verifyTokenPOST, cartController.getAllProducts);
+router.post('/add', authMiddleware.verifyTokenPOST, cartController.addProduct);
+router.post('/update', authMiddleware.verifyTokenPOST, cartController.updateCart);
+router.post('/remove', authMiddleware.verifyTokenPOST, cartController.removeProduct);
 
 module.exports = router;
