@@ -12,10 +12,14 @@
   <div class="header-search">
     <div class="hd-search-ctn row">
       <div>
-        <input type="text" name="" id="search-field">
+        <form id="search-form" method="get" action="/product/search">
+          <input type="text" name="keyword" id="search-field" value="<%= (typeof keyword != 'undefined' ? keyword : '') %>">
+        </form>
       </div>
       <div>
-        <a href="#"><i class="header-icon fa-solid fa-magnifying-glass"></i></a>
+        <a id="search-icon" href="#" onclick="$('#search-form').submit(); return false;">
+          <i class="header-icon fa-solid fa-magnifying-glass"></i>
+        </a>
       </div>
     </div>
   </div>

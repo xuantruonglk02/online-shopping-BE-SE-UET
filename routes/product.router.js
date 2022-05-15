@@ -6,6 +6,12 @@ const productController = require('../controllers/product.controller');
 
 const router = express.Router();
 
+router.get('/search', (req, res) => {
+  res.render('filter', {
+    keyword: req.query.keyword
+  });
+});
+
 router.get('/:productId', (req, res, next) => {
   productController.getProductById(req.params.productId, (err, result) => {
     if (err) {

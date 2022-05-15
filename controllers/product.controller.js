@@ -189,33 +189,33 @@ function getAllCategories(req, res) {
 }
 
 /**
- * key : body
- * begin : body
- * quantity : body
+ * keyword : query
+ * begin : query
+ * quantity : query
  * 
- * classId : body
- * lineId : body
- * sortBy : body : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
+ * classId : query
+ * lineId : query
+ * sortBy : query : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
 function searchProductsByKeyword(req, res) {
-  if (!req.body.key || !req.body.begin || !req.body.quantity || isNaN(req.body.begin) || isNaN(req.body.quantity)) {
+  if (!req.query.keyword || !req.query.begin || !req.query.quantity || isNaN(req.query.begin) || isNaN(req.query.quantity)) {
     return res.json({ success: 0 });
   }
 
-  req.body.begin = parseInt(req.body.begin);
-  req.body.quantity = parseInt(req.body.quantity);
+  req.query.begin = parseInt(req.query.begin);
+  req.query.quantity = parseInt(req.query.quantity);
 
   let query = 'SELECT product_id, name, price, sold, rating, thumbnail FROM Products WHERE name LIKE CONCAT("%",?,"%")';
-  let params = [req.body.key];
-  if (req.body.classId) {
+  let params = [req.query.keyword];
+  if (req.query.classId) {
     query += ' AND class_id=?';
-    params.push(req.body.classId);
+    params.push(req.query.classId);
   }
-  if (req.body.lineId) {
+  if (req.query.lineId) {
     query += ' AND line_id=?';
-    params.push(req.body.lineId);
+    params.push(req.query.lineId);
   }
-  switch (req.body.sortBy) {
+  switch (req.query.sortBy) {
     case 'priceASC':
       query += ' ORDER BY price ASC';
       break;
@@ -235,7 +235,7 @@ function searchProductsByKeyword(req, res) {
       query += ' ORDER BY create_at DESC';
   }
   query += ' LIMIT ?,?';
-  params.push(req.body.begin, req.body.quantity);
+  params.push(req.query.begin, req.query.quantity);
 
   connection.query(query, params, (err, results) => {
     if (err) {

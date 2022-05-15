@@ -6,43 +6,43 @@
 </head>
 
 <body>
-  <%- include('layouts/header') %>
+  <div class="main">
+    <%- include('layouts/header') %>
 
-  <%- include('layouts/slider') %>
-
-  <section id="products">
-    <h1>Sản phẩm nổi bật</h1>
-    <script>
-      $(document).ready(() => {
-        $.post('/product/new', {
-          'begin': 0,
-          'quantity': 20
-        }, (data) => {
-          if (!data.success) {
-
-          }
-          let ins = '';
-          for (let i = 0; i < data.results.length; i++) {
-            if (i % 4 == 0) ins += '<div class="menu"><ul class="list2">';
-            ins += '<li>'
-              + '<a href="/product/' + data.results[i].product_id + '">'
-              + '<div class="trans"><img src="' + data.results[i].thumbnail + '" alt="" style="width: 90%;"></div>'
-              + '</a>'
-              + '<a href="/product/' + data.results[i].product_id + '">'
-              + '<p class="description">' + data.results[i].name + '</p>'
-              + '</a>'
-              + '<h3 class="price">' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(data.results[i].price) + '</h3>'
-              + '</li>';
-            if (i % 4 == 3 || i == data.results.length - 1) ins += '</ul></div>';
-          }
-          $('#products').append(ins);
-        });
-      });
-    </script>
-  </section>
+    <%- include('layouts/slider') %>
   
-  <%- include('layouts/footer') %>
-
+    <div class="page-body">
+      <div class="products-list-ctn" id="products-list-ctn">
+        <script>
+          $(document).ready(() => {
+            $.post('/product/new', {
+              'begin': 0,
+              'quantity': 20
+            }, (data) => {
+              if (!data.success) {
+    
+              }
+              data.results.forEach((e) => {
+                $('#products-list-ctn').append(
+                  '<div class="product-ctn"><div class="product-thumb-ctn">'
+                  + '<a href="/product/' + e.product_id + '">'
+                  + '<img src="' + e.thumbnail + '" alt="">'
+                  + '</a></div><div class="product-text-ctn"><div class="product-name-ctn">'
+                  + '<a href="/product/' + e.product_id + '"><p>' + e.name + '</p>'
+                  + '</a></div><div class="product-price-ctn">'
+                  + '<span>' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(e.price) + '</span>'
+                  + '</div></div></div>'
+                );
+              });
+            });
+          });
+        </script>
+      </div>
+    </div>
+    
+    <%- include('layouts/footer') %>
+  </div>
+  
   <%- include('layouts/script') %>
 </body>
 
