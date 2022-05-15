@@ -96,6 +96,12 @@ header a {
   align-items: center;
 }
 
+.main {
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .header-fixed {
   position: fixed;
   top: 0;
@@ -276,4 +282,42 @@ header a {
 }
 .view-cart-btn:hover {
   background-color: rgb(211, 59, 51);
+}
+
+.products-list-ctn {
+  margin: 70px 150px 100px 150px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.product-ctn {
+  width: min-content;
+  margin: 15px 20px 15px 20px;
+}
+
+.product-thumb-ctn img {
+  width: 260px;
+  transition: all 0.3s ease;
+}
+.product-thumb-ctn img:hover {
+  transform: translateY(-20px);
+}
+
+.product-text-ctn {
+  background-color: rgb(245, 245, 245);;
+  text-align: center;
+  margin-top: -4px;
+  padding: 10px;
+}
+
+.product-name-ctn {
+  font-size: 18px;
+}
+
+.product-price-ctn {
+  color: red;
+  font-size: 17px;
+  font-weight: bold;
+  margin-top: 5px;
 }
