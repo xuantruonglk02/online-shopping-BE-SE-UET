@@ -3,6 +3,10 @@ body {
   background-image: url("/images/login1.jpg");
 }
 
+input[type=submit] {
+  cursor: pointer;
+}
+
 .page-body {
   display: flex;
   justify-content: center;
@@ -32,8 +36,9 @@ body {
 .form-input-ctn:first-child {
   margin-top: 0;
 }
+
 .auth-error {
-  margin-top: 0;
+  margin-top: 3px;
 }
 
 .form-input-ctn input {
