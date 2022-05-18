@@ -47,6 +47,7 @@
             $(document).ready(() => {
               $('#login-form').submit(function (e) {
                 e.preventDefault();
+                $('.auth-error').css('display', 'none');
                 $.ajax({
                   type: 'POST',
                   url: '/auth/login',
@@ -58,10 +59,15 @@
                     if (data.success) {
                       window.location.href = data.redirect;
                     } else {
-                      if (data.msg) {
-                        alert(data.msg);
-                      } else {
-                        alert('Đã có lỗi xảy ra');
+                      switch (data.code) {
+                        case 'username':
+                          $('.auth-error:first').css('display', 'block');
+                          break;
+                        case 'password':
+                          $('.auth-error:last').css('display', 'block');
+                          break;
+                        default:
+                          alert('Đã có lỗi xảy ra');
                       }
                     }
                   },

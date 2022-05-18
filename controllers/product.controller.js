@@ -24,7 +24,10 @@ function getProductById(productId, callback) {
  * begin : body
  * quantity : body
  * 
- * sortBy : body : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
+ * minPrice : body
+ * maxPrice : body
+ * minStar : body
+ * orderBy : body : newest|priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
 function getAllProductsByLine(req, res) {
   if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
@@ -35,7 +38,7 @@ function getAllProductsByLine(req, res) {
   req.body.quantity = parseInt(req.body.quantity);
 
   let query = 'SELECT product_id, name, price, sold, rating, thumbnail FROM Products WHERE line_id=? ORDER BY ';
-  switch (req.body.sortBy) {
+  switch (req.body.orderBy) {
     case 'priceASC':
       query += 'price ASC';
       break;
@@ -50,6 +53,9 @@ function getAllProductsByLine(req, res) {
       break;
     case 'ratingDESC':
       query += 'rating DESC';
+      break;
+    case 'newest':
+      query += 'create_at DESC';
       break;
     default:
       query += 'create_at DESC';
@@ -71,7 +77,7 @@ function getAllProductsByLine(req, res) {
  * begin : body
  * quantity : body
  * 
- * sortBy : body : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
+ * orderBy : body : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
 function getAllProductsByClass(req, res) {
   if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
@@ -82,7 +88,7 @@ function getAllProductsByClass(req, res) {
   req.body.quantity = parseInt(req.body.quantity);
 
   let query = 'SELECT product_id, name, price, sold, rating, thumbnail FROM Products WHERE class_id=? ORDER BY ';
-  switch (req.body.sortBy) {
+  switch (req.body.orderBy) {
     case 'priceASC':
       query += 'price ASC';
       break;
@@ -189,33 +195,57 @@ function getAllCategories(req, res) {
 }
 
 /**
- * keyword : query
- * begin : query
- * quantity : query
+ * keyword : body
+ * begin : body
+ * quantity : body
  * 
- * classId : query
- * lineId : query
- * sortBy : query : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
+ * classId : body
+ * lineId : body
+ * minPrice : body
+ * maxPrice : body
+ * minStar : body
+ * orderBy : body : newest|priceASC|priceDESC|soldDESC|qoRatingDESC|ratingDESC
  */
 function searchProductsByKeyword(req, res) {
-  if (!req.query.keyword || !req.query.begin || !req.query.quantity || isNaN(req.query.begin) || isNaN(req.query.quantity)) {
+  if (!req.body.keyword || !req.body.begin || !req.body.quantity || isNaN(req.body.begin) || isNaN(req.body.quantity)) {
     return res.json({ success: 0 });
   }
-
-  req.query.begin = parseInt(req.query.begin);
-  req.query.quantity = parseInt(req.query.quantity);
+  
+  req.body.begin = parseInt(req.body.begin);
+  req.body.quantity = parseInt(req.body.quantity);
 
   let query = 'SELECT product_id, name, price, sold, rating, thumbnail FROM Products WHERE name LIKE CONCAT("%",?,"%")';
-  let params = [req.query.keyword];
-  if (req.query.classId) {
+  let params = [req.body.keyword];
+  if (req.body.classId) {
     query += ' AND class_id=?';
-    params.push(req.query.classId);
+    params.push(req.body.classId);
   }
-  if (req.query.lineId) {
+  if (req.body.lineId) {
     query += ' AND line_id=?';
-    params.push(req.query.lineId);
+    params.push(req.body.lineId);
   }
-  switch (req.query.sortBy) {
+  if (req.body.minPrice && !isNaN(req.body.minPrice)) {
+    req.body.minPrice = parseInt(req.body.minPrice);
+    if (req.body.minPrice > 0) {
+      query += ' AND price>=?';
+      params.push(req.body.minPrice);
+    }
+  }
+  if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
+    req.body.maxPrice = parseInt(req.body.maxPrice);
+    if (req.body.maxPrice > 0) {
+      query += ' AND price<=?';
+      params.push(req.body.maxPrice);
+    }
+  }
+  if (req.body.minStar && !isNaN(req.body.minStar)) {
+    req.body.minStar = parseInt(req.body.minStar);
+    if (req.body.minPrice >= 1 && req.body.minStar <= 5) {
+      query += ' AND rating>=?';
+      params.push(req.body.minStar);
+    }
+  }
+  switch (req.body.orderBy) {
     case 'priceASC':
       query += ' ORDER BY price ASC';
       break;
@@ -225,17 +255,20 @@ function searchProductsByKeyword(req, res) {
     case 'soldDESC':
       query += ' ORDER BY sold DESC';
       break;
-    case 'aoRatingDESC':
-      query += ' ORDER BY amount_of_rating DESC';
+    case 'qoRatingDESC':
+      query += ' ORDER BY quantity_of_rating DESC';
       break;
     case 'ratingDESC':
       query += ' ORDER BY rating DESC';
+      break;
+    case 'newest':
+      query += ' ORDER BY create_at DESC';
       break;
     default:
       query += ' ORDER BY create_at DESC';
   }
   query += ' LIMIT ?,?';
-  params.push(req.query.begin, req.query.quantity);
+  params.push(req.body.begin, req.body.quantity);
 
   connection.query(query, params, (err, results) => {
     if (err) {

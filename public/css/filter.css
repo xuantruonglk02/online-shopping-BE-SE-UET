@@ -1,0 +1,125 @@
+.page-body {
+  align-items: flex-start;
+  margin: 50px 150px 100px 150px;
+}
+
+.filter-div:not(:first-of-type) {
+  margin-top: 20px;
+}
+
+.filter-div-title {
+  border-bottom: 3px solid black;
+  margin-bottom: 10px;
+}
+
+.filter-product-class {
+  margin-left: 20px;
+}
+
+.filter-product-class:not(:first-of-type) {
+  margin-top: 10px;
+}
+
+.filter-product-lines {
+  display: flex;
+  flex-direction: column;
+  margin-left: 30px;
+}
+
+.filter-product-lines li {
+  margin-top: 5px;
+  list-style-type: disc;
+}
+
+.filter-product-class a {
+  font-size: 19px;
+}
+
+.category-selected {
+  color: rgb(211, 59, 51);
+}
+
+.price-filter-group input {
+  width: 100px;
+  font-size: 16px;
+  margin: 0 10px 0 10px;
+  padding: 5px;
+  outline: none;
+}
+
+.price-filter-submit {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.price-filter-submit button {
+  font-size: 17px;
+  color: white;
+  background-color: black;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.rating-filter-option {
+  width: fit-content;
+  margin: 10px 0 10px 20px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.rating-filter-option i {
+  font-size: 18px;
+}
+
+.rating-filter-option span {
+  font-size: 18px;
+  margin-left: 10px;
+}
+
+.checked {
+  color: yellow;
+}
+
+.products-col {
+  margin-left: 20px;
+}
+
+.products-sort-filter {
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  margin-bottom: 20px;
+}
+
+.products-sort-filter-title {
+  margin: 0 5px 0 20px;
+}
+
+.products-sort-option {
+  padding: 10px;
+  margin: 0 5px 0 5px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.selected {
+  background-color: black;
+}
+
+.selected span {
+  color: white;
+}
+
+.products-sort-selection {
+  padding: 5px;
+}
+
+.products-sort-selection select {
+  font-size: 16px;
+  padding: 10px;
+  cursor: pointer;
+  outline: none;
+}
+
+.products-list-ctn {
+  margin: 0;
+}

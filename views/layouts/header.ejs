@@ -14,6 +14,9 @@
       <div>
         <form id="search-form" method="get" action="/product/search">
           <input type="text" name="keyword" id="search-field" value="<%= (typeof keyword != 'undefined' ? keyword : '') %>">
+          <input type="number" name="begin" value="0" hidden>
+          <input type="number" name="quantity" value="15" hidden>
+          <input type="submit" value="submit" hidden>
         </form>
       </div>
       <div>
