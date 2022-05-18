@@ -42,12 +42,17 @@
   $(document).ready(() => {
     $('.hd-cart-icon-ctn.dropdown').click(function () {
       if ($(this).find('.dropdown-menu').css('display') != 'none') { return; }
+      $('#cart-menu-products').empty();
+      $('#cart-menu-total').text('');
+
       $.ajax({
         type: 'POST',
         url: '/cart/menu',
         success: function (data) {
           if (!data.success || !data.results.length) { return; }
+          let total = 0;
           for (let i = 0; i < data.results.length; i++) {
+            total += data.results[i].price;
             $('#cart-menu-products').append(
               '<li><div class="row"><div class="cart-menu-thumb-ctn">'
               + '<a href="/product/' + data.results[i].product_id + '">'
@@ -57,6 +62,7 @@
               + '</div></div></li>'
             );
           }
+          $('#cart-menu-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(total));
         },
         error: function (data) {
           if (data.status == 401) {

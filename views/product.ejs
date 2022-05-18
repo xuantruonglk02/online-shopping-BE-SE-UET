@@ -10,84 +10,174 @@
     <%- include('layouts/header') %>
 
     <%- include('layouts/slider') %>
-  
-    <%- JSON.stringify(product) %>
-  
-    <section>
-      <table style="width: 90%;">
-        <tr style="height: 40px">
-          <td><img class="member" src="<%= product.thumbnail %>"></td>
-          <td>
-            <div class="jeans2-name">
-              <h1><%= product.name %></h1><br>
-              <h2 style="color: red;"><%= product.price %></h3><br>
-  
-              <p>------------------------------------------------------------------------------------------------</p>
-              
-              <pre><%= product.description %></pre>
-  
-              <h3>Mô tả</h3><br>
-              <p>- Chất liệu: Jeans cotton</p><br>
-              <p>- Đặc tính: có độ thấm hút mồ hôi và hút ẩm cao, thoáng mát.</p><br>
-              <p>- Màu sắc: đen</p><br>
-              <p>- Kiểu dáng: tepered</p><br>
-              <h3>+ Hướng dẫn sử dụng:</h3><br>
-              <p>- Giặt ở nhiệt độ bình thường, với đồ có màu tương tự.</p><br>
-              <p>- Không được dùng hóa chất tẩy.</p><br>
-              <p>- Hạn chế sử dụng máy sấy, ủi ở nhiệt độ bình thường.</p><br>
-              <h3>Sản phẩm đã có mặt ở toàn bộ các cửa hàng trên hệ thống.</h3><br><br>
-              <div class="cart-jeans"><i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng</div>
+
+    <div class="container">
+      <div class="product-content row">
+        <div class="product-content-left">
+          <div class="product-content-left-big-img">
+            <img src="<%= product.thumbnail %>" alt="">
+          </div>
+          <div class="product-content-left-small-img row">
+            <img src="<%= product.thumbnail %>" alt="">
+            <img src="<%= product.thumbnail %>" alt="">
+            <img src="<%= product.thumbnail %>" alt="">
+          </div>
+          <script>
+            $('.product-content-left-small-img img').on('click', function () {
+              $('.product-content-left-big-img img').attr('src', $(this).attr('src'));
+            });
+          </script>
+        </div>
+        <div class="product-content-right">
+          <div class="c">
+            <h1><%= product.name %></h1>
+          </div>
+          <div class="product-rating">
+            <% product.rating == null ? product.rating = 0 : product.rating = parseInt(product.rating) %>
+            <% for (let i = 0; i < product.rating; i++) { %>
+              <i class="fa-solid fa-star checked"></i>
+            <% } %>
+            <% for (let i = 0; i < 5 - product.rating; i++) { %>
+              <i class="fa-solid fa-star"></i>
+            <% } %>
+            <span>(<%= product.quantity_of_rating %> đánh giá)</span>
+          </div>
+          <div class="product-content-right-price">
+            <span><%= product.price %></span>
+          </div>
+          <!-- <div class="product-content-right-color">
+            <p style="font-weight: bold;">Màu sắc:</p>
+            <div class="color">
+              <span>màu xanh</span>
             </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <ul class="member-ul">
-              <% if (product.urls == null) { product.urls = "[]"; } %>
-              <% let previewImages = JSON.parse(product.urls) %>
-              <% for (let i = 0; i < previewImages.length; i++) { %>
-                <li><img class="member-ul-li" src="<%= previewImages[i] %>" onclick="document.querySelector('.member').src = this.src"></li>
-              <% } %>
-            </ul>
-          </td>
-        </tr>
-      </table>
-    </section>
-  
-    <section>
-      <h1 style="text-align: center;">Sản phẩm liên quan</h1><br>
-      <ul class="member-ul">
-        <li>
-          <a href="jeans1.html">
-            <div class="trans"><img class="member2-ul-li" src="/images/jeans1.jpg"></div>
-          </a>
-          <p class="description2">Quần jeans nam QJDOL008</p>
-          <h3 class="price2">450.000₫</h3>
-        </li>
-        <li>
-          <a href="jeans2.html">
-            <div class="trans"><img class="member2-ul-li" src="/images/jeans2.jpg"></div>
-          </a>
-          <p class="description2">Quần jeans nam QJDTK241</p>
-          <h3 class="price2">495.000₫</h3>
-        </li>
-        <li>
-          <a href="jeans3.html">
-            <div class="trans"><img class="member2-ul-li" src="/images/jeans3.jpg"></div>
-          </a>
-          <p class="description2">Quần jeans nam QJDTK240</p>
-          <h3 class="price2">520.000₫</h3>
-        </li>
-        <li>
-          <a href="jeans4.html">
-            <div class="trans"><img class="member2-ul-li" src="/images/jeans4.jpg"></div>
-          </a>
-          <p class="description2">Quần jeans nam QJDTK239</p>
-          <h3 class="price2">490.000₫</h3>
-        </li>
-      </ul>
-    </section>
-  
+          </div> -->
+          <div class="product-content-right-size row">
+            <div class="product-content-right-size-input">
+              <span>Size</span>
+              <div class="product-content-right-size-input-select">
+                <select name="size" id="size-select">
+                  <% let sizes = JSON.parse(product.sizes) %>
+                  <% for (let i = 0; i < sizes.length; i++) { %>
+                    <option value="<%= sizes[i].sizeId %>" data-quantity="<%= sizes[i].quantity %>"><%= sizes[i].sizeId %></option>
+                  <% } %>
+                </select>
+              </div>
+            </div>
+            <div class="product-content-right-size-quantity">
+              <span id="quantity-title">Số Lượng: còn <%= sizes[0].quantity %></span>
+              <div class="product-content-right-size-input-quantity row">
+                <div class="quantity-modify">
+                  <a id="quantity-modify-desc" href="#" onclick="return false">-</a>
+                </div>
+                <input type="number" name="quantity" id="quantity-input" min="1" value="1" max="1">
+                <div class="quantity-modify">
+                  <a id="quantity-modify-asc" href="#" onclick="return false">+</a>
+                </div>
+              </div>
+            </div>
+            <script>
+              $('#size-select').on('change', function () {
+                $('#quantity-input').attr('max', parseInt($('#size-select :selected').data().quantity));
+                $('#quantity-input').val(1);
+                $('#quantity-title').text('Số Lượng: còn ' + $('#size-select :selected').data().quantity);
+              });
+              $('#quantity-modify-desc').on('click', function () {
+                if ($('#quantity-input').val() > 1) {
+                  $('#quantity-input').val(parseInt($('#quantity-input').val()) - 1);
+                }
+              });
+              $('#quantity-modify-asc').on('click', function () {
+                if ($('#quantity-input').val() < $('#size-select :selected').data().quantity) {
+                  $('#quantity-input').val(parseInt($('#quantity-input').val()) + 1);
+                }
+              });
+            </script>
+          </div>
+          <div class="product-content-right-button row">
+            <a id="add-to-cart" href="#" onclick="return false">
+              <div><i class="fa-solid fa-cart-shopping"></i>Thêm vào giỏ hàng</div>
+            </a>
+            <a href="#">
+              <div>Mua ngay</div>
+            </a>
+            <script>
+              $('#add-to-cart').on('click', function () {
+                $.ajax({
+                  type: 'POST',
+                  url: '/cart/add',
+                  data: {
+                    'productId': document.location.href.substr(document.location.href.lastIndexOf('/') + 1),
+                    'sizeId': $('#size-select :selected').val(),
+                    'quantity': parseInt($('#quantity-input').val())
+                  },
+                  success: function (data) {
+                    if (data.success) {
+                      alert('Thành công');
+                    } else {
+                      switch (data.code) {
+                        case 'ER_DUP_ENTRY':
+                          alert('Sản phẩm đã có sẵn trong giỏ hàng');
+                          break;
+                        default:
+                          alert('Đã có lỗi xảy ra');
+                      }
+                    }
+                  },
+                  error: function (data) {
+                    if (data.status == 401) {
+                      window.location.href = data.responseJSON.redirect;
+                    } 
+                  }
+                });
+              });
+            </script>
+          </div>
+          <% if (product.description != '') { %>
+            <div class="product-content-right-botton">
+              <div class="product-content-right-botton-top">
+                &#8564;
+              </div>
+              <div class="product-content-right-botton-des">
+                <div class="product-content-right-botton-title row">
+                  <div class="product-content-right-botton-title-item">
+                    <p>Chi Tiết Sản Phẩm</p>
+                  </div>
+                </div>
+                <% let descs = product.description.split('#') %>
+                <% for (let i = 0; i < descs.length; i++) { %>
+                  <div class="product-content-right-botton">
+                    <div class="product-content-right-botton-chitiet">
+                      <p><%- descs[i].replaceAll('\n', '</p><br><p>') %></p>
+                    </div>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <div class="product-rating">
+        <div class="container">
+          <p class="page-title">Khách hàng đánh giá</p>
+        </div>
+        <div class="stars">
+          <form action="">
+            <input class="star star-5" id="star-5" type="radio" name="star" />
+            <label class="star star-5" for="star-5"></label>
+            <input class="star star-4" id="star-4" type="radio" name="star" />
+            <label class="star star-4" for="star-4"></label>
+            <input class="star star-3" id="star-3" type="radio" name="star" />
+            <label class="star star-3" for="star-3"></label>
+            <input class="star star-2" id="star-2" type="radio" name="star" />
+            <label class="star star-2" for="star-2"></label>
+            <input class="star star-1" id="star-1" type="radio" name="star" />
+            <label class="star star-1" for="star-1"></label>
+          </form>
+        </div>
+        <link rel='stylesheet prefetch' href='https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css'>
+      </div>
+    </div>
+
     <%- include('layouts/footer') %>
   </div>
 

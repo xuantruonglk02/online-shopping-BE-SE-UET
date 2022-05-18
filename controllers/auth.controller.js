@@ -23,19 +23,19 @@ function login(req, res) {
       }
 
       if (!results.length) {
-        return res.json({ success: 0, msg: 'Số điện thoại hoặc email không chính xác' });
+        return res.json({ success: 0, code: 'username' });
       }
       
       const match = await bcrypt.compare(req.body.password, results[0].password);
       if (!match) {
-        return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
+        return res.json({ success: 0, code: 'password' });
       }
       
       const token = jwt.sign({ userId: results[0].user_id, cartId: results[0].cart_id, admin: results[0].admin }, process.env.JWT_SECRET, {
         expiresIn: 24 * 60 * 60 * 1000
       });
       res.cookie('x-access-token', token, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-      res.json({ success: 1, accessToken: token });
+      res.json({ success: 1, redirect: '/', accessToken: token });
     });
 }
 
