@@ -53,19 +53,21 @@ function getAllProducts(req, res) {
 /**
  * productId : body
  * sizeId : body
+ * quantity : body
  */
 function addProduct(req, res) {
-  if (!req.body.productId || !req.body.sizeId) {
+  if (!req.body.productId || !req.body.sizeId || !req.body.quantity
+    || isNaN(req.body.quantity)) {
     return res.json({ success: 0 });
   }
+  req.body.quantity = parseInt(req.body.quantity);
 
   const cartId = getCartId(req.cookies['x-access-token']);
-
-  connection.query('INSERT INTO Cart_has_Product (cart_id, product_id, size_id) values (?,?,?)',
-    [cartId, req.body.productId, req.body.sizeId], (err, results) => {
+  connection.query('INSERT INTO Cart_has_Product (cart_id, product_id, size_id, quantity) values (?,?,?,?)',
+    [cartId, req.body.productId, req.body.sizeId, req.body.quantity], (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({ success: 0 });
+        return res.json({ success: 0, code: err.code });
       }
 
       res.json({ success: 1 });

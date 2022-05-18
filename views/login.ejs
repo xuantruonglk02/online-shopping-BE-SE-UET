@@ -3,16 +3,90 @@
 
 <head>
   <%- include('layouts/head') %>
+
+  <link rel="stylesheet" href="/css/auth.css">
 </head>
 
 <body>
   <div class="main">
-    <form action="/auth/login" method="post">
-      <input type="text" name="username" id="">
-      <input type="password" name="password" id="">
-      <input type="submit" value="Login">
-    </form>
+    <div class="page-body row">
+      <div class="auth-left">
+        <div class="logo-ctn">
+          <img src="/images/logo.png" alt="">
+        </div>
+      </div>
+      <div class="auth-right">
+        <div class="form-ctn">
+          <form action="/auth/login" method="post" id="login-form">
+            <div class="form-input-ctn">
+              <input type="text" name="username" id="username">
+            </div>
+            <div class="form-input-ctn auth-error">
+              <span>Email hoặc số điện thoại không chính xác</span>
+            </div>
+            <div class="form-input-ctn">
+              <input type="password" name="password" id="password">
+            </div>
+            <div class="form-input-ctn auth-error">
+              <span>Mật khẩu không chính xác</span>
+            </div>
+            <div class="form-input-ctn">
+              <input type="submit" value="Đăng nhập">
+            </div>
+            <div class="form-input-ctn form-forget-password">
+              <a href="#">Quên mật khẩu?</a>
+            </div>
+            <div class="form-input-ctn form-split-line"></div>
+            <div class="form-input-ctn new-account-btn-ctn">              
+              <a href="/auth/signup">
+                <div class="new-account-btn">Tạo tài khoản mới</div>
+              </a>
+            </div>
+          </form>
+          <script>
+            $(document).ready(() => {
+              $('#login-form').submit(function (e) {
+                e.preventDefault();
+                $.ajax({
+                  type: 'POST',
+                  url: '/auth/login',
+                  data: {
+                    'username': $('#username').val(),
+                    'password': $('#password').val()
+                  },
+                  success: function (data) {
+                    if (data.success) {
+                      window.location.href = data.redirect;
+                    } else {
+                      if (data.msg) {
+                        alert(data.msg);
+                      } else {
+                        alert('Đã có lỗi xảy ra');
+                      }
+                    }
+                  },
+                  error: function (data) {
+                    alert('Đã có lỗi xảy ra');
+                  }
+                })
+              });
+            });
+          </script>
+        </div>
+      </div>
+    </div>
   </div>
+  <script>
+    $(document).ready(() => {
+      const bgImages = ['/images/login1.jpg', '/images/login2.jpg', '/images/login3.jpg'];
+      let bgImage = 0;
+      setInterval(() => {
+        $('body').css('background-image', 'url("' + bgImages[bgImage] + '")');
+        bgImage += 1;
+        if (bgImage == bgImages.length) bgImage = 0;
+      }, 5000);
+    });
+  </script>
 </body>
 
 </html>
