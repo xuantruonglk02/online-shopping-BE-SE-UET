@@ -9,7 +9,6 @@
             $('#cart-number').text(data.result.quantity);
             if (data.result.quantity == 0) {
               $('#cart-menu-products').append('<li><h3 style="color: rgb(211, 59, 51); margin-left: 10px;">Giỏ hàng của bạn đang trống</h3></li>');
-              $('#cart-menu-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(0));
             }
           }
         });
@@ -26,10 +25,6 @@
             </ul>
           </div>
           <div class="cart-menu-bottom row">
-            <div class="cart-menu-total row">
-              <h3>Tổng cộng:</h3>
-              <span id="cart-menu-total"></span>
-            </div>
             <a class="view-cart-btn" href="/cart">Xem giỏ hàng</a>
           </div>
         </div>
@@ -43,7 +38,6 @@
     $('.hd-cart-icon-ctn.dropdown').click(function () {
       if ($(this).find('.dropdown-menu').css('display') != 'none') { return; }
       $('#cart-menu-products').empty();
-      $('#cart-menu-total').text('');
 
       $.ajax({
         type: 'POST',
@@ -53,12 +47,9 @@
           if (!data.success) { return; }
           if (data.results.length == 0) {
             $('#cart-menu-products').append('<p>Giỏ hàng hiện trống</p>');
-            $('#cart-menu-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(0));
             return;
           }
-          let total = 0;
           for (let i = 0; i < data.results.length; i++) {
-            total += data.results[i].price;
             $('#cart-menu-products').append(
               '<li><div class="row"><div class="cart-menu-thumb-ctn">'
               + '<a href="/product/' + data.results[i].product_id + '">'
@@ -68,7 +59,6 @@
               + '</div></div></li>'
             );
           }
-          $('#cart-menu-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(total));
         },
         error: function (data) {
           if (data.status == 401) {

@@ -3,15 +3,165 @@
 
 <head>
   <%- include('layouts/head') %>
+
+  <link rel="stylesheet" href="/css/cart.css">
 </head>
 
 <body>
   <div class="main">
     <%- include('layouts/header') %>
   
-    <%- include('layouts/slider') %>
-  
-    
+    <div class="page-body">
+      <div class="cart-ctn">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 150px;">Hình ảnh</th>
+              <th style="width: 320px;">Tên sản phẩm</th>
+              <th style="width: 150px;">Đơn giá</th>
+              <th>Size</th>
+              <th>Số lượng</th>
+              <th style="width: 150px;">Số tiền</th>
+              <th style="width: 60px;">Xóa</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+          <script>
+            $(document).on('click', '.quantity-input-ctn a',  function () {
+              let parentTr = $(this).parents()[3];
+              if ($(this).hasClass('quantity-modify-desc')) {
+                if (parseInt(parentTr.getElementsByTagName('input')[0].value) > 1) {
+                  parentTr.getElementsByTagName('input')[0].value = parseInt(parentTr.getElementsByTagName('input')[0].value) - 1;
+                }
+              } else {
+                if (parseInt(parentTr.getElementsByTagName('input')[0].value) < parseInt(parentTr.getElementsByTagName('select')[0].options[parentTr.getElementsByTagName('select')[0].selectedIndex].dataset.quantity)) {
+                  parentTr.getElementsByTagName('input')[0].value = parseInt(parentTr.getElementsByTagName('input')[0].value) + 1;
+                }
+              }
+              parentTr.getElementsByTagName('span')[2].dataset.total = parentTr.getElementsByTagName('span')[1].dataset.price * parentTr.getElementsByTagName('input')[0].value;
+              parentTr.getElementsByTagName('span')[2].innerText = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(parentTr.getElementsByTagName('span')[2].dataset.total);
+
+              grandTotal();
+            });
+
+            $(document).on('click', '.remove-ctn a', function () {
+              $(this).parents()[1].remove();
+
+              grandTotal();
+            });
+
+            function grandTotal() {
+              let total = 0;
+              Array.from($('.total-ctn span')).forEach(e => total += parseInt(e.dataset.total));
+              $('#price-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(total));
+              $('#grand-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(total + parseInt($('#ship-price').data('ship'))))
+            }
+          </script>
+          <script>
+            $(document).ready(() => {
+              $.ajax({
+                type: 'POST',
+                url: '/cart/all',
+                success: function (data) {
+                  if (!data.success) { return; }
+                  if (data.results.length == 0) {
+                    return $('#table-body').append('');
+                  }
+                  data.results.forEach(e => {
+                    $('#table-body').append(
+                      '<tr><td class="thumbnail-ctn"><a href="/product/' + e.product_id + '">'
+                      + '<img src="' + e.thumbnail + '" alt=""></a></td><td class="name-ctn">'
+                      + '<a href="/product/' + e.product_id + '"><span id="' + e.product_id + '">' + e.name + '</span>'
+                      + '</a></td><td class="price-ctn">'
+                      + '<span data-price="' + e.price + '">' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(e.price) + '</span>'
+                      + '</td><td class="size-ctn"><div class="size-select-ctn"><select>'
+                      + '<option value="' + e.size_id + '" data-quantity="' + e.max_quantity + '" selected>' + e.text + '</option>'
+                      + '</select></div></td><td class="quantity-ctn"><div class="quantity-input-ctn row"><div class="quantity-modify">'
+                      + '<a class="quantity-modify-desc" href="#" onclick="return false">-</a></div>'
+                      + '<input type="number" min="1" max="' + e.max_quantity + '" value="' + e.quantity + '">'
+                      + '<div class="quantity-modify"><a class="quantity-modify-asc" href="#" onclick="return false">+</a>'
+                      + '</div></div></td><td class="total-ctn">'
+                      + '<span data-total="' + (e.price * e.quantity) + '">' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(e.price * e.quantity) + '</span>'
+                      + '</td><td class="remove-ctn"><a href="#" onclick="return false"><i class="fa-solid fa-xmark"></i></a></td></tr>'
+                    );
+                  });
+
+                  grandTotal();
+                },
+                error: function (data) {
+                  console.log(data);
+                }
+              });
+            });
+          </script>
+        </table>
+      </div>
+      <div class="edit-cart-btns-ctn">
+        <div class="update-cart-btn">
+          <button id="update-cart">Cập nhật</button>
+          <script>
+            $('#update-cart').on('click', function () {
+              let productIds = Array.from($('.name-ctn span')).map(e => e.id);
+              let sizeIds = Array.from($('.size-ctn select')).map(e => e.value);
+              let quantities = Array.from($('.quantity-ctn input')).map(e => e.value);
+
+              let data = [];
+              for (let i = 0; i < productIds.length; i++) {
+                data.push({ productId: productIds[i], sizeId: sizeIds[i], quantity: quantities[i] });
+              }
+
+              $.ajax({
+                type: 'POST',
+                url: '/cart/update',
+                data: {
+                  'list': JSON.stringify(data)
+                },
+                success: function (data) {
+                  console.log(data);
+                  if (data.success) {
+                    alert('Thành công');
+                  } else {
+                    alert('Đã có lỗi xảy ra');
+                  }
+                },
+                error: function (data) {
+                  console.log(data);
+                  alert('Đã có lỗi xảy ra');
+                }
+              });
+            });
+          </script>
+        </div>
+      </div>
+      <div class="checkout-cart-ctn">
+        <div class="checkout-cart">
+          <div class="checkout-cart-title">
+            <span>Thanh toán</span>
+          </div>
+          <div class="checkout-cart-div">
+            <div class="checkout-cart-row row">
+              <span>Tổng tiền hàng</span>
+              <span id="price-total">0 ₫</span>
+            </div>
+          </div>
+          <div class="checkout-cart-div">
+            <div class="checkout-cart-row row">
+              <span>Phí Ship</span>
+              <span id="ship-price" data-ship="0">0 ₫</span>
+            </div>
+          </div>
+          <div class="checkout-cart-div">
+            <div class="checkout-cart-row row">
+              <span>Tổng cộng</span>
+              <span id="grand-total">0 ₫</span>
+            </div>
+          </div>
+        </div>
+        <div class="checkout-cart-btn">
+          <button>Thanh toán</button>
+        </div>
+      </div>
+    </div>
     
     <%- include('layouts/footer') %>
   </div>

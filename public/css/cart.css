@@ -1,0 +1,145 @@
+.page-body {
+  margin: 50px 200px 100px 200px;
+}
+
+.cart-ctn {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background-color: #D33B33;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 12px 15px 12px 15px;
+  text-align: left;
+}
+
+.table td {
+  padding: 12px;
+  border-top: 1px solid #dee2e6;
+}
+
+.thumbnail-ctn img {
+  width: 150px;
+}
+
+.name-ctn span {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.price-ctn span {
+  white-space: nowrap;
+}
+
+.size-ctn select {
+  width: 70px;
+  font-size: 18px;
+  padding: 5px;
+  outline: 1px black solid;
+}
+
+.quantity-ctn input {
+  width: 100%;
+  max-width: 150px;
+  font-size: 18px;
+  padding: 4px 4px 4px 8px;
+  outline: 1px black solid;
+}
+
+.total-ctn span {
+  white-space: nowrap;
+}
+
+.remove-ctn {
+  text-align: center;
+}
+
+.remove-ctn i {
+  margin: 0;
+}
+
+.edit-cart-btns-ctn {
+  margin-top: 50px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.update-cart-btn button {
+  background-color: black;
+  color: white;
+  font-size: 18px;
+  padding: 10px 20px;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.update-cart-btn button:hover {
+  background-color: #D33B33;
+}
+
+.checkout-cart-ctn {
+  margin-top: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.checkout-cart {
+  width: 30%;
+}
+
+.checkout-cart-title span {
+  color: #222222;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.checkout-cart-div {
+  padding: 20px 0 20px 0;
+  border-bottom: 1px solid rgba(0,0,0,.1);
+}
+
+.checkout-cart-row {
+  justify-content: space-between;
+}
+
+.checkout-cart-row:not(:first-of-type) {
+  margin-top: 10px;
+}
+
+.checkout-cart-row span:first-of-type {
+  font-size: 18px;
+}
+.checkout-cart-row span:last-of-type {
+  color: #666666;
+  font-size: 18px;
+  margin-left: auto;
+}
+
+.checkout-cart-btn {
+  margin-top: 20px;
+}
+
+.checkout-cart-btn button {
+  background-color: #D33B33;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 15px 20px;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.checkout-cart-btn button:hover {
+  background-color: black;
+}
