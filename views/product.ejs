@@ -49,7 +49,7 @@
             <div class="product-content-right-size-input">
               <span>Size</span>
               <div class="product-content-right-size-input-select">
-                <select name="size" id="size-select">
+                <select id="size-select">
                   <% let sizes = JSON.parse(product.sizes) %>
                   <% for (let i = 0; i < sizes.length; i++) { %>
                     <option value="<%= sizes[i].sizeId %>" data-quantity="<%= sizes[i].quantity %>"><%= sizes[i].size %></option>
@@ -63,7 +63,7 @@
                 <div class="quantity-modify">
                   <a id="quantity-modify-desc" href="#" onclick="return false">-</a>
                 </div>
-                <input type="number" name="quantity" id="quantity-input" min="1" value="1" max="1">
+                <input type="number" id="quantity-input" min="1" value="1" max="<%= sizes[0].quantity %>">
                 <div class="quantity-modify">
                   <a id="quantity-modify-asc" href="#" onclick="return false">+</a>
                 </div>

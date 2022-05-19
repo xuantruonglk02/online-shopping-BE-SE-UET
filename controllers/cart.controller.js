@@ -35,11 +35,13 @@ function getAllProductsForCartMenu(req, res) {
 function getAllProducts(req, res) {
   const cartId = getCartId(req.cookies['x-access-token']);
 
-  let query = 'SELECT p.product_id, p.name, p.price, p.thumbnail, s.size_id, chp.quantity '
+  let query = 'SELECT p.product_id, p.name, p.price, p.thumbnail, s.size_id, s.text, chp.quantity, phs.quantity AS max_quantity '
     + 'FROM Cart_has_Product chp '
     + 'INNER JOIN Products p ON chp.product_id = p.product_id '
     + 'INNER JOIN Sizes s ON chp.size_id = s.size_id '
-    + 'WHERE chp.cart_id=? ';
+    + 'INNER JOIN Product_has_Size phs ON chp.product_id = phs.product_id AND chp.size_id = phs.size_id '
+    + 'WHERE chp.cart_id=? '
+    + 'ORDER BY chp.create_at ASC';
   connection.query(query, [cartId], (err, results) => {
     if (err) {
       console.log(err);
@@ -80,7 +82,7 @@ function addProduct(req, res) {
  */
 function updateCart(req, res) {
   if (!req.body.list) {
-    return res.json({ success: 0 });
+    return res.status(400).json({ success: 0 });
   }
 
   try {
@@ -88,18 +90,20 @@ function updateCart(req, res) {
   } catch (err) {
     if (err) {
       console.log(err);
-      return res.json({ success: 0 });
+      return res.status(400).json({ success: 0 });
     }
   }
   if (!req.body.list.length) {
     return res.json({ success: 1 });
   }
   for (let i = 0; i < req.body.list.length; i++) {
-    if (!req.body.list[i].productId  || !req.body.list[i].sizeId || isNaN(req.body.list[i].quantity)) {
-      return res.json({ success: 0 });
+    if (!req.body.list[i].productId  || !req.body.list[i].sizeId || !req.body.list[i].quantity
+      || isNaN(req.body.list[i].sizeId) || isNaN(req.body.list[i].quantity)) {
+      return res.status(400).json({ success: 0 });
     }
+    req.body.list[i].sizeId = parseInt(req.body.list[i].sizeId);
     req.body.list[i].quantity = parseInt(req.body.list[i].quantity);
-    if (req.body.list[i].quantity < 1) { return res.json({ success: 0 }); }
+    if (req.body.list[i].quantity < 1) { return res.status(400).json({ success: 0 }); }
   }
 
   const cartId = getCartId(req.cookies['x-access-token']);
@@ -107,13 +111,13 @@ function updateCart(req, res) {
   connection.beginTransaction((err) => {
     if (err) {
       console.log(err);
-      return res.json({ success: 0 });
+      return res.status(500).json({ success: 0 });
     }
 
     connection.query('DELETE FROM Cart_has_Product WHERE cart_id=?', [cartId], (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({ success: 0 });
+        return res.status(500).json({ success: 0 });
       }
 
       let query = 'INSERT INTO Cart_has_Product (cart_id, product_id, size_id, quantity) VALUES '
@@ -122,7 +126,7 @@ function updateCart(req, res) {
       connection.query(query, params, (err, results) => {
         if (err) {
           console.log(err);
-          return res.json({ success: 0 });
+          return res.status(500).json({ success: 0 });
         }
 
         return commitTransaction(connection, res);
