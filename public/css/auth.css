@@ -1,14 +1,17 @@
 body {
-  background-color: #f5f0f2;
   background-image: url("/images/login1.jpg");
+  background-position: inherit;
 }
 
 input[type=submit] {
   cursor: pointer;
 }
 
+.main {
+  
+}
+
 .page-body {
-  display: flex;
   justify-content: center;
   margin-top: 200px;
 }
@@ -52,7 +55,7 @@ input[type=submit] {
 }
 
 .form-input-ctn input[type=submit] {
-  background-color: #1877f2;
+  background-color: rgb(31, 31, 31);
   color: white;
   font-size: 20px;
   font-weight: bold;
@@ -61,6 +64,10 @@ input[type=submit] {
   border-radius: 6px;
   padding: 0 16px;
   width: 332px;
+}
+
+.form-input-ctn input[type=submit]:hover {
+  background-color: rgb(211, 59, 51);
 }
 
 .auth-error {
@@ -91,7 +98,7 @@ input[type=submit] {
 
 .new-account-btn {
   width: fit-content;
-  background-color: #42b72a;
+  background-color: rgb(31, 31, 31);
   color: white;
   border: none;
   border-radius: 6px;
@@ -99,4 +106,8 @@ input[type=submit] {
   font-weight: bold;
   line-height: 48px;
   padding: 0 16px;
+}
+
+.new-account-btn:hover {
+  background-color: rgb(211, 59, 51);
 }

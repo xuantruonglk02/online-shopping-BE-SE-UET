@@ -57,9 +57,10 @@ function getAllProducts(req, res) {
  */
 function addProduct(req, res) {
   if (!req.body.productId || !req.body.sizeId || !req.body.quantity
-    || isNaN(req.body.quantity)) {
+    || isNaN(req.body.sizeId) || isNaN(req.body.quantity)) {
     return res.json({ success: 0 });
   }
+  req.body.sizeId = parseInt(req.body.sizeId);
   req.body.quantity = parseInt(req.body.quantity);
 
   const cartId = getCartId(req.cookies['x-access-token']);

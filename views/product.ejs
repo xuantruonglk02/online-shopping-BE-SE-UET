@@ -45,12 +45,6 @@
           <div class="product-content-right-price">
             <span><%= product.price %></span>
           </div>
-          <!-- <div class="product-content-right-color">
-            <p style="font-weight: bold;">Màu sắc:</p>
-            <div class="color">
-              <span>màu xanh</span>
-            </div>
-          </div> -->
           <div class="product-content-right-size row">
             <div class="product-content-right-size-input">
               <span>Size</span>
@@ -58,7 +52,7 @@
                 <select name="size" id="size-select">
                   <% let sizes = JSON.parse(product.sizes) %>
                   <% for (let i = 0; i < sizes.length; i++) { %>
-                    <option value="<%= sizes[i].sizeId %>" data-quantity="<%= sizes[i].quantity %>"><%= sizes[i].sizeId %></option>
+                    <option value="<%= sizes[i].sizeId %>" data-quantity="<%= sizes[i].quantity %>"><%= sizes[i].size %></option>
                   <% } %>
                 </select>
               </div>
