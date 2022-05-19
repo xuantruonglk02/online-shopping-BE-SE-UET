@@ -19,19 +19,19 @@
   $(document).ready(() => {
     $.post('/product/category/all', (data) => {
       if (!data.success) {
-
+        return console.log(data);
       }
       for (let i = 0; i < data.results.length; i++) {
         let div = '<div><ul>';
         let lines = JSON.parse(data.results[i].product_lines);
         for (let j = 0; j < lines.length; j++) {
-          div += '<li><a href="/product/category/line/' + lines[j].lineId + '">' + lines[j].name + '</a></li>';
+          div += '<li><a href="/product/category/' + lines[j].lineId + '?category=line&name=' + lines[j].name + '&begin=0&quantity=15">' + lines[j].name + '</a></li>';
         }
         div += '</ul></div>'
         $('#product-categories-ctn').append(
           '<div class="col-menu">'
           + '<h2 class="col-menu-title">'
-          + '<a href="/product/category/class/' + data.results[i].class_id + '">' + data.results[i].name + '</a>'
+          + '<a href="/product/category/' + data.results[i].class_id + '?category=class&name=' + data.results[i].name + '&begin=0&quantity=15">' + data.results[i].name + '</a>'
           + '</h2>' + div + '</div>'
         );
       }

@@ -28,7 +28,7 @@
                 if (!data.success) {
                   return;
                 }
-                let categoryId = params.get('classId') == null ? (params.get('lineId') == null ? '' : params.get('lineId')) : params.get('classId');
+                let categoryId = window.location.href.substring(window.location.href.indexOf('/product/category/') + 18, window.location.href.indexOf('?'))
                 for (let i = 0; i < data.results.length; i++) {
                   let ul = '<ul>';
                   let lines = JSON.parse(data.results[i].product_lines);
@@ -47,12 +47,25 @@
               });
 
               $(document).on('click', '.filter-product-class a', function (e) {
-                let url = removeParam('lineId', removeParam('classId', window.location.href));
+                let url = removeParam('name', window.location.href) + '&name=' + $(this).text();
                 if ($(this).data().lineid) {
-                  url += '&lineId=' + $(this).data().lineid;
+                  url = url.split('/');
+                  let tail = url[5].split('?');
+                  tail[0] = $(this).data().lineid;
+                  tail = tail.join('?');
+                  url[5] = tail;
+                  url = url.join('/');
+                  url = removeParam('category', url) + '&category=line';
                 } else if ($(this).data().classid) {
-                  url += '&classId=' + $(this).data().classid;
+                  url = url.split('/');
+                  let tail = url[5].split('?');
+                  tail[0] = $(this).data().classid;
+                  tail = tail.join('?');
+                  url[5] = tail;
+                  url = url.join('/');
+                  url = removeParam('category', url) + '&category=class';
                 }
+                console.log(url);
                 window.location.href = url;
               });
             });
@@ -165,19 +178,18 @@
           $(document).ready(() => {
             $.ajax({
               type: 'POST',
-              url: '/product/search',
+              url: window.location.href.substring(window.location.href.indexOf('/product/category/'), window.location.href.indexOf('?')),
               data: {
-                'keyword': params.get('keyword'),
+                'category': params.get('category'),
                 'begin': params.get('begin'),
                 'quantity': params.get('quantity'),
-                'classId': params.get('classId'),
-                'lineId': params.get('lineId'),
+                'minStar': params.get('minStar'),
                 'minPrice': params.get('minPrice'),
                 'maxPrice': params.get('maxPrice'),
-                'minStar': params.get('minStar'),
                 'orderBy': params.get('orderBy')
               },
               success: function (data) {
+                console.log(data);
                 if (data.results.length == 0) {
                   return $('#products-list-ctn').append('<p>Không tìm thấy sản phẩm phù hợp</p>');
                 }

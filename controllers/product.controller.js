@@ -6,10 +6,11 @@ const { getUserId } = require('./user.controller');
  * callback
  */
 function getProductById(productId, callback) {
-  let query = `SELECT product_id, name, price, sold, quantity_of_rating, rating, description, thumbnail,`
-    + ` (SELECT CONCAT('[',GROUP_CONCAT(CONCAT('"',url,'"')),']') FROM Preview_Images WHERE product_id=? GROUP BY product_id) AS urls,`
-    + ` (SELECT CONCAT('[',GROUP_CONCAT(CONCAT('{"sizeId":"',size_id,'","quantity":',quantity,'}')),']') FROM Product_has_Size WHERE product_id=? GROUP BY product_id) AS sizes`
-    + ` FROM Products WHERE product_id=?`;
+  let query = `SELECT product_id, name, price, sold, quantity_of_rating, rating, description, thumbnail, `
+    + `(SELECT CONCAT('[',GROUP_CONCAT(CONCAT('"',url,'"')),']') FROM Preview_Images WHERE product_id=? GROUP BY product_id) AS urls, `
+    + `(SELECT CONCAT('[',GROUP_CONCAT(CONCAT('{"sizeId":',phs.size_id,',"size":"',s.text,'","quantity":',phs.quantity,'}')),']') `
+    + `FROM Product_has_Size phs INNER JOIN Sizes s ON phs.size_id=s.size_id WHERE phs.product_id=? GROUP BY phs.product_id) AS sizes `
+    + `FROM Products WHERE product_id=?`;
   connection.query(query, [productId, productId, productId], (err, results) => {
     if (err) {
       return callback(err, null);
@@ -20,7 +21,8 @@ function getProductById(productId, callback) {
 }
 
 /**
- * lineId : params
+ * categoryId : param
+ * category : body
  * begin : body
  * quantity : body
  * 
@@ -29,93 +31,70 @@ function getProductById(productId, callback) {
  * minStar : body
  * orderBy : body : newest|priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
-function getAllProductsByLine(req, res) {
-  if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
-    return res.json({ success: 0 });
+function getProductsByCategory(req, res) {
+  if ((req.body.category != 'class' && req.body.category != 'line')
+    || !req.body.begin || !req.body.quantity
+    || isNaN(req.body.begin) || isNaN(req.body.quantity)) {
+    return res.status(400).json({ success: 0 });
   }
-
   req.body.begin = parseInt(req.body.begin);
   req.body.quantity = parseInt(req.body.quantity);
 
-  let query = 'SELECT product_id, name, price, sold, rating, thumbnail FROM Products WHERE line_id=? ORDER BY ';
+  let query = 'SELECT product_id, name, price, sold, rating, thumbnail FROM Products WHERE ' + req.body.category + '_id=?';
+  let params = [req.params.categoryId];
+  if (req.body.minPrice && !isNaN(req.body.minPrice)) {
+    req.body.minPrice = parseInt(req.body.minPrice);
+    if (req.body.minPrice > 0) {
+      query += ' AND price>=?';
+      params.push(req.body.minPrice);
+    }
+  }
+  if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
+    req.body.maxPrice = parseInt(req.body.maxPrice);
+    if (req.body.maxPrice > 0) {
+      query += ' AND price<=?';
+      params.push(req.body.maxPrice);
+    }
+  }
+  if (req.body.minStar && !isNaN(req.body.minStar)) {
+    req.body.minStar = parseInt(req.body.minStar);
+    if (req.body.minStar >= 1 && req.body.minStar <= 5) {
+      query += ' AND rating>=?';
+      params.push(req.body.minStar);
+    }
+  }
   switch (req.body.orderBy) {
     case 'priceASC':
-      query += 'price ASC';
+      query += ' ORDER BY price ASC';
       break;
     case 'priceDESC':
-      query += 'price DESC';
+      query += ' ORDER BY price DESC';
       break;
     case 'soldDESC':
-      query += 'sold DESC';
+      query += ' ORDER BY sold DESC';
       break;
-    case 'aoRatingDESC':
-      query += 'amount_of_rating DESC';
+    case 'qoRatingDESC':
+      query += ' ORDER BY quantity_of_rating DESC';
       break;
     case 'ratingDESC':
-      query += 'rating DESC';
+      query += ' ORDER BY rating DESC';
       break;
     case 'newest':
-      query += 'create_at DESC';
+      query += ' ORDER BY create_at DESC';
       break;
     default:
-      query += 'create_at DESC';
+      query += ' ORDER BY create_at DESC';
   }
   query += ' LIMIT ?,?';
+  params = params.concat([req.body.begin, req.body.quantity]);
 
-  connection.query(query, [req.params.lineId, req.body.begin, req.body.quantity], (err, results) => {
+  connection.query(query, params, (err, results) => {
     if (err) {
       console.log(err);
-      return res.json({ success: 0 });
+      return res.status(500).json({ success: 0 });
     }
 
-    res.json({ success: 1, results: results });
-  });
-}
-
-/**
- * classId : params
- * begin : body
- * quantity : body
- * 
- * orderBy : body : priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
- */
-function getAllProductsByClass(req, res) {
-  if (!req.body.begin || isNaN(req.body.begin) || !req.body.quantity || isNaN(req.body.quantity)) {
-    return res.json({ success: 0 });
-  }
-
-  req.body.begin = parseInt(req.body.begin);
-  req.body.quantity = parseInt(req.body.quantity);
-
-  let query = 'SELECT product_id, name, price, sold, rating, thumbnail FROM Products WHERE class_id=? ORDER BY ';
-  switch (req.body.orderBy) {
-    case 'priceASC':
-      query += 'price ASC';
-      break;
-    case 'priceDESC':
-      query += 'price DESC';
-      break;
-    case 'soldDESC':
-      query += 'sold DESC';
-      break;
-    case 'aoRatingDESC':
-      query += 'amount_of_rating DESC';
-      break;
-    case 'ratingDESC':
-      query += 'rating DESC';
-      break;
-    default:
-      query += 'create_at DESC';
-  }
-  query += ' LIMIT ?,?';
-
-  connection.query(query, [req.params.classId, req.body.begin, req.body.quantity], (err, results) => {
-    if (err) {
-      console.log(err);
-      return res.json({ success: 0 });
-    }
-
-    res.json({ success: 1, results: results });
+    res.status(200).json({ success: 1, results: results });
   });
 }
 
@@ -184,7 +163,7 @@ function getAllCategories(req, res) {
     + `FROM Product_Classes pc `
     + `INNER JOIN Product_Lines pl ON pc.class_id = pl.class_id `
     + `GROUP BY pc.class_id `
-    + `ORDER BY pc.create_at`, (err, results) => {
+    + `ORDER BY pc.create_at, pl.create_at`, (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -208,7 +187,7 @@ function getAllCategories(req, res) {
  */
 function searchProductsByKeyword(req, res) {
   if (!req.body.keyword || !req.body.begin || !req.body.quantity || isNaN(req.body.begin) || isNaN(req.body.quantity)) {
-    return res.json({ success: 0 });
+    return res.status(400).json({ success: 0 });
   }
   
   req.body.begin = parseInt(req.body.begin);
@@ -240,7 +219,7 @@ function searchProductsByKeyword(req, res) {
   }
   if (req.body.minStar && !isNaN(req.body.minStar)) {
     req.body.minStar = parseInt(req.body.minStar);
-    if (req.body.minPrice >= 1 && req.body.minStar <= 5) {
+    if (req.body.minStar >= 1 && req.body.minStar <= 5) {
       query += ' AND rating>=?';
       params.push(req.body.minStar);
     }
@@ -253,7 +232,7 @@ function searchProductsByKeyword(req, res) {
       query += ' ORDER BY price DESC';
       break;
     case 'soldDESC':
-      query += ' ORDER BY sold DESC';
+      query += 'ORDER BY sold DESC';
       break;
     case 'qoRatingDESC':
       query += ' ORDER BY quantity_of_rating DESC';
@@ -273,10 +252,10 @@ function searchProductsByKeyword(req, res) {
   connection.query(query, params, (err, results) => {
     if (err) {
       console.log(err);
-      return res.json({ success: 0 });
+      return res.status(500).json({ success: 0 });
     }
 
-    res.json({ success: 1, results: results });
+    res.status(200).json({ success: 1, results: results });
   });
 }
 
@@ -347,8 +326,7 @@ function insertUserRating(req, res) {
 
 module.exports = {
   getProductById,
-  getAllProductsByLine,
-  getAllProductsByClass,
+  getProductsByCategory,
   getAllCategories,
   getAllProductClasses,
   getAllProductLines,
