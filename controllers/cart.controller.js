@@ -41,7 +41,7 @@ function getAllProducts(req, res) {
     + 'INNER JOIN Sizes s ON chp.size_id = s.size_id '
     + 'INNER JOIN Product_has_Size phs ON chp.product_id = phs.product_id AND chp.size_id = phs.size_id '
     + 'WHERE chp.cart_id=? '
-    + 'ORDER BY chp.create_at ASC';
+    + 'ORDER BY chp.create_at DESC';
   connection.query(query, [cartId], (err, results) => {
     if (err) {
       console.log(err);
