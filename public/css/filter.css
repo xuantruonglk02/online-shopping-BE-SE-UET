@@ -123,3 +123,7 @@
 .products-list-ctn {
   margin: 0;
 }
+
+.pages-list-ctn {
+  justify-content: center;
+}

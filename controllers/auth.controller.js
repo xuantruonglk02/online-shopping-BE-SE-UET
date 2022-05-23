@@ -3,7 +3,7 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-const transporter = require('../config/nodemailer.config').transporter;
+const { transporter, verificationEmailOptions }  = require('../config/nodemailer.config');
 const { connection } = require('../models/database');
 
 /**
@@ -47,7 +47,7 @@ function registerEmail(req, res) {
     return res.json({ success: 0 });
   }
   if (!validator.isEmail(req.body.email)) {
-    return res.json({ success: 0, msg: 'Email không hợp lệ' });
+    return res.json({ success: 0, code: 'invalid' });
   }
 
   connection.query('SELECT COUNT(user_id) AS exist FROM Users WHERE email=?', [req.body.email], (err, results) => {
@@ -57,7 +57,7 @@ function registerEmail(req, res) {
     }
 
     if (results[0].exist) {
-      return res.json({ success: 0, msg: 'Email đã tồn tại' });
+      return res.json({ success: 0, code: 'exist' });
     }
 
     crypto.randomBytes(30, (err, buffer) => {
@@ -67,9 +67,10 @@ function registerEmail(req, res) {
       }
 
       const token = buffer.toString('hex');
-      transporter.sendMail(nodemailer.verificationEmailOptions(req.body.email, token), (err, info) => {
+      transporter.sendMail(verificationEmailOptions(req.body.email, token), (err, info) => {
         if (err) {
           console.log(err);
+          return res.json({ success: 0 });
         }
       });
 
@@ -90,42 +91,44 @@ function registerEmail(req, res) {
  * email : body
  * number : body
  * password : body
+ * repassword : body
  * token : body
  */
 function createAccount(req, res) {
-  if (!req.body.name || !req.body.email || !req.body.password || !req.body.token) {
-    return res.json({ success: 0 });
+  if (!req.body.name || !req.body.email || !req.body.number
+    || !req.body.password || !req.body.repassword || !req.body.token) {
+    return res.status(400).json({ success: 0 });
   }
-  if (!validator.isEmail(req.body.email)) {
-    return res.json({ success: 0, msg: 'Email không hợp lệ' });
+  if (req.body.password !== req.body.repassword) {
+    return res.json({ success: 0, code: 'repassword-wrong' });
   }
-  if (req.body.number && !validator.isMobilePhone(req.body.number, 'vi-VN')) {
-    return res.json({ success: 0, msg: 'Số điện thoại không hợp lệ' });
+  if (!validator.isMobilePhone(req.body.number, 'vi-VN')) {
+    return res.json({ success: 0, code: 'number-wrong' });
   }
 
   connection.query('SELECT create_at FROM Verify_Email WHERE email=? AND token=?',
     [req.body.email, req.body.token], (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({ success: 0 });
+        return res.status(500).json({ success: 0 });
       }
 
       if (!results.length) {
-        return res.json({ success: 0 });
+        return res.json({ success: 0, code: 'verify-not-exist' });
       }
       if (new Date() - new Date(results[0].create_at) > process.env.EMAIL_TOKEN_EXPIRATION_TIME) {
-        return res.json({ success: 0, msg: 'Token đã hết hạn' });
+        return res.json({ success: 0, code: 'verify-expired' });
       }
 
       connection.query('SELECT COUNT(user_id) AS exist FROM Users WHERE email=? OR number=?',
         [req.body.email, req.body.number], async (err, results) => {
           if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0 });
           }
     
           if (results[0].exist) {
-            return res.json({ success: 0, msg: 'Email hoặc số điện thoại đã tồn tại' });
+            return res.json({ success: 0, code: 'email-phone-exist' });
           }
     
           const salt = await bcrypt.genSalt(12);
@@ -134,24 +137,23 @@ function createAccount(req, res) {
           connection.query('INSERT INTO Carts VALUES(DEFAULT, DEFAULT)', (err, results) => {
             if (err) {
               console.log(err);
-              return res.json({ success: 0 });
+              return res.status(500).json({ success: 0 });
             }
     
             const cartId = results.insertId;
-    
             connection.query('INSERT INTO Users (cart_id, name, number, email, password) VALUES (?,?,?,?,?)',
               [cartId, req.body.name, req.body.number, req.body.email, hash],
               (err, results) => {
                 if (err) {
                   console.log(err);
-                  return res.json({ success: 0 });
+                  return res.status(500).json({ success: 0 });
                 }
                 
                 const token = jwt.sign({ userId: results.insertId, cartId: cartId, admin: 0 }, process.env.JWT_SECRET, {
                   expiresIn: 60 * 60 * 24
                 });
                 res.cookie('x-access-token', token, { maxAge: 60 * 60 * 24, httpOnly: true });
-                res.json({ success: 1, accessToken: token });
+                res.json({ success: 1, redirect: '/', accessToken: token });
 
                 connection.query('DELETE FROM Verify_Email WHERE email=? AND token=?',
                   [req.body.email, token], (err, results) => {});

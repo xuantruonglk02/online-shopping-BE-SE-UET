@@ -13,7 +13,7 @@ input[type=submit] {
 
 .page-body {
   justify-content: center;
-  margin-top: 200px;
+  margin-top: 180px;
 }
 
 .auth-left {
@@ -31,6 +31,11 @@ input[type=submit] {
   box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 8px 16px rgb(0 0 0 / 10%);
   box-sizing: border-box;
   padding: 15px 0 15px 0;
+}
+
+.form-ctn h2 {
+  margin-bottom: 15px;
+  margin-left: 15px;
 }
 
 .form-input-ctn {
@@ -110,4 +115,14 @@ input[type=submit] {
 
 .new-account-btn:hover {
   background-color: rgb(211, 59, 51);
+}
+
+.success-notif {
+  max-width: fit-content;
+  text-align: center;
+}
+
+.success-notif span {
+  font-size: 20px;
+  font-weight: 500;
 }
