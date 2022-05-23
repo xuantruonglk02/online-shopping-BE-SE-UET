@@ -24,21 +24,21 @@
       <div class="auth-right">
         <div class="form-ctn">
           <h2>Đăng ký tài khoản</h2>
-          <form action="/auth/signup/create-account" method="post" id="create-account-form">
+          <form action="" method="" id="create-account-form">
             <div class="form-input-ctn">
-              <input type="text" id="name" placeholder="Tên người dùng">
+              <input type="text" id="name" placeholder="Tên người dùng" required>
             </div>
             <div class="form-input-ctn">
-              <input type="text" id="number" placeholder="Số điện thoại">
+              <input type="text" id="number" placeholder="Số điện thoại" required>
             </div>
             <div class="form-input-ctn auth-error">
               <span>Số điện thoại không hợp lệ</span>
             </div>
             <div class="form-input-ctn">
-              <input type="password" id="password" placeholder="Mật khẩu">
+              <input type="password" id="password" placeholder="Mật khẩu" required>
             </div>
             <div class="form-input-ctn">
-              <input type="password" id="repassword" placeholder="Nhập lại mật khẩu">
+              <input type="password" id="repassword" placeholder="Nhập lại mật khẩu" required>
             </div>
             <div class="form-input-ctn auth-error">
               <span>Mật khẩu nhập lại không khớp</span>
@@ -52,70 +52,87 @@
             <div class="form-input-ctn auth-error">
               <span>Email hoặc số điện thoại đã tồn tại</span>
             </div>
-            <div class="form-input-ctn">
-              <input type="submit" value="Đăng ký">
+            <div class="form-input-ctn row relative">
+              <input type="submit" value="Đăng ký" id="submit-btn" data-enable="1">
+              <div class="loader" id="submit-loader" style="right: 5px;"></div>
             </div>
             <div class="form-input-ctn form-forget-password">
               <a href="#">Đã có tài khoản? Đăng nhập</a>
             </div>
             <div class="form-input-ctn form-split-line" style="display: none;"></div>
             <div class="form-input-ctn success-notif" style="display: none;">
-              <span>Tạo tài khoản thành công</span>
+              <span>Tạo tài khoản thành công. Chuyển hướng sau 3 giây</span>
             </div>
           </form>
           <script>
             $(document).ready(() => {
-              $('#create-account-form').submit(function (e) {
-                e.preventDefault();
-                $('.auth-error').css('display', 'none');
-                $.ajax({
-                  type: 'POST',
-                  url: '/auth/signup/create-account',
-                  data: {
-                    'name': $('#name').val(),
-                    'number': $('#number').val(),
-                    'password': $('#password').val(),
-                    'repassword': $('#repassword').val(),
-                    'email': params.get('email'),
-                    'token': params.get('token')
-                  },
-                  success: function (data) {
-                    if (data.success) {
-                      console.log(data);
-                      $('.form-split-line').css('display', 'block');
-                      $('.success-notif').css('display', 'block');
-                      setTimeout(() => {
-                        window.location.href = data.redirect;
-                      }, 3000);
-                    } else {
-                      console.log(data);
-                      switch (data.code) {
-                        case 'number-wrong':
-                          $('.auth-error:eq(0)').css('display', 'block');
-                          break;
-                        case 'repassword-wrong':
-                          $('.auth-error:eq(1)').css('display', 'block');
-                          break;
-                        case 'verify-not-exist':
-                          $('.auth-error:eq(2)').css('display', 'block');
-                          break;
-                        case 'verify-expired':
-                          $('.auth-error:eq(3)').css('display', 'block');
-                          break;
-                        case 'email-phone-exist':
-                          $('.auth-error:eq(4)').css('display', 'block');
-                          break;
-                        default:
-                          alert('Đã có lỗi xảy ra');
-                      }
-                    }
-                  },
-                  error: function (data) {
-                    alert('Đã có lỗi xảy ra');
-                  }
-                });
-              });
+              $('#create-account-form').submit(function (e) {submitForm(e)});
             });
+
+            function submitForm(e) {
+              if ($('#submit-btn').data('enable') == '0')  {
+                return;
+              }
+              e.preventDefault();
+              $('#create-account-form').submit(false);
+              $('.auth-error').css('display', 'none');
+              $('.success-notif').css('display', 'none');
+              $('#submit-btn').data('enable', '0');
+              $('#submit-btn').css('pointer-events', 'none');
+              $('#submit-loader').css('display', 'block');
+              $.ajax({
+                type: 'POST',
+                url: '/auth/signup/create-account',
+                data: {
+                  'name': $('#name').val(),
+                  'number': $('#number').val(),
+                  'password': $('#password').val(),
+                  'repassword': $('#repassword').val(),
+                  'email': params.get('email'),
+                  'token': params.get('token')
+                },
+                success: function (data) {
+                  $('#register-email-form').submit(function (e) {submitForm(e)});
+                  $('#submit-btn').data('enable', '1');
+                  $('#submit-btn').css('pointer-events', 'all');
+                  $('#submit-loader').css('display', 'none');
+                  if (data.success) {
+                    $('.form-split-line').css('display', 'block');
+                    $('.success-notif').css('display', 'block');
+                    setTimeout(() => {
+                      window.location.href = data.redirect;
+                    }, 3000);
+                  } else {
+                    switch (data.code) {
+                      case 'number-wrong':
+                        $('.auth-error:eq(0)').css('display', 'block');
+                        break;
+                      case 'repassword-wrong':
+                        $('.auth-error:eq(1)').css('display', 'block');
+                        break;
+                      case 'verify-not-exist':
+                        $('.auth-error:eq(2)').css('display', 'block');
+                        break;
+                      case 'verify-expired':
+                        $('.auth-error:eq(3)').css('display', 'block');
+                        break;
+                      case 'email-phone-exist':
+                        $('.auth-error:eq(4)').css('display', 'block');
+                        break;
+                      default:
+                        alert('Đã có lỗi xảy ra');
+                    }
+                  }
+                },
+                error: function (data) {
+                  $('#register-email-form').submit(function (e) {submitForm(e)});
+                  $('#submit-btn').data('enable', '1');
+                  $('#submit-btn').css('pointer-events', 'all');
+                  $('#submit-loader').css('display', 'none');
+                  alert('Đã có lỗi xảy ra');
+                }
+              });
+            }
           </script>
         </div>
       </div>

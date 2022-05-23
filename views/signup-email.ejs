@@ -20,9 +20,9 @@
       <div class="auth-right">
         <div class="form-ctn">
           <h2>Đăng ký Email</h2>
-          <form action="/auth/signup/register-email" method="post" id="register-email-form">
+          <form action="" method="" id="register-email-form">
             <div class="form-input-ctn">
-              <input type="text" id="email" placeholder="Email">
+              <input type="text" id="email" placeholder="Email" required>
             </div>
             <div class="form-input-ctn auth-error">
               <span>Địa chỉ email không hợp lệ</span>
@@ -33,8 +33,9 @@
             <div class="form-input-ctn auth-error">
               <span>Đã xảy ra lỗi khi gửi email. Vui lòng thử lại</span>
             </div>
-            <div class="form-input-ctn">
-              <input type="submit" value="Gửi">
+            <div class="form-input-ctn row relative">
+              <input type="submit" value="Gửi" id="submit-btn" data-enable="1">
+              <div class="loader" id="submit-loader" style="right: 5px;"></div>
             </div>
             <div class="form-input-ctn form-forget-password">
               <a href="#">Đã có tài khoản? Đăng nhập</a>
@@ -46,41 +47,59 @@
           </form>
           <script>
             $(document).ready(() => {
-              $('#register-email-form').submit(function (e) {
-                e.preventDefault();
-                $('.auth-error').css('display', 'none');
-                $.ajax({
-                  type: 'POST',
-                  url: '/auth/signup/register-email',
-                  data: {
-                    'email': $('#email').val()
-                  },
-                  success: function (data) {
-                    if (data.success) {
-                      $('.form-split-line').css('display', 'block');
-                      $('.success-notif').css('display', 'block');
-                    } else {
-                      switch (data.code) {
-                        case 'invalid':
-                          $('.auth-error:eq(0)').css('display', 'block');
-                          break;
-                        case 'exist':
-                          $('.auth-error:eq(1)').css('display', 'block');
-                          break;
-                        case 'email-sending-error':
-                          $('.auth-error:eq(2)').css('display', 'block');
-                          break;
-                        default:
-                          alert('Đã có lỗi xảy ra');
-                      }
-                    }
-                  },
-                  error: function (data) {
-                    alert('Đã có lỗi xảy ra');
-                  }
-                });
-              });
+              $('#register-email-form').submit(function (e) {submitForm(e)});
             });
+
+            function submitForm(e) {
+              if ($('#submit-btn').data('enable') == '0')  {
+                return;
+              }
+              e.preventDefault();
+              $('#register-email-form').submit(false);
+              $('.auth-error').css('display', 'none');
+              $('.success-notif').css('display', 'none');
+              $('#submit-btn').data('enable', '0');
+              $('#submit-btn').css('pointer-events', 'none');
+              $('#submit-loader').css('display', 'block');
+              $.ajax({
+                type: 'POST',
+                url: '/auth/signup/register-email',
+                data: {
+                  'email': $('#email').val()
+                },
+                success: function (data) {
+                  $('#register-email-form').submit(function (e) {submitForm(e)});
+                  $('#submit-btn').data('enable', '1');
+                  $('#submit-btn').css('pointer-events', 'all');
+                  $('#submit-loader').css('display', 'none');
+                  if (data.success) {
+                    $('.form-split-line').css('display', 'block');
+                    $('.success-notif').css('display', 'block');
+                  } else {
+                    switch (data.code) {
+                      case 'invalid':
+                        $('.auth-error:eq(0)').css('display', 'block');
+                        break;
+                      case 'exist':
+                        $('.auth-error:eq(1)').css('display', 'block');
+                        break;
+                      case 'email-sending-error':
+                        $('.auth-error:eq(2)').css('display', 'block');
+                        break;
+                      default:
+                        alert('Đã có lỗi xảy ra');
+                    }
+                  }
+                },
+                error: function (data) {
+                  $('#register-email-form').submit(function (e) {submitForm(e)});
+                  $('#submit-btn').data('enable', '1');
+                  $('#submit-btn').css('pointer-events', 'all');
+                  $('#submit-loader').css('display', 'none');
+                  alert('Đã có lỗi xảy ra');
+                }
+              });
+            }
           </script>
         </div>
       </div>
