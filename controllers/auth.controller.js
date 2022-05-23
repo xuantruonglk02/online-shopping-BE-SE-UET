@@ -70,16 +70,17 @@ function registerEmail(req, res) {
       transporter.sendMail(verificationEmailOptions(req.body.email, token), (err, info) => {
         if (err) {
           console.log(err);
-        }
-      });
-
-      connection.query('INSERT INTO Verify_Email (email, token) VALUES (?,?)', [req.body.email, token], (err, results) => {
-        if (err) {
-          console.log(err);
-          return res.json({ success: 0 });
+          return res.json({ success: 0, code: 'email-sending-error' });
         }
 
-        res.json({ success: 1 });
+        connection.query('INSERT INTO Verify_Email (email, token) VALUES (?,?)', [req.body.email, token], (err, results) => {
+          if (err) {
+            console.log(err);
+            return res.json({ success: 0 });
+          }
+  
+          res.json({ success: 1 });
+        });
       });
     });
   });
