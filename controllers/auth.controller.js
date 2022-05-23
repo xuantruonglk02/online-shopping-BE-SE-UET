@@ -70,7 +70,6 @@ function registerEmail(req, res) {
       transporter.sendMail(verificationEmailOptions(req.body.email, token), (err, info) => {
         if (err) {
           console.log(err);
-          return res.json({ success: 0 });
         }
       });
 
