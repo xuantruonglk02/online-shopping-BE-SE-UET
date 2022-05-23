@@ -7,11 +7,11 @@ const router = express.Router();
 router.get('/login', (req, res) => {
   res.render('login', { title: 'Login' });
 });
-router.get('/signup', (req, res) => {
-  res.render('signup');
+router.get('/signup/register-email', (req, res) => {
+  res.render('signup-email', { title: 'Đăng ký email' });
 });
 router.get('/signup/create-account', (req, res) => {
-  res.json(req.query);
+  res.render('signup-account', { title: 'Tạo tài khoản' });
 });
 
 router.post('/login', authController.login);

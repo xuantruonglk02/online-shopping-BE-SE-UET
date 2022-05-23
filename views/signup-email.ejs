@@ -19,54 +19,49 @@
       </div>
       <div class="auth-right">
         <div class="form-ctn">
-          <h2>Đăng nhập</h2>
-          <form action="/auth/login" method="post" id="login-form">
+          <h2>Đăng ký Email</h2>
+          <form action="/auth/signup/register-email" method="post" id="register-email-form">
             <div class="form-input-ctn">
-              <input type="text" name="username" id="username" placeholder="Email hoặc số điện thoại">
+              <input type="text" id="email" placeholder="Email">
             </div>
             <div class="form-input-ctn auth-error">
-              <span>Email hoặc số điện thoại không chính xác</span>
-            </div>
-            <div class="form-input-ctn">
-              <input type="password" name="password" id="password" placeholder="Mật khẩu">
+              <span>Địa chỉ email không hợp lệ</span>
             </div>
             <div class="form-input-ctn auth-error">
-              <span>Mật khẩu không chính xác</span>
+              <span>Địa chỉ email đã tồn tại</span>
             </div>
             <div class="form-input-ctn">
-              <input type="submit" value="Đăng nhập">
+              <input type="submit" value="Gửi">
             </div>
             <div class="form-input-ctn form-forget-password">
-              <a href="#">Quên mật khẩu?</a>
+              <a href="#">Đã có tài khoản? Đăng nhập</a>
             </div>
-            <div class="form-input-ctn form-split-line"></div>
-            <div class="form-input-ctn new-account-btn-ctn">              
-              <a href="/auth/signup/register-email">
-                <div class="new-account-btn">Tạo tài khoản mới</div>
-              </a>
+            <div class="form-input-ctn form-split-line" style="display: none;"></div>
+            <div class="form-input-ctn success-notif" style="display: none;">
+              <span>Email xác nhận đã được gửi tới hộp thư của bạn. Hãy xác nhận email</span>
             </div>
           </form>
           <script>
             $(document).ready(() => {
-              $('#login-form').submit(function (e) {
+              $('#register-email-form').submit(function (e) {
                 e.preventDefault();
                 $('.auth-error').css('display', 'none');
                 $.ajax({
                   type: 'POST',
-                  url: '/auth/login',
+                  url: '/auth/signup/register-email',
                   data: {
-                    'username': $('#username').val(),
-                    'password': $('#password').val()
+                    'email': $('#email').val()
                   },
                   success: function (data) {
                     if (data.success) {
-                      window.location.href = data.redirect;
+                      $('.form-split-line').css('display', 'block');
+                      $('.success-notif').css('display', 'block');
                     } else {
                       switch (data.code) {
-                        case 'username':
+                        case 'invalid':
                           $('.auth-error:first').css('display', 'block');
                           break;
-                        case 'password':
+                        case 'exist':
                           $('.auth-error:last').css('display', 'block');
                           break;
                         default:
@@ -77,7 +72,7 @@
                   error: function (data) {
                     alert('Đã có lỗi xảy ra');
                   }
-                })
+                });
               });
             });
           </script>
