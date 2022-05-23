@@ -30,6 +30,9 @@
             <div class="form-input-ctn auth-error">
               <span>Địa chỉ email đã tồn tại</span>
             </div>
+            <div class="form-input-ctn auth-error">
+              <span>Đã xảy ra lỗi gửi email. Vui lòng thử lại</span>
+            </div>
             <div class="form-input-ctn">
               <input type="submit" value="Gửi">
             </div>
@@ -59,10 +62,13 @@
                     } else {
                       switch (data.code) {
                         case 'invalid':
-                          $('.auth-error:first').css('display', 'block');
+                          $('.auth-error:eq(0)').css('display', 'block');
                           break;
                         case 'exist':
-                          $('.auth-error:last').css('display', 'block');
+                          $('.auth-error:rq(1)').css('display', 'block');
+                          break;
+                        case 'email-sending-error':
+                          $('.auth-error:rq(2)').css('display', 'block');
                           break;
                         default:
                           alert('Đã có lỗi xảy ra');
