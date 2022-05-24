@@ -73,6 +73,7 @@
                   'token': params.get('token')
                 },
                 success: function (data) {
+                  console.log(data);
                   $('#reset-form').submit(function (e) {submitForm(e)});
                   ajaxStop();
                   if (data.success) {
@@ -85,10 +86,10 @@
                       case 'repassword-wrong':
                         $('.auth-error:eq(0)').css('display', 'block');
                         break;
-                      case '-not-exist':
+                      case 'token-not-exist':
                         $('.auth-error:eq(1)').css('display', 'block');
                         break;
-                      case '-expired':
+                      case 'token-expired':
                         $('.auth-error:eq(2)').css('display', 'block');
                         break;
                       default:
@@ -97,6 +98,7 @@
                   }
                 },
                 error: function (data) {
+                  console.log(data);
                   $('#reset-form').submit(function (e) {submitForm(e)});
                   ajaxStop();
                   alert('Đã có lỗi xảy ra');

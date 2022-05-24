@@ -225,63 +225,34 @@ function resetPassword(req, res) {
     return res.json({ success: 0, code: 'repassword-wrong' });
   }
 
-  connection.query('SELECT create_at FROM Verify_Email WHERE email=? AND token=?',
-  [req.body.email, req.body.token], (err, results) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({ success: 0 });
-    }
+  connection.query('SELECT user_id, create_at FROM Reset_Password_Token WHERE email=? AND token=?',
+    [req.body.email, req.body.token], async (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.json({ success: 0 });
+      }
+      if (!results.length) {
+        return res.json({ success: 0, code: 'token-not-exist' });
+      }
+      if (new Date() - new Date(results[0].create_at) > process.env.RESET_PASSWORD_TOKEN_EXPIRATION_TIME) {
+        return res.json({ success: 0, code: 'token-expired' });
+      }
 
-    if (!results.length) {
-      return res.json({ success: 0, code: 'verify-not-exist' });
-    }
-    if (new Date() - new Date(results[0].create_at) > process.env.EMAIL_TOKEN_EXPIRATION_TIME) {
-      return res.json({ success: 0, code: 'verify-expired' });
-    }
-
-    connection.query('SELECT COUNT(user_id) AS exist FROM Users WHERE email=? OR number=?',
-      [req.body.email, req.body.number], async (err, results) => {
+      const userId = results[0].user_id;
+      const salt = await bcrypt.genSalt(12);
+      const hash = await bcrypt.hash(req.body.password, salt);
+      connection.query('UPDATE Users SET password=? WHERE user_id=?', [hash, userId], (err, results) => {
         if (err) {
           console.log(err);
-          return res.status(500).json({ success: 0 });
+          return res.json({ success: 0 });
         }
-  
-        if (results[0].exist) {
-          return res.json({ success: 0, code: 'email-phone-exist' });
-        }
-  
-        const salt = await bcrypt.genSalt(12);
-        const hash = await bcrypt.hash(req.body.password, salt);
-  
-        connection.query('INSERT INTO Carts VALUES(DEFAULT, DEFAULT)', (err, results) => {
-          if (err) {
-            console.log(err);
-            return res.status(500).json({ success: 0 });
-          }
-  
-          const cartId = results.insertId;
-          connection.query('INSERT INTO Users (cart_id, name, number, email, password) VALUES (?,?,?,?,?)',
-            [cartId, req.body.name, req.body.number, req.body.email, hash],
-            (err, results) => {
-              if (err) {
-                console.log(err);
-                return res.status(500).json({ success: 0 });
-              }
-              
-              const token = jwt.sign({ userId: results.insertId, cartId: cartId, admin: 0 }, process.env.JWT_SECRET, {
-                expiresIn: 60 * 60 * 24
-              });
-              res.cookie('x-access-token', token, { maxAge: 60 * 60 * 24, httpOnly: true });
-              res.json({ success: 1, redirect: '/', accessToken: token });
 
-              connection.query('DELETE FROM Verify_Email WHERE email=? AND token=?',
-                [req.body.email, token], (err, results) => {});
-            });
-        });
+        res.json({ success: 1 });
+
+        connection.query('DELETE FROM Reset_Password_Token WHERE user_id=? AND email=? AND token=?',
+          [userId, req.body.email, req.body.token], (err, results) => {});
       });
-  });
-
-  // RESET_PASSWORD_TOKEN_EXPIRATION_TIME
+    });
 }
 
 module.exports = {
