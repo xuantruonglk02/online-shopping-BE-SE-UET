@@ -33,7 +33,7 @@ function checkoutForAProduct(req, res) {
       }
 
       const userId = getUserId(req.headers['x-access-token']);
-      connection.query('SELECT name, number, address FROM Users WHERE user_id=?', [userId], (err, results) => {
+      connection.query('SELECT name, phone, address FROM Users WHERE user_id=?', [userId], (err, results) => {
         if (err) {
           console.log(err);
           return res.json({ success: 0 });
@@ -43,8 +43,8 @@ function checkoutForAProduct(req, res) {
           return res.json({ success: 0 });
         }
 
-        const userName = results[0].name, userNumber = results[0].number, userAddress = results[0].address;
-        connection.query('INSERT INTO Bills (user_id, user_name, user_number, user_address) VALUES (?,?,?,?)',
+        const userName = results[0].name, userNumber = results[0].phone, userAddress = results[0].address;
+        connection.query('INSERT INTO Bills (user_id, user_name, user_phone, user_address) VALUES (?,?,?,?)',
           [userId, userName, userNumber, userAddress], (err, results) => {
             if (err) {
               console.log(err);
@@ -104,7 +104,7 @@ function checkoutForCart(req, res) {
     }
     
     const userId = getUserId(req.headers['x-access-token']);
-    connection.query('SELECT name, number, address FROM Users WHERE user_id=?', [userId], (err, results) => {
+    connection.query('SELECT name, phone, address FROM Users WHERE user_id=?', [userId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -114,8 +114,8 @@ function checkoutForCart(req, res) {
         return res.json({ success: 0 });
       }
 
-      const userName = results[0].name, userNumber = results[0].number, userAddress = results[0].address;
-      connection.query('INSERT INTO Bills (user_id, user_name, user_number, user_address) VALUES (?,?,?,?)',
+      const userName = results[0].name, userNumber = results[0].phone, userAddress = results[0].address;
+      connection.query('INSERT INTO Bills (user_id, user_name, user_phone, user_address) VALUES (?,?,?,?)',
         [userId, userName, userNumber, userAddress], (err, results) => {
           if (err) {
             console.log(err);

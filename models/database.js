@@ -2,10 +2,10 @@ const mysql = require('mysql');
 
 const config = require('../config/database.config');
 
-connect();
-
 var connection;
 var interval;
+
+connect();
 
 function connect() {
   connection = mysql.createConnection(config);

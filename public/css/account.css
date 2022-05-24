@@ -1,0 +1,27 @@
+body {
+  background-color: #F5F5F5;
+}
+
+.page-body {
+  margin: 50px 200px 100px 200px;
+  align-items: flex-start;
+}
+
+.account-left-row:first-of-type {
+  margin-top: 50px !important;
+}
+.account-left-row {
+  margin-top: 10px;
+}
+
+.account-left-row span {
+  font-size: 18px;
+  font-weight: 700;
+}
+.account-left-focus span, .account-left-row span:hover {
+  color: #d33b33;
+}
+
+.account-right {
+  background-color: white;
+}

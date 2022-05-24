@@ -17,7 +17,7 @@ function getCartId(token) {
 function getUserInformation(req, res) {
   const userId = getUserId(req.headers['x-access-token']);
 
-  connection.query('SELECT name, number, email, address FROM Users WHERE user_id=?', [userId], (err, results) => {
+  connection.query('SELECT name, phone, email, address FROM Users WHERE user_id=?', [userId], (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
@@ -108,14 +108,14 @@ function changeEmail(req, res) {
 }
 
 /**
- * number : body
+ * phone : body
  * password : body
  */
-function changeNumber(req, res) {
-  if (!req.body.number || !req.body.password) {
+function changePhone(req, res) {
+  if (!req.body.phone || !req.body.password) {
     return res.json({ success: 0 });
   }
-  if (!validator.isMobilePhone(req.body.number, 'vi-VN')) {
+  if (!validator.isMobilePhone(req.body.phone, 'vi-VN')) {
     return res.json({ success: 0, msg: 'Số điện thoại không hợp lệ' });
   }
 
@@ -132,7 +132,7 @@ function changeNumber(req, res) {
       return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
     }
 
-    connection.query('SELECT COUNT(user_id) AS exist FROM Users WHERE number=?', [req.body.number], (err, results) => {
+    connection.query('SELECT COUNT(user_id) AS exist FROM Users WHERE phone=?', [req.body.phone], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -142,7 +142,7 @@ function changeNumber(req, res) {
         return res.json({ success: 0, msg: 'Số điện thoại đã tồn tại' });
       }
 
-      connection.query('UPDATE Users SET number=? WHERE user_id=?', [req.body.number, userId], (err, results) => {
+      connection.query('UPDATE Users SET phone=? WHERE user_id=?', [req.body.phone, userId], (err, results) => {
         if (err) {
           console.log(err);
           return res.json({ success: 0 });
@@ -232,7 +232,7 @@ module.exports = {
   getUserInformation,
   changeName,
   changeEmail,
-  changeNumber,
+  changePhone,
   changePassword,
   updateAddress
 }
