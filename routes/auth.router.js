@@ -13,9 +13,17 @@ router.get('/signup/register-email', (req, res) => {
 router.get('/signup/create-account', (req, res) => {
   res.render('signup-account', { title: 'Tạo tài khoản' });
 });
+router.get('/forget-password', (req, res) => {
+  res.render('auth-forget', { title: 'Quên mật khẩu' });
+});
+router.get('/reset-password', (req, res) => {
+  res.render('auth-reset', { title: 'Đặt lại mật khẩu' });
+});
 
 router.post('/login', authController.login);
 router.post('/signup/register-email', authController.registerEmail);
 router.post('/signup/create-account', authController.createAccount);
+router.post('/forget-password', authController.forgetPassword);
+router.post('/reset-password', authController.resetPassword);
 
 module.exports = router;

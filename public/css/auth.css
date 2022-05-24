@@ -1,6 +1,6 @@
 body {
-  background-image: url("/images/login1.jpg");
-  background-position: inherit;
+  height: 100%;
+  overflow: hidden;
 }
 
 input[type=submit] {
@@ -8,13 +8,27 @@ input[type=submit] {
 }
 
 .main {
-  
+  max-width: none;
+  margin: 0;
+  position: relative;
+}
+
+.auth-background {
+  background-image: url("/images/auth1.jpg");
+  height: 100vh;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 0.7;
 }
 
 .page-body {
+  position: absolute;
+  top: 170px;
+  left: 50%;
+  right: 50%;
   justify-content: center;
   align-items: flex-start;
-  margin-top: 180px;
 }
 
 .auth-left {
@@ -51,7 +65,7 @@ input[type=submit] {
 }
 
 .form-input-ctn input {
-  width: 330px;
+  width: -webkit-fill-available;
   font-size: 17px;
   line-height: 16px;
   padding: 14px 16px;

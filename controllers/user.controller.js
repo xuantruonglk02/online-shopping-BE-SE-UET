@@ -164,7 +164,6 @@ function changePassword(req, res) {
   }
 
   const userId = getUserId(req.headers['x-access-token']);
-
   connection.query('SELECT password FROM Users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
       console.log(err);
