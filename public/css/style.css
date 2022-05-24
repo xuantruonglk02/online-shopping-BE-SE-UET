@@ -176,7 +176,7 @@ a {
   font-weight: 600;
 }
 .nav-text:hover {
-  color: rgb(211, 59, 51);
+  color: #d33b33;
 }
 
 .hd-search-ctn {
@@ -202,7 +202,7 @@ a {
   margin: 0 15px 0 15px;
 }
 .header-icon:hover {
-  color: rgb(211, 59, 51);
+  color: #d33b33;
 }
 
 .hd-cart-icon-ctn a {
@@ -253,7 +253,7 @@ a {
   color: rgb(111, 111, 111);
 }
 .col-menu a:hover {
-  color: rgb(211, 59, 51);
+  color: #d33b33;
 }
 
 .col-menus-ctn .col-menu:first-child {
@@ -296,11 +296,11 @@ a {
 }
 
 .cart-menu-name-ctn span:hover {
-  color: rgb(211, 59, 51);
+  color: #d33b33;
 }
 
 .cart-menu-price-ctn {
-  color: rgb(211, 59, 51);
+  color: #d33b33;
   margin-left: auto;
 }
 
@@ -317,7 +317,7 @@ a {
   padding: 10px;
 }
 .view-cart-btn:hover {
-  background-color: rgb(211, 59, 51);
+  background-color: #d33b33;
 }
 
 .slides-ctn {

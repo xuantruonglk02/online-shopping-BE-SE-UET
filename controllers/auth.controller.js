@@ -15,7 +15,7 @@ function login(req, res) {
     return res.status(400).json({ success: 0 });
   }
 
-  connection.query('SELECT user_id, cart_id, password, admin FROM Users WHERE ? IN (number, email)',
+  connection.query('SELECT user_id, cart_id, password, admin FROM Users WHERE ? IN (phone, email)',
     [req.body.username], async (err, results) => {
       if (err) {
         console.log(err);
@@ -88,21 +88,21 @@ function registerEmail(req, res) {
 /**
  * name : body
  * email : body
- * number : body
+ * phone : body
  * password : body
  * repassword : body
  * token : body
  */
 function createAccount(req, res) {
-  if (!req.body.name || !req.body.email || !req.body.number
+  if (!req.body.name || !req.body.email || !req.body.phone
     || !req.body.password || !req.body.repassword || !req.body.token) {
     return res.status(400).json({ success: 0 });
   }
   if (req.body.password !== req.body.repassword) {
     return res.json({ success: 0, code: 'repassword-wrong' });
   }
-  if (!validator.isMobilePhone(req.body.number, 'vi-VN')) {
-    return res.json({ success: 0, code: 'number-wrong' });
+  if (!validator.isMobilePhone(req.body.phone, 'vi-VN')) {
+    return res.json({ success: 0, code: 'phone-wrong' });
   }
 
   connection.query('SELECT create_at FROM Verify_Email WHERE email=? AND token=?',
@@ -119,8 +119,8 @@ function createAccount(req, res) {
         return res.json({ success: 0, code: 'verify-expired' });
       }
 
-      connection.query('SELECT COUNT(user_id) AS exist FROM Users WHERE email=? OR number=?',
-        [req.body.email, req.body.number], async (err, results) => {
+      connection.query('SELECT COUNT(user_id) AS exist FROM Users WHERE email=? OR phone=?',
+        [req.body.email, req.body.phone], async (err, results) => {
           if (err) {
             console.log(err);
             return res.status(500).json({ success: 0 });
@@ -140,8 +140,8 @@ function createAccount(req, res) {
             }
     
             const cartId = results.insertId;
-            connection.query('INSERT INTO Users (cart_id, name, number, email, password) VALUES (?,?,?,?,?)',
-              [cartId, req.body.name, req.body.number, req.body.email, hash],
+            connection.query('INSERT INTO Users (cart_id, name, phone, email, password) VALUES (?,?,?,?,?)',
+              [cartId, req.body.name, req.body.phone, req.body.email, hash],
               (err, results) => {
                 if (err) {
                   console.log(err);

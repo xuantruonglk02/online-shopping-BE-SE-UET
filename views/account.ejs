@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('layouts/head') %>
+
+  <link rel="stylesheet" href="/css/account.css">
+</head>
+
+<body>
+  <div class="main">
+    <%- include('layouts/header') %>
+
+    <div class="page-body row">
+      <div class="account-left">
+        <div class="account-left-row account-left-focus">
+          <a href="/user/account">
+            <i class="fa-solid fa-user"></i>
+            <span>Thông tin tài khoản</span>
+          </a>
+        </div>
+        <div class="account-left-row">
+          <a href="/user/orders">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Đơn hàng</span>
+          </a>
+        </div>
+      </div>
+      <div class="account-right">
+        <div class="account-right-title">
+          <h2>Hồ sơ của tôi</h2>
+          <span>Quản lý thông tin tài khoản</span>
+        </div>
+        <div class="account-right-content">
+          <div class="account-right-row row">
+            <div class="account-right-row-left">
+              <span>Tên tài khoản</span>
+            </div>
+            <div class="account-right-row-right">
+              <span>Phạm Xuân Trường</span>
+            </div>
+          </div>
+          <div class="account-right-row row">
+            <div class="account-right-row-left">
+              <span>Email</span>
+            </div>
+            <div class="account-right-row-right">
+              <input type="email" id="email" value="xuantruonglk02@gmail.com">
+            </div>
+          </div>
+          <div class="account-right-row row">
+            <div class="account-right-row-left">
+              <span>Số điện thoại</span>
+            </div>
+            <div class="account-right-row-right">
+              <input type="text" id="phone" value="0376520507">
+            </div>
+          </div>
+          <div class="account-right-row row">
+            <div class="account-right-row-left">
+              <span>Địa chỉ</span>
+            </div>
+            <div class="account-right-row-right">
+              <input type="text" id="address" value="HN">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>  
+  </div>
+
+  <%- include('layouts/footer') %>
+  <%- include('layouts/script') %>
+</body>
+
+</html>

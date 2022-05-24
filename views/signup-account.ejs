@@ -31,7 +31,7 @@
               <input type="text" id="name" placeholder="Tên người dùng" required>
             </div>
             <div class="form-input-ctn">
-              <input type="text" id="number" placeholder="Số điện thoại" required>
+              <input type="text" id="phone" placeholder="Số điện thoại" required>
             </div>
             <div class="form-input-ctn auth-error">
               <span>Số điện thoại không hợp lệ</span>
@@ -83,7 +83,7 @@
                 url: '/auth/signup/create-account',
                 data: {
                   'name': $('#name').val(),
-                  'number': $('#number').val(),
+                  'phone': $('#phone').val(),
                   'password': $('#password').val(),
                   'repassword': $('#repassword').val(),
                   'email': params.get('email'),
@@ -99,7 +99,7 @@
                     }, 3000);
                   } else {
                     switch (data.code) {
-                      case 'number-wrong':
+                      case 'phone-wrong':
                         $('.auth-error:eq(0)').css('display', 'block');
                         break;
                       case 'repassword-wrong':
