@@ -5,10 +5,13 @@
   <%- include('layouts/head') %>
 
   <link rel="stylesheet" href="/css/auth.css">
+
+  <script src="/js/auth-script.js"></script>
 </head>
 
 <body>
   <div class="main">
+    <div class="auth-background"></div>
     <div class="page-body row">
       <div class="auth-left">
         <div class="logo-ctn">
@@ -22,7 +25,7 @@
           <h2>Đăng ký Email</h2>
           <form action="" method="" id="register-email-form">
             <div class="form-input-ctn">
-              <input type="text" id="email" placeholder="Email" required>
+              <input type="email" id="email" placeholder="Email" required>
             </div>
             <div class="form-input-ctn auth-error">
               <span>Địa chỉ email không hợp lệ</span>
@@ -38,7 +41,7 @@
               <div class="loader" id="submit-loader" style="right: 5px;"></div>
             </div>
             <div class="form-input-ctn form-forget-password">
-              <a href="#">Đã có tài khoản? Đăng nhập</a>
+              <a href="/auth/login">Đã có tài khoản? Đăng nhập</a>
             </div>
             <div class="form-input-ctn form-split-line" style="display: none;"></div>
             <div class="form-input-ctn success-notif" style="display: none;">
@@ -56,11 +59,7 @@
               }
               e.preventDefault();
               $('#register-email-form').submit(false);
-              $('.auth-error').css('display', 'none');
-              $('.success-notif').css('display', 'none');
-              $('#submit-btn').data('enable', '0');
-              $('#submit-btn').css('pointer-events', 'none');
-              $('#submit-loader').css('display', 'block');
+              ajaxStart();
               $.ajax({
                 type: 'POST',
                 url: '/auth/signup/register-email',
@@ -69,12 +68,9 @@
                 },
                 success: function (data) {
                   $('#register-email-form').submit(function (e) {submitForm(e)});
-                  $('#submit-btn').data('enable', '1');
-                  $('#submit-btn').css('pointer-events', 'all');
-                  $('#submit-loader').css('display', 'none');
+                  ajaxStop();
                   if (data.success) {
-                    $('.form-split-line').css('display', 'block');
-                    $('.success-notif').css('display', 'block');
+                    ajaxSuccess();
                   } else {
                     switch (data.code) {
                       case 'invalid':
@@ -93,9 +89,7 @@
                 },
                 error: function (data) {
                   $('#register-email-form').submit(function (e) {submitForm(e)});
-                  $('#submit-btn').data('enable', '1');
-                  $('#submit-btn').css('pointer-events', 'all');
-                  $('#submit-loader').css('display', 'none');
+                  ajaxStop();
                   alert('Đã có lỗi xảy ra');
                 }
               });
@@ -105,17 +99,6 @@
       </div>
     </div>
   </div>
-  <script>
-    $(document).ready(() => {
-      const bgImages = ['/images/login1.jpg', '/images/login2.jpg', '/images/login3.jpg'];
-      let bgImage = 0;
-      setInterval(() => {
-        $('body').css('background-image', 'url("' + bgImages[bgImage] + '")');
-        bgImage += 1;
-        if (bgImage == bgImages.length) bgImage = 0;
-      }, 5000);
-    });
-  </script>
 </body>
 
 </html>
