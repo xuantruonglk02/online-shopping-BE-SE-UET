@@ -6,15 +6,13 @@
 
   <link rel="stylesheet" href="/css/filter.css">
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-  </script>
+  <script src="/js/filter.js"></script>
 </head>
 
 <body>
+  <%- include('layouts/header') %>
+
   <div class="main">
-    <%- include('layouts/header') %>
-  
     <div class="page-body row">
       <div class="filter-col">
         <div class="filter-div">
@@ -65,8 +63,7 @@
                   url = url.join('/');
                   url = removeParam('category', url) + '&category=class';
                 }
-                console.log(url);
-                window.location.href = url;
+                window.location.href = removeParam('page', url) + '&page=1';
               });
             });
           </script>
@@ -84,29 +81,6 @@
             <div class="price-filter-submit">
               <button id="price-filter-submit-btn">Áp dụng</button>
             </div>
-            <script>
-              $(document).ready(() => {
-                if (params.get('minPrice')) $('#minPrice').val(params.get('minPrice'));
-                if (params.get('maxPrice')) $('#maxPrice').val(params.get('maxPrice'));
-
-                $('#price-filter-submit-btn').click(function () {
-                  let url = window.location.href;
-                  if ($('#minPrice').val() == '') {
-                    url = removeParam('minPrice', url);
-                  }
-                  if ($('#maxPrice').val() == '') {
-                    url = removeParam('maxPrice', url);
-                  }
-                  if ($('#minPrice').val() && !isNaN($('#minPrice').val())) {
-                    url = removeParam('minPrice', url) + '&minPrice=' + parseInt($('#minPrice').val());
-                  }
-                  if ($('#maxPrice').val() && !isNaN($('#maxPrice').val())) {
-                    url = removeParam('maxPrice', url) + '&maxPrice=' + parseInt($('#maxPrice').val());
-                  }
-                  window.location.href = url;
-                });
-              });
-            </script>
           </div>
         </div>
         <div class="filter-div">
@@ -122,19 +96,6 @@
               <i class="fa-solid fa-star" id="rating-filter-star-5"></i>
               <span>trở lên</span>
             </div>
-            <script>
-              $(document).ready(() => {
-                if (params.get('minStar')) {
-                  for (let i = 1; i <= params.get('minStar'); i++) {
-                    $('#rating-filter-star-' + i).addClass('checked');
-                  }
-                }
-
-                $('.rating-filter-option i').click(function() {
-                  window.location.href = removeParam('minStar', window.location.href) + '&minStar=' + $(this).attr('id')[$(this).attr('id').length - 1];
-                });
-              });
-            </script>
           </div>
         </div>
       </div>
@@ -152,37 +113,9 @@
               <option id="priceDESC" value="priceDESC">Cao đến thấp</option>
             </select>
           </div>
-          <script>
-            $(document).ready(() => {
-              let order = params.get('orderBy');
-              if (order == null) order = 'newest';
-              if (order == 'priceASC' || order == 'priceDESC') {
-                $('.products-sort-selection select').css('background-color', 'black');
-                $('.products-sort-selection select').css('color', 'white');
-                $('#' + order).attr('selected', 'selected');
-              } else {
-                $('#' + order).addClass('selected');
-              }
-
-              $('.products-sort-option').click(function() {
-                window.location.href = removeParam('orderBy', window.location.href) + '&orderBy=' + $(this).data().order;
-              });
-              $('.products-sort-selection').change(function () {
-                window.location.href = removeParam('orderBy', window.location.href) + '&orderBy=' + $('#sort-selection').val();
-              });
-            });
-          </script>
         </div>
         <div class="products-list-ctn" id="products-list-ctn"></div>
-        <div class="pages-list-ctn row" id="pages-list-ctn">
-          <div class="pages-btn-ctn"><a href="#"><</a></div>
-          <div class="pages-btn-ctn"><a href="#">1</a></div>
-          <div class="pages-btn-ctn"><a href="#">2</a></div>
-          <div class="pages-btn-ctn"><a href="#">3</a></div>
-          <div class="pages-btn-ctn"><a href="#">...</a></div>
-          <div class="pages-btn-ctn"><a href="#">7</a></div>
-          <div class="pages-btn-ctn"><a href="#">></a></div>
-        </div>
+        <div class="pages-list-ctn row" id="pages-list-ctn"></div>
         <script>
           $(document).ready(() => {
             $.ajax({
@@ -190,8 +123,7 @@
               url: window.location.href.substring(window.location.href.indexOf('/product/category/'), window.location.href.indexOf('?')),
               data: {
                 'category': params.get('category'),
-                'begin': params.get('begin'),
-                'quantity': params.get('quantity'),
+                'page': params.get('page'),
                 'minStar': params.get('minStar'),
                 'minPrice': params.get('minPrice'),
                 'maxPrice': params.get('maxPrice'),
@@ -202,7 +134,6 @@
                 if (data.results.length == 0) {
                   return $('#products-list-ctn').append('<p>Không tìm thấy sản phẩm phù hợp</p>');
                 }
-                $('#products-list-ctn').empty();
                 data.results.forEach((e) => {
                   $('#products-list-ctn').append(
                     '<div class="product-ctn"><div class="product-thumb-ctn">'
@@ -215,6 +146,9 @@
                     + '</div></div></div>'
                   );
                 });
+                if (data.results.length != 0) {
+                  $('#pages-list-ctn').append(genPageButtons(parseInt(params.get('page')), data.totalRows));
+                }
               },
               error: function (data) {
                 console.log(data);
@@ -225,6 +159,7 @@
       </div>
     </div>
   </div>
+  
   <%- include('layouts/footer') %>
 
   <%- include('layouts/script') %>

@@ -7,7 +7,7 @@ const productController = require('../controllers/product.controller');
 const router = express.Router();
 
 router.get('/search', (req, res) => {
-  res.render('filter', {
+  res.render('search', {
     title: req.query.keyword,
     keyword: req.query.keyword
   });

@@ -6,15 +6,13 @@
 
   <link rel="stylesheet" href="/css/filter.css">
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-  </script>
+  <script src="/js/filter.js"></script>
 </head>
 
 <body>
-  <div class="main">
-    <%- include('layouts/header') %>
+  <%- include('layouts/header') %>
   
+  <div class="main">  
     <div class="page-body row">
       <div class="filter-col">
         <div class="filter-div">
@@ -53,7 +51,7 @@
                 } else if ($(this).data().classid) {
                   url += '&classId=' + $(this).data().classid;
                 }
-                window.location.href = url;
+                window.location.href = removeParam('page', url) + '&page=1';
               });
             });
           </script>
@@ -71,29 +69,6 @@
             <div class="price-filter-submit">
               <button id="price-filter-submit-btn">Áp dụng</button>
             </div>
-            <script>
-              $(document).ready(() => {
-                if (params.get('minPrice')) $('#minPrice').val(params.get('minPrice'));
-                if (params.get('maxPrice')) $('#maxPrice').val(params.get('maxPrice'));
-
-                $('#price-filter-submit-btn').click(function () {
-                  let url = window.location.href;
-                  if ($('#minPrice').val() == '') {
-                    url = removeParam('minPrice', url);
-                  }
-                  if ($('#maxPrice').val() == '') {
-                    url = removeParam('maxPrice', url);
-                  }
-                  if ($('#minPrice').val() && !isNaN($('#minPrice').val())) {
-                    url = removeParam('minPrice', url) + '&minPrice=' + parseInt($('#minPrice').val());
-                  }
-                  if ($('#maxPrice').val() && !isNaN($('#maxPrice').val())) {
-                    url = removeParam('maxPrice', url) + '&maxPrice=' + parseInt($('#maxPrice').val());
-                  }
-                  window.location.href = url;
-                });
-              });
-            </script>
           </div>
         </div>
         <div class="filter-div">
@@ -109,19 +84,6 @@
               <i class="fa-solid fa-star" id="rating-filter-star-5"></i>
               <span>trở lên</span>
             </div>
-            <script>
-              $(document).ready(() => {
-                if (params.get('minStar')) {
-                  for (let i = 1; i <= params.get('minStar'); i++) {
-                    $('#rating-filter-star-' + i).addClass('checked');
-                  }
-                }
-
-                $('.rating-filter-option i').click(function() {
-                  window.location.href = removeParam('minStar', window.location.href) + '&minStar=' + $(this).attr('id')[$(this).attr('id').length - 1];
-                });
-              });
-            </script>
           </div>
         </div>
       </div>
@@ -139,28 +101,31 @@
               <option id="priceDESC" value="priceDESC">Cao đến thấp</option>
             </select>
           </div>
-          <script>
-            $(document).ready(() => {
-              let order = params.get('orderBy');
-              if (order == null) order = 'newest';
-              if (order == 'priceASC' || order == 'priceDESC') {
-                $('.products-sort-selection select').css('background-color', 'black');
-                $('.products-sort-selection select').css('color', 'white');
-                $('#' + order).attr('selected', 'selected');
-              } else {
-                $('#' + order).addClass('selected');
-              }
-
-              $('.products-sort-option').click(function() {
-                window.location.href = removeParam('orderBy', window.location.href) + '&orderBy=' + $(this).data().order;
-              });
-              $('.products-sort-selection').change(function () {
-                window.location.href = removeParam('orderBy', window.location.href) + '&orderBy=' + $('#sort-selection').val();
-              });
-            });
-          </script>
         </div>
         <div class="products-list-ctn" id="products-list-ctn"></div>
+        <div class="pages-list-ctn row" id="pages-list-ctn">
+          <div class="pages-btn-ctn">
+            <a href="#" onclick="stepPage(-1); return false;"><div>&#10094;</div></a>
+          </div>
+          <div class="pages-btn-ctn" id="page-btn-1">
+            <a href="#" onclick="gotoPage(1); return false;"><div>1</div></a>
+          </div>
+          <div class="pages-btn-ctn" id="page-btn-2">
+            <a href="#" onclick="gotoPage(2); return false;"><div>2</div></a>
+          </div>
+          <div class="pages-btn-ctn" id="page-btn-3">
+            <a href="#" onclick="gotoPage(3); return false;"><div>3</div></a>
+          </div>
+          <div class="pages-btn-ctn" style="background-color: black;">
+            <a href="#" onclick="return false" style="cursor: default;"><div>...</div></a>
+          </div>
+          <div class="pages-btn-ctn" id="page-btn-7">
+            <a href="#" onclick="gotoPage(7); return false;"><div>7</div></a>
+          </div>
+          <div class="pages-btn-ctn">
+            <a href="#" onclick="stepPage(1); return false;"><div>&#10095;</div></a>
+          </div>
+        </div>
         <script>
           $(document).ready(() => {
             $.ajax({
@@ -168,8 +133,7 @@
               url: '/product/search',
               data: {
                 'keyword': params.get('keyword'),
-                'begin': params.get('begin'),
-                'quantity': params.get('quantity'),
+                'page': params.get('page'),
                 'classId': params.get('classId'),
                 'lineId': params.get('lineId'),
                 'minPrice': params.get('minPrice'),
@@ -178,10 +142,10 @@
                 'orderBy': params.get('orderBy')
               },
               success: function (data) {
+                console.log(data);
                 if (data.results.length == 0) {
                   return $('#products-list-ctn').append('<p>Không tìm thấy sản phẩm phù hợp</p>');
                 }
-                $('#products-list-ctn').empty();
                 data.results.forEach((e) => {
                   $('#products-list-ctn').append(
                     '<div class="product-ctn"><div class="product-thumb-ctn">'
@@ -194,6 +158,9 @@
                     + '</div></div></div>'
                   );
                 });
+                if (data.results.length != 0) {
+                  $('#pages-list-ctn').append(genPageButtons(parseInt(params.get('page')), data.totalRows));
+                }
               },
               error: function (data) {
                 console.log(data);
@@ -204,6 +171,7 @@
       </div>
     </div>
   </div>
+
   <%- include('layouts/footer') %>
 
   <%- include('layouts/script') %>
