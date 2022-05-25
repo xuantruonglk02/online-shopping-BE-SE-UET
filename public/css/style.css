@@ -105,6 +105,24 @@ a {
   100% { transform: rotate(360deg); }
 }
 
+@keyframes fade {
+  from {opacity: .4}
+  to {opacity: 1}
+}
+
+.fade {
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+.hide {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
 .relative {
   position: relative;
 }
@@ -152,7 +170,7 @@ a {
 
 .header {
   background-color: white;
-  /* border-top: 5px solid black; */
+  user-select: none;
 }
 
 .hd-logo-ctn {
@@ -220,6 +238,7 @@ a {
 }
 
 .dropdown-menu {
+  z-index: 999999;
   background-color: white;
   display: none;
   position: absolute;
@@ -321,17 +340,87 @@ a {
 }
 
 .slides-ctn {
+  position: relative;
 }
 
-.slide {
-  position: absolute;
+.cover-slides {
+  display: flex;
+  flex-direction: column;
 }
 
 .slide-background {
-  height: 500px;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.slide-ctn {
+  height: 400px;
+  background: rgba(51, 51, 51, 0.5);
+  color: white;
+  padding: 150px 200px 0 200px;
+}
+
+.slide-content {
+  width: 100%;
+}
+
+.slide-content h1 {
+  font-size: 72px;
+  font-weight: bold;
+}
+
+.slide-content span {
+  font-size: 22px;
+  /* font-weight: bold; */
+}
+
+.prev, .next {
+  background-color: black;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  margin-top: -22px;
+  padding: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+}
+
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+.prev:hover, .next:hover {
+  background-color: #d33b33;
+}
+
+.dots-ctn {
+  align-self: center;
+  position: absolute;
+  bottom: 0;
+}
+
+.dot {
+  background-color: #bbb;
+  height: 20px;
+  width: 20px;
+  margin: 0 2px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.dot:hover {
+  background-color: #d33b33;
+}
+
+.cur-dot {
+  background-color: #d33b33;
 }
 
 .products-list-title {
