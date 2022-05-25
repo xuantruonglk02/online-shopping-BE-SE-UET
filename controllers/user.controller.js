@@ -155,6 +155,39 @@ function changePhone(req, res) {
 }
 
 /**
+ * address : body
+ * password : body
+ */
+ function changeAddress(req, res) {
+  if (!req.body.address || !req.body.password) {
+    return res.json({ success: 0 });
+  }
+
+  const userId = getUserId(req.headers['x-access-token']);
+
+  connection.query('SELECT password FROM Users WHERE user_id=?', [userId], async (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+
+    const match = await bcrypt.compare(req.body.password, results[0].password);
+    if (!match) {
+      return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
+    }
+
+    connection.query('UPDATE Users SET address=? WHERE user_id=?', [req.body.address, userId], (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.json({ success: 0 });
+      }
+  
+      res.json({ success: 1 });
+    });
+  });
+}
+
+/**
  * oldPassword : body
  * newPassword : body
  */
@@ -193,39 +226,6 @@ function changePassword(req, res) {
   });
 }
 
-/**
- * address : body
- * password : body
- */
-function updateAddress(req, res) {
-  if (!req.body.address || !req.body.password) {
-    return res.json({ success: 0 });
-  }
-
-  const userId = getUserId(req.headers['x-access-token']);
-
-  connection.query('SELECT password FROM Users WHERE user_id=?', [userId], async (err, results) => {
-    if (err) {
-      console.log(err);
-      return res.json({ success: 0 });
-    }
-
-    const match = await bcrypt.compare(req.body.password, results[0].password);
-    if (!match) {
-      return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
-    }
-
-    connection.query('UPDATE Users SET address=? WHERE user_id=?', [req.body.address, userId], (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({ success: 0 });
-      }
-  
-      res.json({ success: 1 });
-    });
-  });
-}
-
 module.exports = {
   getUserId,
   getCartId,
@@ -233,6 +233,6 @@ module.exports = {
   changeName,
   changeEmail,
   changePhone,
-  changePassword,
-  updateAddress
+  changeAddress,
+  changePassword
 }

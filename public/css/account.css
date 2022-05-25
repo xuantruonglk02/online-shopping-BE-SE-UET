@@ -11,7 +11,9 @@ body {
   margin-top: 50px !important;
 }
 .account-left-row {
+  width: max-content;
   margin-top: 10px;
+  padding: 0 30px 0 0;
 }
 
 .account-left-row span {
@@ -23,5 +25,112 @@ body {
 }
 
 .account-right {
+  width: 100%;
   background-color: white;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  padding: 20px;
+}
+
+.account-right-title {
+  padding-bottom: 20px;
+  border-bottom: .0625rem solid #efefef;
+}
+.account-right-title span {
+  margin-left: 10px;
+}
+
+.account-right-content {
+  padding-top: 20px;
+}
+
+.account-right-row:not(:first-of-type) {
+  margin-top: 10px;
+}
+
+.account-right-content input {
+  font-size: 17px;
+  padding: 10px;
+  border: .0625rem solid black;
+  border-radius: 10px;
+  outline: none;
+}
+
+.account-right-row-left {
+  width: 15%;
+  font-size: 18px;
+  text-align: right;
+  margin-right: 20px;
+  color: rgb(85, 85, 85);
+}
+
+.account-right-row-right {
+  width: 85%;
+  font-size: 18px;
+}
+
+.account-right-row-right input {
+  width: 100%;
+}
+.account-right-row-right input:disabled {
+  color: black;
+}
+
+.account-right-row-right a {
+  text-decoration: underline;
+}
+.account-right-row-right a:hover {
+  color: #d33b33;
+}
+
+.account-right-row-btns a {
+  margin-left: 10px;
+}
+
+.account-right-row-btns a:last-of-type {
+  display: none;
+}
+
+.account-right-row-btns i {
+  font-size: 20px;
+}
+.account-right-row-btns i:hover {
+  color: #d33b33;
+}
+
+.account-right-submit-ctn {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: .0625rem solid #efefef;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  display: none;
+}
+
+.account-right-submit-content-up {
+  margin-bottom: 10px;
+}
+.account-right-submit-content-up span {
+  margin-right: 20px;
+}
+
+.account-right-submit-ctn input {
+  font-size: 17px;
+  padding: 10px;
+  border: 0.0625rem solid black;
+  border-radius: 10px;
+  outline: none;
+}
+
+.account-right-submit-ctn button {
+  background-color: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 10px 20px;
+
+}
+.account-right-submit-ctn button:hover {
+  background-color: #d33b33;
 }

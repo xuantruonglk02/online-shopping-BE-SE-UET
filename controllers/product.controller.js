@@ -23,8 +23,7 @@ function getProductById(productId, callback) {
 /**
  * categoryId : param
  * category : body
- * begin : body
- * quantity : body
+ * page : body
  * 
  * minPrice : body
  * maxPrice : body
@@ -32,15 +31,16 @@ function getProductById(productId, callback) {
  * orderBy : body : newest|priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
 function getProductsByCategory(req, res) {
-  if ((req.body.category != 'class' && req.body.category != 'line')
-    || !req.body.begin || !req.body.quantity
-    || isNaN(req.body.begin) || isNaN(req.body.quantity)) {
+  if ((req.body.category != 'class' && req.body.category != 'line') || !req.body.page
+    || isNaN(req.body.page)) {
     return res.status(400).json({ success: 0 });
   }
-  req.body.begin = parseInt(req.body.begin);
-  req.body.quantity = parseInt(req.body.quantity);
+  req.body.page = parseInt(req.body.page);
+  if (req.body.page < 0) {
+    return res.status(400).json({ success: 0 });
+  }
 
-  let query = 'SELECT product_id, name, price, sold, rating, thumbnail FROM Products WHERE ' + req.body.category + '_id=?';
+  let query = 'SELECT SQL_CALC_FOUND_ROWS product_id, name, price, sold, rating, thumbnail FROM Products WHERE ' + req.body.category + '_id=?';
   let params = [req.params.categoryId];
   if (req.body.minPrice && !isNaN(req.body.minPrice)) {
     req.body.minPrice = parseInt(req.body.minPrice);
@@ -85,8 +85,8 @@ function getProductsByCategory(req, res) {
     default:
       query += ' ORDER BY create_at DESC';
   }
-  query += ' LIMIT ?,?';
-  params = params.concat([req.body.begin, req.body.quantity]);
+  query += ' LIMIT ?,15';
+  params.push((req.body.page - 1) * 15);
 
   connection.query(query, params, (err, results) => {
     if (err) {
@@ -94,7 +94,14 @@ function getProductsByCategory(req, res) {
       return res.status(500).json({ success: 0 });
     }
 
-    res.status(200).json({ success: 1, results: results });
+    const rows = results;
+    connection.query('SELECT FOUND_ROWS() as count', (err, results) => {
+      if (results[0].count) {
+        res.status(200).json({ success: 1, results: rows, totalRows: results[0].count });
+      } else {
+        res.status(200).json({ success: 1, results: rows });
+      }
+    });
   });
 }
 
@@ -175,8 +182,7 @@ function getAllCategories(req, res) {
 
 /**
  * keyword : body
- * begin : body
- * quantity : body
+ * page : body
  * 
  * classId : body
  * lineId : body
@@ -186,14 +192,16 @@ function getAllCategories(req, res) {
  * orderBy : body : newest|priceASC|priceDESC|soldDESC|qoRatingDESC|ratingDESC
  */
 function searchProductsByKeyword(req, res) {
-  if (!req.body.keyword || !req.body.begin || !req.body.quantity || isNaN(req.body.begin) || isNaN(req.body.quantity)) {
+  if (!req.body.keyword || !req.body.page || isNaN(req.body.page)) {
     return res.status(400).json({ success: 0 });
   }
   
-  req.body.begin = parseInt(req.body.begin);
-  req.body.quantity = parseInt(req.body.quantity);
+  req.body.page = parseInt(req.body.page);
+  if (req.body.page < 0) {
+    return res.status(400).json({ success: 0 });
+  }
 
-  let query = 'SELECT product_id, name, price, sold, rating, thumbnail FROM Products WHERE name LIKE CONCAT("%",?,"%")';
+  let query = 'SELECT SQL_CALC_FOUND_ROWS product_id, name, price, sold, rating, thumbnail FROM Products WHERE name LIKE CONCAT("%",?,"%")';
   let params = [req.body.keyword];
   if (req.body.classId) {
     query += ' AND class_id=?';
@@ -246,8 +254,8 @@ function searchProductsByKeyword(req, res) {
     default:
       query += ' ORDER BY create_at DESC';
   }
-  query += ' LIMIT ?,?';
-  params.push(req.body.begin, req.body.quantity);
+  query += ' LIMIT ?,15';
+  params.push((req.body.page - 1) * 15);
 
   connection.query(query, params, (err, results) => {
     if (err) {
@@ -255,7 +263,14 @@ function searchProductsByKeyword(req, res) {
       return res.status(500).json({ success: 0 });
     }
 
-    res.status(200).json({ success: 1, results: results });
+    const rows = results;
+    connection.query('SELECT FOUND_ROWS() as count', (err, results) => {
+      if (results[0].count) {
+        res.status(200).json({ success: 1, results: rows, totalRows: results[0].count });
+      } else {
+        res.status(200).json({ success: 1, results: rows });
+      }
+    });
   });
 }
 
