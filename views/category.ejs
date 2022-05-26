@@ -130,7 +130,6 @@
                 'orderBy': params.get('orderBy')
               },
               success: function (data) {
-                console.log(data);
                 if (data.results.length == 0) {
                   return $('#products-list-ctn').append('<p>Không tìm thấy sản phẩm phù hợp</p>');
                 }
@@ -147,7 +146,7 @@
                   );
                 });
                 if (data.results.length != 0) {
-                  $('#pages-list-ctn').append(genPageButtons(parseInt(params.get('page')), data.totalRows));
+                  $('#pages-list-ctn').append(genPageButtons(parseInt(params.get('page')), Math.floor(data.totalRows / 15) + 1));
                 }
               },
               error: function (data) {

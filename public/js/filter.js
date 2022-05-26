@@ -63,18 +63,19 @@ function stepPage(n) {
 }
 
 function genPageButtons(curPage, totalPage) {
-  let pagesList = '';
-  let i = curPage, d = 0;
-  while (i > 0 && d < 3) {
-    pagesList = makePageButton(i, curPage) + pagesList;
-    i--;
-    d++;
-  }
-  i = curPage + 1;
-  while (i <= totalPage && d < 5) {
-    pagesList += makePageButton(i, curPage);
-    i++;
-    d++;
+  let d = 0, l = curPage - 1, r = curPage + 1;
+  let pagesList = makePageButton(curPage, curPage)
+  while (d < 4) {
+    if (l > 0) {
+      pagesList = makePageButton(l, curPage) + pagesList;
+      l--;
+      d++;
+    }
+    if (r <= totalPage) {
+      pagesList += makePageButton(r, curPage);
+      r++;
+      d++;
+    }
   }
   if (curPage != 1) pagesList = makePageButton('p', null) + pagesList;
   if (curPage != totalPage) pagesList += makePageButton('n', null);
