@@ -66,6 +66,7 @@ function genPageButtons(curPage, totalPage) {
   let d = 0, l = curPage - 1, r = curPage + 1;
   let pagesList = makePageButton(curPage, curPage)
   while (d < 4) {
+    if (l <= 0 && r > totalPage) break;
     if (l > 0) {
       pagesList = makePageButton(l, curPage) + pagesList;
       l--;
@@ -92,5 +93,5 @@ function makePageButton(content, cur) {
   if (content == 'd') {
     return '<div class="pages-btn-ctn" style="background-color: black;"><a href="#" onclick="return false" style="cursor: default;"><div>...</div></a></div>';
   }
-  return '<div class="pages-btn-ctn ' + (cur == content ? 'cur-page' : '') + '" id="page-btn-' + content + '"><a href="#" onclick="gotoPage(' + content + '); return false;"><div>' + content + '</div></a></div>';
+  return '<div class="pages-btn-ctn' + (cur == content ? ' cur-page' : '') + '" id="page-btn-' + content + '"><a href="#" onclick="gotoPage(' + content + '); return false;"><div>' + content + '</div></a></div>';
 }

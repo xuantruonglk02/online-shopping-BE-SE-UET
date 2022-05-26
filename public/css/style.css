@@ -284,6 +284,7 @@ a {
 }
 
 .cart-menu {
+  min-width: 250px;
   margin: 20px 0 10px 0;
 }
 

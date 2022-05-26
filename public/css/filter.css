@@ -15,6 +15,9 @@
 .filter-product-class {
   margin-left: 20px;
 }
+.filter-product-class a:hover {
+  color: #d33b33;
+}
 
 .filter-product-class:not(:first-of-type) {
   margin-top: 10px;

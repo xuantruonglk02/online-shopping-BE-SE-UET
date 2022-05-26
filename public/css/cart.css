@@ -65,6 +65,9 @@
 .remove-ctn i {
   margin: 0;
 }
+.remove-ctn i:hover {
+  color: #D33B33;
+}
 
 .edit-cart-btns-ctn {
   margin-top: 50px;

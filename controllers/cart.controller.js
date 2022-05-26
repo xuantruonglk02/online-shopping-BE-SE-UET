@@ -93,9 +93,7 @@ function updateCart(req, res) {
       return res.status(400).json({ success: 0 });
     }
   }
-  if (!req.body.list.length) {
-    return res.json({ success: 1 });
-  }
+
   for (let i = 0; i < req.body.list.length; i++) {
     if (!req.body.list[i].productId  || !req.body.list[i].sizeId || !req.body.list[i].quantity
       || isNaN(req.body.list[i].sizeId) || isNaN(req.body.list[i].quantity)) {
@@ -108,31 +106,42 @@ function updateCart(req, res) {
 
   const cartId = getCartId(req.cookies['x-access-token']);
 
-  connection.beginTransaction((err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({ success: 0 });
-    }
-
+  if (req.body.list.length == 0) {
     connection.query('DELETE FROM Cart_has_Product WHERE cart_id=?', [cartId], (err, results) => {
       if (err) {
         console.log(err);
         return res.status(500).json({ success: 0 });
       }
 
-      let query = 'INSERT INTO Cart_has_Product (cart_id, product_id, size_id, quantity) VALUES '
-        + '(?,?,?,?),'.repeat(req.body.list.length).slice(0, -1);
-      let params = req.body.list.reduce((p, c) => p.concat([cartId, c.productId, c.sizeId, c.quantity]), []);
-      connection.query(query, params, (err, results) => {
+      return res.json({ success: 1 });
+    });
+  } else {
+    connection.beginTransaction((err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ success: 0 });
+      }
+  
+      connection.query('DELETE FROM Cart_has_Product WHERE cart_id=?', [cartId], (err, results) => {
         if (err) {
           console.log(err);
           return res.status(500).json({ success: 0 });
         }
-
-        return commitTransaction(connection, res);
+  
+        let query = 'INSERT INTO Cart_has_Product (cart_id, product_id, size_id, quantity) VALUES '
+          + '(?,?,?,?),'.repeat(req.body.list.length).slice(0, -1);
+        let params = req.body.list.reduce((p, c) => p.concat([cartId, c.productId, c.sizeId, c.quantity]), []);
+        connection.query(query, params, (err, results) => {
+          if (err) {
+            console.log(err);
+            return res.status(500).json({ success: 0 });
+          }
+  
+          return commitTransaction(connection, res);
+        });
       });
     });
-  });
+  }
 }
 
 /**

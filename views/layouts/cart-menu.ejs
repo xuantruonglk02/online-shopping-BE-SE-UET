@@ -43,7 +43,6 @@
         type: 'POST',
         url: '/cart/menu',
         success: function (data) {
-          console.log(data);
           if (!data.success) { return; }
           if (data.results.length == 0) {
             $('#cart-menu-products').append('<p>Giỏ hàng hiện trống</p>');

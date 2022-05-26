@@ -175,7 +175,7 @@ function getAllCategories(req, res) {
         console.log(err);
         return res.json({ success: 0 });
       }
-  
+      
       res.json({ success: 1, results: results });
     });
 }
@@ -192,6 +192,9 @@ function getAllCategories(req, res) {
  * orderBy : body : newest|priceASC|priceDESC|soldDESC|qoRatingDESC|ratingDESC
  */
 function searchProductsByKeyword(req, res) {
+  if (req.body.keyword == '') {
+    return res.json({ success: 1, results: [], totalRows: 0 });
+  }
   if (!req.body.keyword || !req.body.page || isNaN(req.body.page)) {
     return res.status(400).json({ success: 0 });
   }
@@ -256,7 +259,7 @@ function searchProductsByKeyword(req, res) {
   }
   query += ' LIMIT ?,15';
   params.push((req.body.page - 1) * 15);
-
+  
   connection.query(query, params, (err, results) => {
     if (err) {
       console.log(err);
