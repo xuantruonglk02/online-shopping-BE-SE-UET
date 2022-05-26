@@ -1,3 +1,5 @@
+const params = new URLSearchParams(window.location.search);
+
 $(document).ready(function () {
   $(window).scroll(function () {
     if ($(this).scrollTop() != 0) {

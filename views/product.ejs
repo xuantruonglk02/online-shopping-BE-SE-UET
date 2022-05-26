@@ -74,15 +74,18 @@
                 $('#quantity-input').attr('max', parseInt($('#size-select :selected').data().quantity));
                 $('#quantity-input').val(1);
                 $('#quantity-title').text('Số Lượng: còn ' + $('#size-select :selected').data().quantity);
+                $('#checkout').attr('href', (window.location.href + '?sizeId=' + $('#size-select').val() + '&size=' + $('#size-select option:selected').text() + '&quantity=' + $('#quantity-input').val()).replace('product', 'checkout'));
               });
               $('#quantity-modify-desc').on('click', function () {
                 if ($('#quantity-input').val() > 1) {
                   $('#quantity-input').val(parseInt($('#quantity-input').val()) - 1);
+                  $('#checkout').attr('href', (window.location.href + '?sizeId=' + $('#size-select').val() + '&size=' + $('#size-select option:selected').text() + '&quantity=' + $('#quantity-input').val()).replace('product', 'checkout'));
                 }
               });
               $('#quantity-modify-asc').on('click', function () {
                 if ($('#quantity-input').val() < $('#size-select :selected').data().quantity) {
                   $('#quantity-input').val(parseInt($('#quantity-input').val()) + 1);
+                  $('#checkout').attr('href', (window.location.href + '?sizeId=' + $('#size-select').val() + '&size=' + $('#size-select option:selected').text() + '&quantity=' + $('#quantity-input').val()).replace('product', 'checkout'));
                 }
               });
             </script>
@@ -91,10 +94,13 @@
             <a id="add-to-cart" href="#" onclick="return false">
               <div><i class="fa-solid fa-cart-shopping"></i>Thêm vào giỏ hàng</div>
             </a>
-            <a href="#">
+            <a id="checkout" href="/checkout/<%= product.product_id %>">
               <div>Mua ngay</div>
             </a>
             <script>
+              $(document).ready(() => {
+                $('#checkout').attr('href', (window.location.href + '?sizeId=' + $('#size-select').val() + '&size=' + $('#size-select option:selected').text() + '&quantity=' + $('#quantity-input').val()).replace('product', 'checkout'));
+              });
               $('#add-to-cart').on('click', function () {
                 $.ajax({
                   type: 'POST',
@@ -106,11 +112,15 @@
                   },
                   success: function (data) {
                     if (data.success) {
+                      $('#cart-number').text(parseInt($('#cart-number').text()) + 1);
                       alert('Thành công');
                     } else {
                       switch (data.code) {
                         case 'ER_DUP_ENTRY':
                           alert('Sản phẩm đã có sẵn trong giỏ hàng');
+                          break;
+                        case 'max-in-cart':
+                          alert('Số sản phẩm trong giỏ không được vượt quá ' + data.max);
                           break;
                         default:
                           alert('Đã có lỗi xảy ra');

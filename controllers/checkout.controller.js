@@ -1,14 +1,18 @@
-const { connection } = require('../models/database');
+const { connection, commitTransaction } = require('../models/database');
 const { getUserId } = require('../controllers/user.controller');
 
 /**
  * productId : params
  * sizeId : body
  * quantity : body
+ * userName : body,
+ * userPhone : body,
+ * userAddress : body
  */
 function checkoutForAProduct(req, res) {
-  if (!req.body.sizeId || !req.body.quantity) {
-    return res.json({ success: 0 });
+  if (!req.body.sizeId || !req.body.quantity
+    || !req.body.userName || !req.body.userPhone || !req.body.userAddress) {
+    return res.json({ success: 0, code: 'not-infor' });
   }
   try {
     req.body.quantity = parseInt(req.body.quantity);
@@ -18,37 +22,34 @@ function checkoutForAProduct(req, res) {
   }
   if (req.body.quantity < 1) { return res.json({ success: 0 }); }
 
-  connection.query('SELECT quantity FROM Product_has_Size WHERE product_id=? AND size_id=?',
-    [req.params.productId, req.body.sizeId], (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({ success: 0 });
-      }
+  connection.beginTransaction((err) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
 
-      if (!results.length) {
-        return res.json({ success: 0 });
-      }
-      if (results[0].quantity <= 0 || results[0].quantity < req.body.quantity) {
-        return res.json({ success: 0, msg: 'Hàng trong kho không đủ' });
-      }
-
-      const userId = getUserId(req.headers['x-access-token']);
-      connection.query('SELECT name, phone, address FROM Users WHERE user_id=?', [userId], (err, results) => {
+    connection.query('SELECT quantity FROM Product_has_Size WHERE product_id=? AND size_id=?',
+      [req.params.productId, req.body.sizeId], (err, results) => {
         if (err) {
           console.log(err);
-          return res.json({ success: 0 });
+          return connection.rollback(() => { return res.json({ success: 0 }); });
         }
-
         if (!results.length) {
-          return res.json({ success: 0 });
+          return connection.rollback(() => { return res.json({ success: 0 }); });
         }
 
-        const userName = results[0].name, userNumber = results[0].phone, userAddress = results[0].address;
+        if (results[0].quantity <= 0 || results[0].quantity < req.body.quantity) {
+          return connection.rollback(() => {
+            return res.json({ success: 0, code: 'not-enough' });
+          });
+        }
+
+        const userId = getUserId(req.cookies['x-access-token']);
         connection.query('INSERT INTO Bills (user_id, user_name, user_phone, user_address) VALUES (?,?,?,?)',
-          [userId, userName, userNumber, userAddress], (err, results) => {
+          [userId, req.body.userName, req.body.userPhone, req.body.userAddress], (err, results) => {
             if (err) {
               console.log(err);
-              return res.json({ success: 0 });
+              return connection.rollback(() => { return res.json({ success: 0 }); });
             }
       
             const billId = results.insertId;
@@ -56,14 +57,14 @@ function checkoutForAProduct(req, res) {
               [billId, req.params.productId, req.body.sizeId, req.body.quantity], (err, results) => {
                 if (err) {
                   console.log(err);
-                  return res.json({ success: 0 });
+                  return connection.rollback(() => { return res.json({ success: 0 }); });
                 }
       
-                res.json({ success: 1 });
+                return commitTransaction(connection, res);
               });
           });
       });
-    });
+  });
 }
 
 /**
@@ -103,7 +104,7 @@ function checkoutForCart(req, res) {
       return res.json({ success: 0, msg: 'Hàng trong kho không đủ', list: results });
     }
     
-    const userId = getUserId(req.headers['x-access-token']);
+    const userId = getUserId(req.cookies['x-access-token']);
     connection.query('SELECT name, phone, address FROM Users WHERE user_id=?', [userId], (err, results) => {
       if (err) {
         console.log(err);
@@ -114,9 +115,9 @@ function checkoutForCart(req, res) {
         return res.json({ success: 0 });
       }
 
-      const userName = results[0].name, userNumber = results[0].phone, userAddress = results[0].address;
+      const userName = results[0].name, userPhone = results[0].phone, userAddress = results[0].address;
       connection.query('INSERT INTO Bills (user_id, user_name, user_phone, user_address) VALUES (?,?,?,?)',
-        [userId, userName, userNumber, userAddress], (err, results) => {
+        [userId, userName, userPhone, userAddress], (err, results) => {
           if (err) {
             console.log(err);
             return res.json({ success: 0 });

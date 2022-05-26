@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('layouts/head') %>
+
+  <link rel="stylesheet" href="/css/checkout.css">
+</head>
+
+<body>
+  <%- include('layouts/header') %>
+
+  <div class="main">
+    <div class="container">
+      <div class="order-ctn">
+        <div class="order-div">
+          <div class="order-div-title">
+            <h2>Thông tin khách hàng</h2>
+          </div>
+          <div class="order-div-content">
+            <div class="order-div-content-row row">
+              <div class="order-div-content-row-left">
+                <span>Họ và tên</span>
+              </div>
+              <div class="order-div-content-row-right row">
+                <input type="text" id="name" value="<%= userName %>" required disabled>
+                <div class="order-div-content-row-right-btns row">
+                  <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
+                  <a href="#" onclick="return false" title="Lưu"><i class="fa-regular fa-circle-check"></i></a>
+                </div>
+              </div>
+            </div>
+            <div class="order-div-content-row row">
+              <div class="order-div-content-row-left">
+                <span>Số điện thoại</span>
+              </div>
+              <div class="order-div-content-row-right row">
+                <input type="text" id="phone" value="<%= userPhone %>" required disabled>
+                <div class="order-div-content-row-right-btns row">
+                  <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
+                  <a href="#" onclick="return false" title="Lưu"><i class="fa-regular fa-circle-check"></i></a>
+                </div>
+              </div>
+            </div>
+            <div class="order-div-content-row row">
+              <div class="order-div-content-row-left">
+                <span>Địa chỉ</span>
+              </div>
+              <div class="order-div-content-row-right row">
+                <input type="text" id="address" value="<%= userAddress %>" required disabled>
+                <div class="order-div-content-row-right-btns row">
+                  <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
+                  <a href="#" onclick="return false" title="Lưu"><i class="fa-regular fa-circle-check"></i></a>
+                </div>
+              </div>
+            </div>
+            <script>
+              $('.order-div-content-row-right-btns a:first-of-type').click(function () {
+                $(this).parents()[1].getElementsByTagName('input')[0].disabled = false;
+                $(this).parents()[0].getElementsByTagName('a')[1].style.display = 'block'
+              });
+              $('.order-div-content-row-right-btns a:last-of-type').click(function () {
+                $(this).parents()[1].getElementsByTagName('input')[0].disabled = true;
+                $(this).parents()[0].getElementsByTagName('a')[1].style.display = 'none'
+              });
+            </script>
+          </div>
+        </div>
+        <div class="order-div">
+          <div class="order-div-title">
+            <h2>Thông tin đơn hàng</h2>
+          </div>
+          <div class="order-div-content table-ctn">
+            <div class="cart-ctn">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 150px;">Hình ảnh</th>
+                    <th style="width: 320px;">Tên sản phẩm</th>
+                    <th style="width: 150px;">Đơn giá</th>
+                    <th>Size</th>
+                    <th style="width: 150px;">Số lượng</th>
+                    <th style="width: 150px;">Số tiền</th>
+                  </tr>
+                </thead>
+                <tbody id="table-body">
+                  <tr>
+                    <td class="thumbnail-ctn">
+                      <a href="/product/<%= productId %>">
+                        <img src="<%= productThumb %>" alt="">
+                      </a>
+                    </td>
+                    <td class="name-ctn">
+                      <a href="/product/<%= productId %>">
+                        <span id="<%= productId %>"><%= productName %></span>
+                      </a>
+                    </td>
+                    <td class="price-ctn">
+                      <span data-price="<%= productPrice %>"><%= new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(productPrice) %></span>
+                    </td>
+                    <td class="size-ctn">
+                      <span data-sizeid="<%= sizeId %>"><%= size %></span>
+                    </td>
+                    <td class="quantity-ctn">
+                      <span data-quantity="<%= quantity %>"><%= quantity %></span>
+                    </td>
+                    <td class="total-ctn">
+                      <span data-total="<%= productPrice * quantity %>"><%= new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(productPrice * quantity) %></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="order-div">
+          <div class="order-div-title">
+            <h2>Thông tin thanh toán</h2>
+          </div>
+          <div class="order-div-content">
+            <div class="order-div-content-row">
+              <input type="radio" name="checkout-method" id="regular-method" value="regular" checked>
+              <label for="regular-method">Thanh toán khi nhận hàng</label>
+            </div>
+            <div class="order-div-content-row">
+              <input type="radio" name="checkout-method" id="momo-method" value="momo" disabled>
+              <label for="momo-method">Thanh toán qua ví Momo</label>
+            </div>
+          </div>
+        </div>
+        <div class="order-div">
+          <div class="order-div-title">
+            <h2>Thành tiền</h2>
+          </div>
+          <div class="order-div-content">
+            <div class="checkout-cart-ctn">
+              <div class="checkout-cart">
+                <div class="checkout-cart-div">
+                  <div class="checkout-cart-row row">
+                    <span>Tổng tiền hàng</span>
+                    <span id="price-total"><%= new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(productPrice * quantity) %></span>
+                  </div>
+                </div>
+                <div class="checkout-cart-div">
+                  <div class="checkout-cart-row row">
+                    <span>Phí Ship</span>
+                    <span id="ship-price" data-ship="0">0 ₫</span>
+                  </div>
+                </div>
+                <div class="checkout-cart-div">
+                  <div class="checkout-cart-row row">
+                    <span>Tổng cộng</span>
+                    <span id="grand-total"><%= new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(productPrice * quantity) %></span>
+                  </div>
+                </div>
+              </div>
+              <div class="checkout-cart-btn">
+                <a href="#" onclick="return false">
+                  <button>Thanh toán</button>
+                </a>
+              </div>
+              <script>
+                $('.checkout-cart-btn a').on('click', function () {
+                  $.ajax({
+                    type: 'POST',
+                    url: window.location.pathname,
+                    data: {
+                      'userName': $('#name').val(),
+                      'userPhone': $('#phone').val(),
+                      'userAddress': $('#address').val(),
+                      'sizeId': $('.size-ctn span').data('sizeid'),
+                      'quantity': $('.quantity-ctn span').data('quantity')
+                    },
+                    success: function (data) {
+                      console.log(data);
+                      if (data.success) {
+                        alert('Đặt hàng thành công. Bạn có thể theo dõi đơn hàng trong cài đặt tài khoản');
+                        return window.location.href = '/';
+                      }
+                      switch (data.code) {
+                        case 'not-infor':
+                          alert('Đã có lỗi xảy ra: Bạn cần nhập đủ thông tin cá nhân');
+                          break;
+                        case 'not-enough':
+                          alert('Đã có lỗi xảy ra: Số hàng trong kho không đủ');
+                          break;
+                        default:
+                          alert('Đã có lỗi xảy ra');
+                      }
+                    },
+                    error: function (data) {
+                      console.log(data);
+                      alert('Đã có lỗi xảy ra');
+                    }
+                  });
+                });
+              </script>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('layouts/footer') %>
+
+  <%- include('layouts/script') %>
+</body>
+
+</html>

@@ -66,7 +66,16 @@ function addProduct(req, res) {
   req.body.quantity = parseInt(req.body.quantity);
 
   const cartId = getCartId(req.cookies['x-access-token']);
-  connection.query('INSERT INTO Cart_has_Product (cart_id, product_id, size_id, quantity) values (?,?,?,?)',
+  connection.query('SELECT quantity FROM Carts WHERE cart_id=?', [cartId], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+    if (results[0].quantity + req.body.quantity > 30) {
+      return res.json({ success: 0, code: 'max-in-cart', max: 30 });
+    }
+
+    connection.query('INSERT INTO Cart_has_Product (cart_id, product_id, size_id, quantity) values (?,?,?,?)',
     [cartId, req.body.productId, req.body.sizeId, req.body.quantity], (err, results) => {
       if (err) {
         console.log(err);
@@ -75,6 +84,7 @@ function addProduct(req, res) {
 
       res.json({ success: 1 });
     });
+  });
 }
 
 /**
@@ -102,6 +112,10 @@ function updateCart(req, res) {
     req.body.list[i].sizeId = parseInt(req.body.list[i].sizeId);
     req.body.list[i].quantity = parseInt(req.body.list[i].quantity);
     if (req.body.list[i].quantity < 1) { return res.status(400).json({ success: 0 }); }
+  }
+
+  if (req.body.list.length > 30) {
+    return res.json({ success: 0, code: 'max-in-cart', max: 30 });
   }
 
   const cartId = getCartId(req.cookies['x-access-token']);

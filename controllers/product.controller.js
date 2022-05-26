@@ -20,6 +20,15 @@ function getProductById(productId, callback) {
   });
 }
 
+function getProductByIdForCheckout(productId, callback) {
+  connection.query('SELECT name, price, thumbnail FROM Products WHERE product_id=?', [productId], (err, results) => {
+    if (err) {
+      return callback(err, null);
+    }
+    callback(null, results[0]);
+  });
+}
+
 /**
  * categoryId : param
  * category : body
@@ -344,6 +353,7 @@ function insertUserRating(req, res) {
 
 module.exports = {
   getProductById,
+  getProductByIdForCheckout,
   getProductsByCategory,
   getAllCategories,
   getAllProductClasses,

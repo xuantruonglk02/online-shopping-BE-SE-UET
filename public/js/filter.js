@@ -1,5 +1,3 @@
-const params = new URLSearchParams(window.location.search);
-
 $(document).ready(() => {
   if (params.get('minPrice')) $('#minPrice').val(params.get('minPrice'));
   if (params.get('maxPrice')) $('#maxPrice').val(params.get('maxPrice'));

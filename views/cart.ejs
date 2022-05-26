@@ -105,23 +105,29 @@
               let sizeIds = Array.from($('.size-ctn select')).map(e => e.value);
               let quantities = Array.from($('.quantity-ctn input')).map(e => e.value);
 
-              let data = [];
+              let list = [];
               for (let i = 0; i < productIds.length; i++) {
-                data.push({ productId: productIds[i], sizeId: sizeIds[i], quantity: quantities[i] });
+                list.push({ productId: productIds[i], sizeId: sizeIds[i], quantity: quantities[i] });
               }
 
               $.ajax({
                 type: 'POST',
                 url: '/cart/update',
                 data: {
-                  'list': JSON.stringify(data)
+                  'list': JSON.stringify(list)
                 },
                 success: function (data) {
-                  console.log(data);
                   if (data.success) {
+                    $('#cart-number').text(list.length);
                     alert('Thành công');
                   } else {
-                    alert('Đã có lỗi xảy ra');
+                    switch (data.code) {
+                      case 'max-in-cart':
+                        alert('Số sản phẩm trong giỏ không được vượt quá ' + data.max);
+                        break;
+                      default:
+                        alert('Đã có lỗi xảy ra');
+                    }
                   }
                 },
                 error: function (data) {
@@ -158,7 +164,9 @@
           </div>
         </div>
         <div class="checkout-cart-btn">
-          <button>Thanh toán</button>
+          <a href="/checkout">
+            <button>Đặt hàng</button>
+          </a>
         </div>
       </div>
     </div>

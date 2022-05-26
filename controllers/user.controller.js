@@ -15,8 +15,7 @@ function getCartId(token) {
 }
 
 function getUserInformation(req, res) {
-  const userId = getUserId(req.headers['x-access-token']);
-
+  const userId = getUserId(req.cookies['x-access-token']);
   connection.query('SELECT name, phone, email, address FROM Users WHERE user_id=?', [userId], (err, results) => {
     if (err) {
       console.log(err);
@@ -24,6 +23,16 @@ function getUserInformation(req, res) {
     }
 
     res.json(results[0]);
+  });
+}
+
+function getUserInformationForCheckout(req, callback) {
+  const userId = getUserId(req.cookies['x-access-token']);
+  connection.query('SELECT name, phone, address FROM Users WHERE user_id=?', [userId], (err, results) => {
+    if (err) {
+      return callback(err, null);
+    }
+    callback(null, results[0]);
   });
 }
 
@@ -36,7 +45,7 @@ function changeName(req, res) {
     return res.json({ success: 0 });
   }
 
-  const userId = getUserId(req.headers['x-access-token']);
+  const userId = getUserId(req.cookies['x-access-token']);
 
   connection.query('SELECT password FROM Users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
@@ -72,7 +81,7 @@ function changeEmail(req, res) {
     return res.json({ success: 0, msg: 'Email không hợp lệ' });
   }
 
-  const userId = getUserId(req.headers['x-access-token']);
+  const userId = getUserId(req.cookies['x-access-token']);
 
   connection.query('SELECT password FROM Users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
@@ -119,7 +128,7 @@ function changePhone(req, res) {
     return res.json({ success: 0, msg: 'Số điện thoại không hợp lệ' });
   }
 
-  const userId = getUserId(req.headers['x-access-token']);
+  const userId = getUserId(req.cookies['x-access-token']);
 
   connection.query('SELECT password FROM Users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
@@ -163,7 +172,7 @@ function changePhone(req, res) {
     return res.json({ success: 0 });
   }
 
-  const userId = getUserId(req.headers['x-access-token']);
+  const userId = getUserId(req.cookies['x-access-token']);
 
   connection.query('SELECT password FROM Users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
@@ -196,7 +205,7 @@ function changePassword(req, res) {
     return res.json({ success: 0 });
   }
 
-  const userId = getUserId(req.headers['x-access-token']);
+  const userId = getUserId(req.cookies['x-access-token']);
   connection.query('SELECT password FROM Users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
       console.log(err);
@@ -230,6 +239,7 @@ module.exports = {
   getUserId,
   getCartId,
   getUserInformation,
+  getUserInformationForCheckout,
   changeName,
   changeEmail,
   changePhone,
