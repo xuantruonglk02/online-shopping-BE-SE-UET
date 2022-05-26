@@ -20,12 +20,27 @@ function getProductById(productId, callback) {
   });
 }
 
-function getProductByIdForCheckout(productId, callback) {
-  connection.query('SELECT name, price, thumbnail FROM Products WHERE product_id=?', [productId], (err, results) => {
+/**
+ * list : body : []
+ */
+function getProductsForCheckout(req, res) {
+  if (!req.body.list) { return res.json({ success: 0 }); }
+  try {
+    req.body.list = JSON.parse(req.body.list);
+  } catch (err) {
+    console.log(err);
+    return res.json({ success: 0 });
+  }
+  if (!(req.body.list instanceof Array) || !req.body.list.length) {
+    return res.json({ success: 0 });
+  }
+
+  let query = 'SELECT product_id, name, price, thumbnail FROM Products WHERE ' + 'product_id=? OR '.repeat(req.body.list.length).slice(0,-4);
+  connection.query(query, req.body.list, (err, results) => {
     if (err) {
-      return callback(err, null);
+      return res.json({ success: 0 });
     }
-    callback(null, results[0]);
+    res.json({ success: 1, results: results });
   });
 }
 
@@ -353,7 +368,7 @@ function insertUserRating(req, res) {
 
 module.exports = {
   getProductById,
-  getProductByIdForCheckout,
+  getProductsForCheckout,
   getProductsByCategory,
   getAllCategories,
   getAllProductClasses,

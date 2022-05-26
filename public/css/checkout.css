@@ -111,10 +111,10 @@
 }
 
 .checkout-cart-ctn {
-  margin-top: 50px;
+  margin-top: 30px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .checkout-cart {

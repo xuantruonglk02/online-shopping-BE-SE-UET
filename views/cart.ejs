@@ -16,6 +16,7 @@
         <table class="table">
           <thead>
             <tr>
+              <th><input type="checkbox" id="select-all"></th>
               <th style="width: 150px;">Hình ảnh</th>
               <th style="width: 320px;">Tên sản phẩm</th>
               <th style="width: 150px;">Đơn giá</th>
@@ -27,18 +28,42 @@
           </thead>
           <tbody id="table-body"></tbody>
           <script>
+            $(document).on('mouseover', '.checkbox-ctn', function () {
+              $(this).parents()[0].style.backgroundColor = '#f5f5f5';
+            });
+            $(document).on('mouseout', '.checkbox-ctn', function () {
+              $(this).parents()[0].style.backgroundColor = 'white';
+            });
+
+            $(document).on('click', '.checkbox-ctn input', function () {
+              $(this).prop('checked', !$(this).prop('checked'));
+              if (!$(this).prop('checked')) $('th input').prop('checked', false);
+              grandTotal();
+            });
+            $(document).on('click', '.checkbox-ctn', function () {
+              $(this).find('input').prop('checked', !$(this).find('input').prop('checked'));
+              if (!$(this).find('input').prop('checked')) $('th input').prop('checked', false);
+              grandTotal();
+            });
+
+            $('th input').on('click', function () {
+              $('.checkbox-ctn input').prop('checked', $('th input').prop('checked'));
+              grandTotal();
+            });
+
             $(document).on('click', '.quantity-input-ctn a',  function () {
               let parentTr = $(this).parents()[3];
               if ($(this).hasClass('quantity-modify-desc')) {
-                if (parseInt(parentTr.getElementsByTagName('input')[0].value) > 1) {
-                  parentTr.getElementsByTagName('input')[0].value = parseInt(parentTr.getElementsByTagName('input')[0].value) - 1;
+                if (parseInt(parentTr.getElementsByTagName('input')[1].value) > 1) {
+                  parentTr.getElementsByTagName('input')[1].value = parseInt(parentTr.getElementsByTagName('input')[1].value) - 1;
                 }
               } else {
-                if (parseInt(parentTr.getElementsByTagName('input')[0].value) < parseInt(parentTr.getElementsByTagName('select')[0].options[parentTr.getElementsByTagName('select')[0].selectedIndex].dataset.quantity)) {
-                  parentTr.getElementsByTagName('input')[0].value = parseInt(parentTr.getElementsByTagName('input')[0].value) + 1;
+                if (parseInt(parentTr.getElementsByTagName('input')[1].value) < parseInt(parentTr.getElementsByTagName('select')[0].options[parentTr.getElementsByTagName('select')[0].selectedIndex].dataset.quantity)) {
+                  parentTr.getElementsByTagName('input')[1].value = parseInt(parentTr.getElementsByTagName('input')[1].value) + 1;
                 }
               }
-              parentTr.getElementsByTagName('span')[2].dataset.total = parentTr.getElementsByTagName('span')[1].dataset.price * parentTr.getElementsByTagName('input')[0].value;
+              parentTr.getElementsByTagName('input')[0].checked = true;
+              parentTr.getElementsByTagName('span')[2].dataset.total = parentTr.getElementsByTagName('span')[1].dataset.price * parentTr.getElementsByTagName('input')[1].value;
               parentTr.getElementsByTagName('span')[2].innerText = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(parentTr.getElementsByTagName('span')[2].dataset.total);
 
               grandTotal();
@@ -46,15 +71,24 @@
 
             $(document).on('click', '.remove-ctn a', function () {
               $(this).parents()[1].remove();
-
               grandTotal();
             });
 
             function grandTotal() {
-              let total = 0;
-              Array.from($('.total-ctn span')).forEach(e => total += parseInt(e.dataset.total));
+              let total = 0, listIds = '', listSizeIds = '', listSizes = '', listQuantity = '';
+              Array.from($('#table-body tr')).forEach((e) => {
+                if (e.getElementsByTagName('input')[0].checked) {
+                  total += parseInt(e.getElementsByClassName('total-ctn')[0].getElementsByTagName('span')[0].dataset.total);
+                  listIds += 'listIds[]=' + e.getElementsByClassName('name-ctn')[0].getElementsByTagName('span')[0].id + '&';
+                  listSizeIds += 'listSizeIds[]=' + e.getElementsByTagName('select')[0].options[e.getElementsByTagName('select')[0].selectedIndex].value + '&';
+                  listSizes += 'listSizes[]=' + e.getElementsByTagName('select')[0].options[e.getElementsByTagName('select')[0].selectedIndex].text + '&';
+                  listQuantity += 'listQuantity[]=' + e.getElementsByTagName('input')[1].value + '&';
+                }
+              });
+              listQuantity = listQuantity.slice(0, -1);
               $('#price-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(total));
               $('#grand-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(total + parseInt($('#ship-price').data('ship'))))
+              $('#checkout').data('href', '/checkout?' + listIds + listSizeIds + listSizes + listQuantity);
             }
           </script>
           <script>
@@ -69,7 +103,7 @@
                   }
                   data.results.forEach(e => {
                     $('#table-body').append(
-                      '<tr><td class="thumbnail-ctn"><a href="/product/' + e.product_id + '">'
+                      '<tr><td class="checkbox-ctn"><input type="checkbox"></td><td class="thumbnail-ctn"><a href="/product/' + e.product_id + '">'
                       + '<img src="' + e.thumbnail + '" alt=""></a></td><td class="name-ctn">'
                       + '<a href="/product/' + e.product_id + '"><span id="' + e.product_id + '">' + e.name + '</span>'
                       + '</a></td><td class="price-ctn">'
@@ -85,8 +119,6 @@
                       + '</td><td class="remove-ctn"><a href="#" onclick="return false"><i class="fa-solid fa-xmark"></i></a></td></tr>'
                     );
                   });
-
-                  grandTotal();
                 },
                 error: function (data) {
                   console.log(data);
@@ -164,9 +196,16 @@
           </div>
         </div>
         <div class="checkout-cart-btn">
-          <a href="/checkout">
-            <button>Đặt hàng</button>
-          </a>
+            <button id="checkout" data-href="/checkout">Đặt hàng</button>
+          <script>
+            $('#checkout').on('click', function (e) {
+              if ($('#checkout').data('href') == '/checkout') {
+                alert('Bạn cần chọn ít nhất một sản phẩm');
+              } else {
+                window.location.href = $('#checkout').data('href');
+              }
+            });
+          </script>
         </div>
       </div>
     </div>

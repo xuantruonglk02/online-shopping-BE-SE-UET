@@ -21,9 +21,28 @@
   text-align: left;
 }
 
+.table th input {
+  width: 20px;
+  height: 20px;
+}
+
 .table td {
   padding: 12px;
   border-top: 1px solid #dee2e6;
+}
+
+.checkbox-ctn {
+  cursor: pointer;
+}
+
+.checkbox-ctn input {
+  width: 15px;
+  height: 15px;
+}
+
+.table th input, .checkbox-ctn input {
+  cursor: pointer;
+  outline: none;
 }
 
 .thumbnail-ctn img {

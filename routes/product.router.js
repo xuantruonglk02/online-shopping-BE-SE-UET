@@ -41,6 +41,7 @@ router.post('/category/line/all', productController.getAllProductLines);
 router.post('/category/class/:classId', productController.getAllProductLinesByClass);
 router.post('/category/:categoryId', productController.getProductsByCategory);
 router.post('/search', productController.searchProductsByKeyword);
+router.post('/checkout-info', productController.getProductsForCheckout);
 router.post('/:productId/rating', productController.getAllRatingsOfProduct);
 router.post('/:productId/rate', authMiddleware.verifyTokenPOST, productController.insertUserRating);
 

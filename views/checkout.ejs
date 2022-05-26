@@ -83,32 +83,73 @@
                     <th style="width: 150px;">Số tiền</th>
                   </tr>
                 </thead>
-                <tbody id="table-body">
-                  <tr>
-                    <td class="thumbnail-ctn">
-                      <a href="/product/<%= productId %>">
-                        <img src="<%= productThumb %>" alt="">
-                      </a>
-                    </td>
-                    <td class="name-ctn">
-                      <a href="/product/<%= productId %>">
-                        <span id="<%= productId %>"><%= productName %></span>
-                      </a>
-                    </td>
-                    <td class="price-ctn">
-                      <span data-price="<%= productPrice %>"><%= new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(productPrice) %></span>
-                    </td>
-                    <td class="size-ctn">
-                      <span data-sizeid="<%= sizeId %>"><%= size %></span>
-                    </td>
-                    <td class="quantity-ctn">
-                      <span data-quantity="<%= quantity %>"><%= quantity %></span>
-                    </td>
-                    <td class="total-ctn">
-                      <span data-total="<%= productPrice * quantity %>"><%= new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(productPrice * quantity) %></span>
-                    </td>
-                  </tr>
-                </tbody>
+                <tbody id="table-body"></tbody>
+                <script>
+                  let productIds = [], sizeIds = [], sizes = [], quantities = [], list = [];
+                  let query = window.location.search.slice(1).split('&');
+                  query.forEach(e => {
+                    if (e.split('[]=')[0] == 'listIds') {
+                      productIds.push(e.split('[]=')[1]);
+                    }
+                    if (e.split('[]=')[0] == 'listSizeIds') {
+                      sizeIds.push(e.split('[]=')[1]);
+                    }
+                    if (e.split('[]=')[0] == 'listSizes') {
+                      sizes.push(e.split('[]=')[1]);
+                    }
+                    if (e.split('[]=')[0] == 'listQuantity') {
+                      quantities.push(e.split('[]=')[1]);
+                    }
+                  });
+                  for (let i = 0; i < productIds.length; i++) {
+                    list.push({
+                      'productId': productIds[i],
+                      'sizeId': sizeIds[i],
+                      'quantity': quantities[i],
+                    });
+                  }
+                </script>
+                <script>
+                  $(document).ready(() => {
+                    $.ajax({
+                      type: 'POST',
+                      url: '/product/checkout-info',
+                      data: {
+                        'list': JSON.stringify(productIds)
+                      },
+                      success: function (data) {
+                        if (data.success) {
+                          let total = 0;
+                          for (let i = 0; i < productIds.length; i++) {
+                            let product = data.results.find((value, index, array) => {
+                              return value.product_id == productIds[i];
+                            });
+                            $('#table-body').append(
+                              '<tr><td class="thumbnail-ctn"><a href="/product/' + product.product_id + '">'
+                              + '<img src="' + product.thumbnail + '" alt=""></a></td><td class="name-ctn">'
+                              + '<a href="/product/' + product.product_id + '"><span id="' + product.product_id + '">' + product.name + '</span>'
+                              + '</a></td><td class="price-ctn"><span data-price="' + product.price + '">' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(product.price) + '</span>'
+                              + '</td><td class="size-ctn"><span data-sizeid="' + sizeIds[i] + '">' + sizes[i] + '</span>'
+                              + '</td><td class="quantity-ctn"><span data-quantity="' + quantities[i] + '">' + quantities[i] + '</span>'
+                              + '</td><td class="total-ctn"><span data-total="' + product.price * quantities[i] + '">' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(product.price * quantities[i]) + '</span>'
+                              + '</td></tr>'
+                            );
+                            total += product.price * quantities[i];
+                          };
+                          $('#price-total').data('total', total);
+                          $('#price-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(total));
+                          $('#grand-total').text(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(total + parseInt($('#ship-price').data('ship'))));
+                        } else {
+                          alert('Đã có lỗi xảy ra');
+                        }
+                      },
+                      error: function (data) {
+                        console.log(data);
+                        alert('Đã có lỗi xảy ra');
+                      }
+                    });
+                  });
+                </script>
               </table>
             </div>
           </div>
@@ -138,7 +179,7 @@
                 <div class="checkout-cart-div">
                   <div class="checkout-cart-row row">
                     <span>Tổng tiền hàng</span>
-                    <span id="price-total"><%= new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(productPrice * quantity) %></span>
+                    <span id="price-total" data-total="0">0 ₫</span>
                   </div>
                 </div>
                 <div class="checkout-cart-div">
@@ -150,7 +191,7 @@
                 <div class="checkout-cart-div">
                   <div class="checkout-cart-row row">
                     <span>Tổng cộng</span>
-                    <span id="grand-total"><%= new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(productPrice * quantity) %></span>
+                    <span id="grand-total">0 ₫</span>
                   </div>
                 </div>
               </div>
@@ -168,12 +209,17 @@
                       'userName': $('#name').val(),
                       'userPhone': $('#phone').val(),
                       'userAddress': $('#address').val(),
-                      'sizeId': $('.size-ctn span').data('sizeid'),
-                      'quantity': $('.quantity-ctn span').data('quantity')
+                      'list': JSON.stringify(list)
                     },
                     success: function (data) {
-                      console.log(data);
                       if (data.success) {
+                        $.ajax({
+                          type: 'POST',
+                          url: '/cart/remove-more',
+                          data: {
+                            'list': JSON.stringify(list)
+                          }
+                        });
                         alert('Đặt hàng thành công. Bạn có thể theo dõi đơn hàng trong cài đặt tài khoản');
                         return window.location.href = '/';
                       }

@@ -160,16 +160,17 @@ function updateCart(req, res) {
 
 /**
  * productId : body
+ * sizeId : body
  */
 function removeProduct(req, res) {
-  if (!req.body.productId) {
+  if (!req.body.productId || !req.body.sizeId) {
     return res.json({ success: 0 });
   }
 
   const cartId = getCartId(req.cookies['x-access-token']);
 
-  connection.query('DELETE FROM Cart_has_Product WHERE cart_id=? AND product_id=?',
-    [cartId, req.body.productId], (err, results) => {
+  connection.query('DELETE FROM Cart_has_Product WHERE cart_id=? AND product_id=? AND size_id=?',
+    [cartId, req.body.productId, req.body.sizeId], (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -179,11 +180,46 @@ function removeProduct(req, res) {
     });
 }
 
+/**
+ * list : body : [productId,sizeId]
+ */
+ function removeProducts(req, res) {
+  if (!req.body.list) {
+    return res.json({ success: 0 });
+  }
+  try {
+    req.body.list = JSON.parse(req.body.list);
+  } catch (err) {
+    console.log(err);
+    return res.json({ success: 0 });
+  }
+  if (!req.body.list.length) { return res.json({ success: 0 }); }
+  for (let i = 0; i < req.body.list.length; i++) {
+    if (!req.body.list[i].productId || !req.body.list[i].sizeId) {
+      return res.json({ success: 0 });
+    }
+  }
+
+  let query = 'DELETE FROM Cart_has_Product WHERE cart_id=? AND ('
+    + '(product_id=? AND size_id=?) OR '.repeat(req.body.list.length).slice(0, -4) + ')';
+  let params = req.body.list.reduce((p, c) => p.concat([c.productId, c.sizeId]), []);
+  const cartId = getCartId(req.cookies['x-access-token']);
+  connection.query(query, [cartId].concat(params), (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+    
+    res.json({ success: 1 });
+  });
+}
+
 module.exports = {
   getQuantityOfProducts,
   getAllProductsForCartMenu,
   getAllProducts,
   addProduct,
   updateCart,
-  removeProduct
+  removeProduct,
+  removeProducts
 }

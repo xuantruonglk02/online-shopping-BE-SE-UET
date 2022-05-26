@@ -29,7 +29,7 @@
           </script>
         </div>
         <div class="product-content-right">
-          <div class="c">
+          <div class="">
             <h1><%= product.name %></h1>
           </div>
           <div class="product-rating">
@@ -74,18 +74,18 @@
                 $('#quantity-input').attr('max', parseInt($('#size-select :selected').data().quantity));
                 $('#quantity-input').val(1);
                 $('#quantity-title').text('Số Lượng: còn ' + $('#size-select :selected').data().quantity);
-                $('#checkout').attr('href', (window.location.href + '?sizeId=' + $('#size-select').val() + '&size=' + $('#size-select option:selected').text() + '&quantity=' + $('#quantity-input').val()).replace('product', 'checkout'));
+                $('#checkout').attr('href', window.location.origin + '/checkout' + '?listIds[]=' + window.location.pathname.split('/')[2] + '&listSizeIds[]=' + $('#size-select').val() + '&listSizes[]=' + $('#size-select option:selected').text() + '&listQuantity[]=' + $('#quantity-input').val());
               });
               $('#quantity-modify-desc').on('click', function () {
                 if ($('#quantity-input').val() > 1) {
                   $('#quantity-input').val(parseInt($('#quantity-input').val()) - 1);
-                  $('#checkout').attr('href', (window.location.href + '?sizeId=' + $('#size-select').val() + '&size=' + $('#size-select option:selected').text() + '&quantity=' + $('#quantity-input').val()).replace('product', 'checkout'));
+                  $('#checkout').attr('href', window.location.origin + '/checkout' + '?listIds[]=' + window.location.pathname.split('/')[2] + '&listSizeIds[]=' + $('#size-select').val() + '&listSizes[]=' + $('#size-select option:selected').text() + '&listQuantity[]=' + $('#quantity-input').val());
                 }
               });
               $('#quantity-modify-asc').on('click', function () {
                 if ($('#quantity-input').val() < $('#size-select :selected').data().quantity) {
                   $('#quantity-input').val(parseInt($('#quantity-input').val()) + 1);
-                  $('#checkout').attr('href', (window.location.href + '?sizeId=' + $('#size-select').val() + '&size=' + $('#size-select option:selected').text() + '&quantity=' + $('#quantity-input').val()).replace('product', 'checkout'));
+                  $('#checkout').attr('href', window.location.origin + '/checkout' + '?listIds[]=' + window.location.pathname.split('/')[2] + '&listSizeIds[]=' + $('#size-select').val() + '&listSizes[]=' + $('#size-select option:selected').text() + '&listQuantity[]=' + $('#quantity-input').val());
                 }
               });
             </script>
@@ -94,12 +94,12 @@
             <a id="add-to-cart" href="#" onclick="return false">
               <div><i class="fa-solid fa-cart-shopping"></i>Thêm vào giỏ hàng</div>
             </a>
-            <a id="checkout" href="/checkout/<%= product.product_id %>">
+            <a id="checkout" href="/checkout">
               <div>Mua ngay</div>
             </a>
             <script>
               $(document).ready(() => {
-                $('#checkout').attr('href', (window.location.href + '?sizeId=' + $('#size-select').val() + '&size=' + $('#size-select option:selected').text() + '&quantity=' + $('#quantity-input').val()).replace('product', 'checkout'));
+                $('#checkout').attr('href', window.location.origin + '/checkout' + '?listIds[]=' + window.location.pathname.split('/')[2] + '&listSizeIds[]=' + $('#size-select').val() + '&listSizes[]=' + $('#size-select option:selected').text() + '&listQuantity[]=' + $('#quantity-input').val());
               });
               $('#add-to-cart').on('click', function () {
                 $.ajax({

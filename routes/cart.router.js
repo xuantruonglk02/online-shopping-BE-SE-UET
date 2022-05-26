@@ -15,5 +15,6 @@ router.post('/all', authMiddleware.verifyTokenPOST, cartController.getAllProduct
 router.post('/add', authMiddleware.verifyTokenPOST, cartController.addProduct);
 router.post('/update', authMiddleware.verifyTokenPOST, cartController.updateCart);
 router.post('/remove', authMiddleware.verifyTokenPOST, cartController.removeProduct);
+router.post('/remove-more', authMiddleware.verifyTokenPOST, cartController.removeProducts);
 
 module.exports = router;
