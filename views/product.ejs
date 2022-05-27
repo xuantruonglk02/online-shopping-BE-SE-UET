@@ -178,7 +178,7 @@
             <% for (let i = 0; i < 5 - roundRating; i++) { %>
               <i class="fa-solid fa-star"></i>
             <% } %>
-            <span><%= product.rating %> trên 5</span>
+            <span><%= product.rating == null ? 'Chưa có đánh giá' : product.rating + ' trên 5' %></span>
           </div>
         </div>
         <div class="product-rating-content" id="product-rating-content">
