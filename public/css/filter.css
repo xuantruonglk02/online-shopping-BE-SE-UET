@@ -61,6 +61,11 @@
   background-color: black;
   padding: 10px;
   cursor: pointer;
+  outline: none;
+  border: none;
+}
+.price-filter-submit button:hover {
+  background-color: #d33b33;
 }
 
 .rating-filter-option {
@@ -103,9 +108,13 @@
   user-select: none;
   cursor: pointer;
 }
+.products-sort-option:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+}
 
 .selected {
-  background-color: black;
+  background-color: black !important;
 }
 
 .selected span {

@@ -44,6 +44,7 @@ $(document).ready(() => {
   }
 
   $('.products-sort-option').click(function() {
+    if ($(this).hasClass('selected')) return;
     window.location.href = removeParam('orderBy', removeParam('page', window.location.href)) + '&page=1&orderBy=' + $(this).data().order;
   });
   $('.products-sort-selection').change(function () {
