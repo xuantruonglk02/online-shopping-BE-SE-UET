@@ -31,7 +31,33 @@
         
         <%- include('cart-menu') %>
         
-        <li><a href="/user/account"><i class="header-icon fa-solid fa-circle-user"></i></a></li>
+        <li class="hd-account-icon-ctn dropdown">
+          <a href="#" onclick="return false"><i class="header-icon fa-solid fa-circle-user"></i></a>
+          <ul class="dropdown-menu user-dropdown" role="menu">
+            <li>
+              <div class="user-menu-ctn">
+                <div class="user-menu">
+                  <div class="account-menu-row">
+                    <a href="/user/account"><div>Thông tin tài khoản</div></a>
+                  </div>
+                  <div class="account-menu-row">
+                    <a href="/user/orders"><div>Đơn hàng đã đặt</div></a>
+                  </div>
+                  <div class="account-menu-row">
+                    <a href="/auth/logout"><div>Đăng xuất</div></a>
+                  </div>
+                </div>
+              </div>      
+            </li>
+          </ul>
+        </li>
+        <script>
+          $('.hd-account-icon-ctn.dropdown').on('click', function (e) {
+            if ($('#cart-number').text() == '') {
+              window.location.href = '/auth/login';
+            }
+          });
+        </script>
       </ul>
     </div>
   </div>

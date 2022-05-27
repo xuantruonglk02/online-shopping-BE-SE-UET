@@ -279,11 +279,11 @@ a {
   border-left: none;
 }
 
-.cart-dropdown {
+.user-dropdown {
   right: 20px;
 }
 
-.cart-menu {
+.user-menu {
   min-width: 250px;
   margin: 20px 0 10px 0;
 }
@@ -338,6 +338,23 @@ a {
 }
 .view-cart-btn:hover {
   background-color: #d33b33;
+}
+
+.hd-account-icon-ctn .user-menu {
+  margin: 0;
+}
+
+.account-menu-row div {
+  font-size: 20px;
+  padding: 10px 20px 10px 20px;
+}
+.account-menu-row:not(:first-of-type) {
+  border-top: 1px solid rgb(224, 224, 224);
+}
+
+.account-menu-row div:hover {
+  background-color: #F5F5F5;
+  color: #d33b33;
 }
 
 .slides-ctn {

@@ -17,9 +17,10 @@ $(document).ready(function () {
 
   $('html').click(function () {
     hideDropdownMenu($('.hd-cart-icon-ctn.dropdown .dropdown-menu'));
+    hideDropdownMenu($('.hd-account-icon-ctn.dropdown .dropdown-menu'));
   });
 
-  $('.dropdown-menu.cart-dropdown').click(function (e) {
+  $('.dropdown-menu.user-dropdown').click(function (e) {
     e.stopPropagation();
   });
 
@@ -30,6 +31,16 @@ $(document).ready(function () {
     } else {
       hideDropdownMenu($(this).find('.dropdown-menu'));
     }
+    hideDropdownMenu($('.hd-account-icon-ctn.dropdown .dropdown-menu'));
+  });
+  $('.hd-account-icon-ctn.dropdown').click(function (e) {
+    if ($(this).find('.dropdown-menu').css('display') == 'none') {
+      e.stopPropagation();
+      showDropdownMenu($(this).find('.dropdown-menu'));
+    } else {
+      hideDropdownMenu($(this).find('.dropdown-menu'));
+    }
+    hideDropdownMenu($('.hd-cart-icon-ctn.dropdown .dropdown-menu'));
   });
 });
 

@@ -13,6 +13,10 @@ router.get('/signup/register-email', (req, res) => {
 router.get('/signup/create-account', (req, res) => {
   res.render('signup-account', { title: 'Tạo tài khoản' });
 });
+router.get('/logout', (req, res) => {
+  res.clearCookie('x-access-token');
+  res.redirect('/');
+});
 router.get('/forget-password', (req, res) => {
   res.render('auth-forget', { title: 'Quên mật khẩu' });
 });
