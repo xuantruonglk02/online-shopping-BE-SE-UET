@@ -3,6 +3,10 @@
 
 <head>
   <%- include('layouts/head') %>
+
+  <link rel="stylesheet" href="/css/product.css">
+
+  <script src="/js/auth-script.js"></script>
 </head>
 
 <body>
@@ -33,11 +37,12 @@
             <h1><%= product.name %></h1>
           </div>
           <div class="product-rating">
-            <% product.rating == null ? product.rating = 0 : product.rating = parseInt(product.rating) %>
-            <% for (let i = 0; i < product.rating; i++) { %>
+            <% let roundRating = product.rating %>
+            <% roundRating == null ? roundRating = 0 : roundRating = parseInt(roundRating) %>
+            <% for (let i = 0; i < roundRating; i++) { %>
               <i class="fa-solid fa-star checked"></i>
             <% } %>
-            <% for (let i = 0; i < 5 - product.rating; i++) { %>
+            <% for (let i = 0; i < 5 - roundRating; i++) { %>
               <i class="fa-solid fa-star"></i>
             <% } %>
             <span>(<%= product.quantity_of_rating %> đánh giá)</span>
@@ -128,6 +133,7 @@
                     }
                   },
                   error: function (data) {
+                    console.log(data);
                     if (data.status == 401) {
                       window.location.href = data.responseJSON.redirect;
                     } 
@@ -160,25 +166,149 @@
           <% } %>
         </div>
       </div>
-      <div class="product-rating">
-        <div class="container">
-          <p class="page-title">Khách hàng đánh giá</p>
+    </div>
+    <div class="container">
+      <div class="product-ratings-ctn">
+        <div class="container-title row">
+          <h2>Đánh giá sản phẩm</h2>
+          <div class="rating-average-ctn">
+            <% for (let i = 0; i < roundRating; i++) { %>
+              <i class="fa-solid fa-star checked"></i>
+            <% } %>
+            <% for (let i = 0; i < 5 - roundRating; i++) { %>
+              <i class="fa-solid fa-star"></i>
+            <% } %>
+            <span><%= product.rating %> trên 5</span>
+          </div>
         </div>
-        <div class="stars">
-          <form action="">
-            <input class="star star-5" id="star-5" type="radio" name="star" />
-            <label class="star star-5" for="star-5"></label>
-            <input class="star star-4" id="star-4" type="radio" name="star" />
-            <label class="star star-4" for="star-4"></label>
-            <input class="star star-3" id="star-3" type="radio" name="star" />
-            <label class="star star-3" for="star-3"></label>
-            <input class="star star-2" id="star-2" type="radio" name="star" />
-            <label class="star star-2" for="star-2"></label>
-            <input class="star star-1" id="star-1" type="radio" name="star" />
-            <label class="star star-1" for="star-1"></label>
-          </form>
+        <div class="product-rating-content" id="product-rating-content">
+          <% if (bought) { %>
+            <div class="product-rating-form" id="product-rating-form">
+              <div class="product-rating-form-title">
+                <h3>Đánh giá của tôi</h3>
+              </div>
+              <form id="rating-form">
+                <div class="form-comment-ctn">
+                  <textarea id="comment" required></textarea>
+                </div>
+                <div class="form-star-ctn">
+                  <i class="fa-solid fa-star" data-star="1"></i>
+                  <i class="fa-solid fa-star" data-star="2"></i>
+                  <i class="fa-solid fa-star" data-star="3"></i>
+                  <i class="fa-solid fa-star" data-star="4"></i>
+                  <i class="fa-solid fa-star" data-star="5"></i>
+                  <input type="number" id="star" required>
+                  <script>
+                    $('.form-star-ctn i').hover(function () {
+                      let star = $(this).data('star');
+                      for (let i = 0; i < star; i++) {
+                        $('.form-star-ctn i:eq(' + i + ')').addClass('star-hover');
+                      }
+                    }, function () {
+                      $('.form-star-ctn i').removeClass('star-hover');
+                    });
+                    $('.form-star-ctn i').click(function () {
+                      $('.form-star-ctn i').removeClass('checked');
+                      let star = $(this).data('star');
+                      $('#star').val(star);
+                      for (let i = 0; i < star; i++) {
+                        $('.form-star-ctn i:eq(' + i + ')').addClass('checked');
+                      }
+                    });
+                  </script>
+                </div>
+                <div class="form-submit-ctn relative">
+                  <input type="submit" value="Gửi nhận xét" id="submit-btn" data-enable="1">
+                  <div class="loader" id="submit-loader" style="right: 5px;"></div>
+                </div>
+                <script>
+                  $(document).ready(() => {
+                    $('#rating-form').submit(function (e) {submitForm(e)});
+                  });
+            
+                  function submitForm(e) {
+                    if ($('#submit-btn').data('enable') == '0')  {
+                      return;
+                    }
+                    e.preventDefault();
+                    $('#rating-form').submit(false);
+                    ajaxStart();
+                    $.ajax({
+                      type: 'POST',
+                      url: window.location.pathname + '/rate',
+                      data: {
+                        'star': $('#star').val(),
+                        'comment': $('#comment').val(),
+                        'urls': '[]'
+                      },
+                      success: function (data) {
+                        ajaxStop();
+                        if (data.success) {
+                          ajaxSuccess();
+                          $('#product-rating-form').append(
+                            '<div class="product-rating row"><div class="product-rating-left"><div class="user-avt-ctn">'
+                            + '<img src="/images/avatars/default.jpg" alt=""></div></div><div class="product-rating-right">'
+                            + '<div class="product-rating-right-top row"><div class="user-name-ctn"><span>Tôi</span>'
+                            + '</div><div class="product-rating-time-ctn"><span>' + new Date().toLocaleString('vi-VI') + '</span></div></div>'
+                            + '<div class="product-rating-right-star"><div class="product-star-ctn">'
+                            + '<i class="fa-solid fa-star checked"></i>'.repeat($('#star').val()) + '<i class="fa-solid fa-star"></i>'.repeat(5 - $('#star').val())
+                            + '</div></div><div class="product-rating-right-comment"><div class="product-rating-comment-ctn">'
+                            + '<p>' + $('#comment').val() + '</p></div></div></div></div>'
+                          );
+                          $('#rating-form').remove();
+                          $('.product-rating-none').remove();
+                        } else {
+                          $('#rating-form').submit(function (e) {submitForm(e)});
+                          alert('Đã có lỗi xảy ra. Vui lòng thử lại sau');
+                        }
+                      },
+                      error: function (data) {
+                        console.log(data);
+                        $('#rating-form').submit(function (e) {submitForm(e)});
+                        ajaxStop();
+                        alert('Đã có lỗi xảy ra. Vui lòng thử lại sau');
+                      }
+                    });
+                  }
+                </script>
+              </form>
+            </div>
+          <% } %>
         </div>
-        <link rel='stylesheet prefetch' href='https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css'>
+        <script>
+          $(document).ready(() => {
+            $.ajax({
+              type: 'POST',
+              url: window.location.pathname + '/rating',
+              success: function (data) {
+                if (data.success) {
+                  if (data.results.length == 0) $('#product-rating-content').append('<div class="product-rating product-rating-none"><span>Sản phẩm này chưa có đánh giá nào</span></div>');
+                  data.results.forEach(e => {
+                    let id;
+                    if (data.userId == e.user_id) {
+                      id = 'product-rating-form';
+                      $('#rating-form').remove();
+                    }
+                    else id = 'product-rating-content';
+                    $('#' + id).append(
+                      '<div class="product-rating row"><div class="product-rating-left"><div class="user-avt-ctn">'
+                      + '<img src="/images/avatars/default.jpg" alt=""></div></div><div class="product-rating-right">'
+                      + '<div class="product-rating-right-top row"><div class="user-name-ctn"><span>' + e.name + '</span>'
+                      + '</div><div class="product-rating-time-ctn"><span>' + new Date(e.create_at).toLocaleString('vi-VI') + '</span></div></div>'
+                      + '<div class="product-rating-right-star"><div class="product-star-ctn">'
+                      + '<i class="fa-solid fa-star checked"></i>'.repeat(e.star) + '<i class="fa-solid fa-star"></i>'.repeat(5 - e.star)
+                      + '</div></div><div class="product-rating-right-comment"><div class="product-rating-comment-ctn">'
+                      + '<p>' + e.comment + '</p></div></div></div></div>'
+                    );
+                  });
+                }
+              },
+              error: function (data) {
+                console.log(data);
+              }
+            });
+          });
+        </script>
       </div>
     </div>
   </div>

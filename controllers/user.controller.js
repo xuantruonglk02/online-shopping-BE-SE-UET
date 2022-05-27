@@ -5,13 +5,21 @@ const validator = require('validator');
 const { connection } = require('../models/database');
 
 function getUserId(token) {
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  return decoded.userId;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded.userId;
+  } catch (err) {
+    return null;
+  }
 }
 
 function getCartId(token) {
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  return decoded.cartId;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded.cartId;
+  } catch (err) {
+    return null;
+  }
 }
 
 function getUserInformation(req, callback) {

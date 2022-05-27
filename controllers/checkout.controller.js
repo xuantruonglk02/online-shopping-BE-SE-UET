@@ -46,14 +46,14 @@ function checkout(req, res) {
       }
     
       const userId = getUserId(req.cookies['x-access-token']);
-      connection.query('INSERT INTO Bills (user_id, user_name, user_phone, user_address) VALUES (?,?,?,?)',
-        [userId, req.body.userName, req.body.userPhone, req.body.userAddress], (err, results) => {
+      const billId = new Date().getTime();
+      connection.query('INSERT INTO Bills (bill_id, user_id, user_name, user_phone, user_address) VALUES (?,?,?,?,?)',
+        [billId, userId, req.body.userName, req.body.userPhone, req.body.userAddress], (err, results) => {
           if (err) {
             console.log(err);
             return connection.rollback(() => { return res.json({ success: 0 }); });
           }
 
-          const billId = results.insertId;
           let query = 'INSERT INTO Bill_has_Product (bill_id, product_id, size_id, quantity) VALUES'
             + ' (?,?,?,?),'.repeat(req.body.list.length).slice(0, -1);
           let params = req.body.list.reduce((p, c) => p.concat([billId, c.productId, c.sizeId, c.quantity]), []);

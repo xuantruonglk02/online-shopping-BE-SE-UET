@@ -305,12 +305,12 @@ function searchProductsByKeyword(req, res) {
  * productId : params
  */
 function getAllRatingsOfProduct(req, res) {
-  connection.query('SELECT r.star, r.comment, r.create_at, GROUP_CONCAT(ri.url) AS urls, u.name '
+  connection.query('SELECT u.user_id, r.star, r.comment, r.create_at, GROUP_CONCAT(ri.url) AS urls, u.name '
     + 'FROM Ratings r '
-    + 'INNER JOIN Users u ON r.user_id=u.id '
-    + 'LEFT JOIN Rating_Images ri ON r.id=ri.rating_id '
+    + 'INNER JOIN Users u ON r.user_id=u.user_id '
+    + 'LEFT JOIN Rating_Images ri ON r.rating_id=ri.rating_id '
     + 'WHERE r.product_id=? '
-    + 'GROUP BY r.id '
+    + 'GROUP BY r.rating_id '
     + 'ORDER BY r.create_at DESC',
     [req.params.productId], (err, results) => {
       if (err) {
@@ -318,7 +318,7 @@ function getAllRatingsOfProduct(req, res) {
         return res.json({ success: 0 });
       }
 
-      res.json({ success: 1, results: results });
+      res.json({ success: 1, results: results, userId: getUserId(req.cookies['x-access-token']) });
     });
 }
 
@@ -329,7 +329,7 @@ function getAllRatingsOfProduct(req, res) {
  * urls: [url] : body
  */
 function insertUserRating(req, res) {
-  if (!req.body.star || !req.body.comment || !req.body.urls) {
+  if (!req.body.comment || !req.body.urls || isNaN(req.body.star)) {
     return res.json({ success: 0 });
   }
   try {
@@ -337,32 +337,58 @@ function insertUserRating(req, res) {
   } catch (err) {
     return res.json({ success: 0 });
   }
-
   req.body.star = parseInt(req.body.star);
 
-  const userId = getUserId(req.headers['x-access-token']);
-  connection.query('INSERT INTO Ratings (user_id, product_id, star, comment) VALUES (?,?,?,?)',
-    [userId, req.params.productId, req.body.star, req.body.comment], (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({ success: 0 });
-      }
+  const userId = getUserId(req.cookies['x-access-token']);
+  checkUserBoughtProduct(userId, req.params.productId, (err, bought) => {
+    if (err) {
+      console.log(err);
+      return res.json({ success: 0 });
+    }
+    if (!bought) { return res.json({ success: 0, code: 'not-buy' }); }
 
-      if (!req.body.urls.length) {
-        return res.json({ success: 1 });
-      }
-
-      let ratingId = results.insertId;
-      let query = 'INSERT INTO Rating_Images (rating_id, url) VALUES ' + '(?,?),'.repeat(req.body.urls.length).slice(0, -1);
-      let params = req.body.urls.reduce((p, c) => p.concat([ratingId, c]), []);
-      connection.query(query, params, (err, results) => {
+    connection.query('SELECT rating_id FROM Ratings WHERE user_id=? AND product_id=?',
+      [userId, req.params.productId], (err, results) => {
         if (err) {
           console.log(err);
           return res.json({ success: 0 });
         }
+        if (results.length > 0) { return res.json({ success: 0, code: 'rating-exist' }); }
 
-        res.json({ success: 1 });
+        connection.query('INSERT INTO Ratings (user_id, product_id, star, comment) VALUES (?,?,?,?)',
+          [userId, req.params.productId, req.body.star, req.body.comment], (err, results) => {
+            if (err) {
+              console.log(err);
+              return res.json({ success: 0 });
+            }
+
+            if (req.body.urls.length == 0) {
+              return res.json({ success: 1 });
+            }
+
+            let ratingId = results.insertId;
+            let query = 'INSERT INTO Rating_Images (rating_id, url) VALUES ' + '(?,?),'.repeat(req.body.urls.length).slice(0, -1);
+            let params = req.body.urls.reduce((p, c) => p.concat([ratingId, c]), []);
+            connection.query(query, params, (err, results) => {
+              if (err) {
+                console.log(err);
+                return res.json({ success: 0 });
+              }
+
+              res.json({ success: 1 });
+            });
+          });
       });
+  });
+}
+
+function checkUserBoughtProduct(userId, productId, callback) {
+  if (!userId) { return callback(new Error('no-userId'), null); }
+  connection.query('SELECT bill_id FROM Bills WHERE user_id=? AND bill_id IN '
+    + '(SELECT bill_id FROM Bill_has_Product WHERE product_id=?)', [userId, productId], (err, results) => {
+      if (err) { return callback(err, null); }
+      if (results.length == 0) { return callback(null, false); }
+      callback(null, true);
     });
 }
 
@@ -374,8 +400,9 @@ module.exports = {
   getAllProductClasses,
   getAllProductLines,
   getAllProductLinesByClass,
-  getAllRatingsOfProduct,
   getNewProducts,
   searchProductsByKeyword,
-  insertUserRating
+  getAllRatingsOfProduct,
+  insertUserRating,
+  checkUserBoughtProduct
 }

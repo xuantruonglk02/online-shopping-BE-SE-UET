@@ -1,6 +1,8 @@
 const express = require('express');
 const createError = require('http-errors');
 
+const { getUserId } = require('../controllers/user.controller');
+
 const authMiddleware = require('../middlewares/auth.middleware');
 const productController = require('../controllers/product.controller');
 
@@ -26,11 +28,15 @@ router.get('/:productId', (req, res, next) => {
       return next(createError(500));
     }
 
-    result.price = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(result.price);
-    res.render('product', {
-      title: result.name,
-      product: result
-    });
+    productController.checkUserBoughtProduct(getUserId(req.cookies['x-access-token']), req.params.productId,
+      (err, bought) => {
+        result.price = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(result.price);
+        res.render('product', {
+          title: result.name,
+          product: result,
+          bought: bought
+        });
+      });
   });
 });
 

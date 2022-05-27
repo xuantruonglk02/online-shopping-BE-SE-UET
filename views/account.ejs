@@ -186,6 +186,7 @@
             }
           },
           error: function (data) {
+            console.log(data);
             $('#login-form').submit(function (e) {submitForm(e)});
             ajaxStop();
             alert('Đã có lỗi xảy ra. Vui lòng thử lại');

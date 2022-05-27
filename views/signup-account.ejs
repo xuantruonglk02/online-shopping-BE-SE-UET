@@ -120,6 +120,7 @@
                   }
                 },
                 error: function (data) {
+                  console.log(data);
                   $('#create-account-form').submit(function (e) {submitForm(e)});
                   ajaxStop();
                   alert('Đã có lỗi xảy ra');

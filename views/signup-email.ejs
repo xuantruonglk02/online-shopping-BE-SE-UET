@@ -88,6 +88,7 @@
                   }
                 },
                 error: function (data) {
+                  console.log(data);
                   $('#register-email-form').submit(function (e) {submitForm(e)});
                   ajaxStop();
                   alert('Đã có lỗi xảy ra');
