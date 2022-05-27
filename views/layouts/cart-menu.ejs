@@ -35,8 +35,12 @@
 
 <script>
   $(document).ready(() => {
-    $('.hd-cart-icon-ctn.dropdown').click(function () {
+    $('.hd-cart-icon-ctn.dropdown').click(function (e) {
       if ($(this).find('.dropdown-menu').css('display') != 'none') { return; }
+      if ($('#cart-number').text() == '') {
+        e.stopImmediatePropagation();
+        window.location.href = '/auth/login';
+      }
       $('#cart-menu-products').empty();
 
       $.ajax({

@@ -5,10 +5,13 @@
   <%- include('layouts/head') %>
 
   <link rel="stylesheet" href="/css/account.css">
+
+  <script src="/js/auth-script.js"></script>
 </head>
 
 <body>
   <%- include('layouts/header') %>
+
   <div class="main">
     <div class="page-body row">
       <div class="account-left">
@@ -36,7 +39,7 @@
               <span>Tên khách hàng</span>
             </div>
             <div class="account-right-row-right row">
-              <input type="text" id="name" value="Phạm Xuân Trường" required disabled>
+              <input type="text" id="name" value="<%= name %>" required disabled>
               <div class="account-right-row-btns row">
                 <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
                 <a href="#" onclick="return false" title="Lưu" data-url="/user/setting/change-email"><i class="fa-regular fa-circle-check"></i></a>
@@ -48,7 +51,7 @@
               <span>Email</span>
             </div>
             <div class="account-right-row-right row">
-              <input type="email" id="email" value="xuantruonglk02@gmail.com" required disabled>
+              <input type="email" id="email" value="<%= email %>" required disabled>
               <div class="account-right-row-btns row">
                 <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
                 <a href="#" onclick="return false" title="Lưu" data-url="/user/setting/change-email"><i class="fa-regular fa-circle-check"></i></a>
@@ -60,7 +63,7 @@
               <span>Số điện thoại</span>
             </div>
             <div class="account-right-row-right row">
-              <input type="text" id="phone" value="0376520507" required disabled>
+              <input type="text" id="phone" value="<%= phone %>" required disabled>
               <div class="account-right-row-btns row">
                 <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
                 <a href="#" onclick="return false" title="Lưu" data-url="/user/setting/change-phone"><i class="fa-regular fa-circle-check"></i></a>
@@ -72,53 +75,124 @@
               <span>Địa chỉ</span>
             </div>
             <div class="account-right-row-right row">
-              <input type="text" id="address" value="HN" required disabled>
+              <input type="text" id="address" value="<%= address %>" required disabled>
               <div class="account-right-row-btns row">
                 <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
                 <a href="#" onclick="return false" title="Lưu" data-url="/user/setting/change-address"><i class="fa-regular fa-circle-check"></i></a>
               </div>
             </div>
           </div>
-        </div>
-        <div class="account-right-submit-ctn">
-          <div class="account-right-submit-content-up row">
-            <span>Mật khẩu</span>
-            <input type="password" id="password" required>
+          <div class="account-right-row row">
+            <div class="account-right-row-left">
+              <span>Mật khẩu</span>
+            </div>
+            <div class="account-right-row-right row">
+              <a href="">Đổi mật khẩu</a>
+            </div>
           </div>
-          <div>
-            <button id="submit-profile">Lưu thông tin</button>
-          </div>
         </div>
-
         <script>
           $('.account-right-row-btns a:first-of-type').click(function () {
             $(this).parents()[1].getElementsByTagName('input')[0].disabled = false;
             $(this).parents()[0].getElementsByTagName('a')[1].style.display = 'block'
           });
           $('.account-right-row-btns a:last-of-type').click(function () {
-            $(this).parents()[1].getElementsByTagName('input')[0].disabled = true;
-            $('.account-right-submit-ctn').css('display', 'flex');
-          });
-          $('#submit-profile').click(function () {
-            $(this).css('display', 'none');
-
-            // $.ajax({
-            //   type: 'POST',
-            //   url: $(this).data('url'),
-            //   data: {
-            //     newData: $(this).parents()[1].getElementsByTagName('input')[0].value
-            //   },
-            //   success: function (data) {
-            //     console.log(data);
-            //   },
-            //   error: function (data) {
-            //     alert('Đã có lỗi xảy ra');
-            //   }
-            // });
+            // $(this).parents()[1].getElementsByTagName('input')[0].disabled = true;
+            $('#field-name').val($(this).parents()[1].getElementsByTagName('input')[0].id);
+            $('#field-value').val($(this).parents()[1].getElementsByTagName('input')[0].value);
+            $('.account-submit-bg').css('display', 'flex');
           });
         </script>
       </div>
     </div>
+    <div class="account-submit-bg row">
+      <div class="account-submit-ctn relative">
+        <div class="account-submit-exit">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </div>
+        <div class="account-right-title">
+          <h2>Xác nhận</h2>
+          <span>Bạn cần nhập mật khẩu để thực hiện thao tác này</span>
+        </div>
+        <div class="account-right-submit-ctn">
+          <form id="submit-form">
+            <div class="account-right-submit-content-up row">
+              <span>Mật khẩu</span>
+              <input type="password" id="password" required>
+            </div>
+            <div class="form-notif-ctn auth-error">
+              <span>Mật khẩu không chính xác</span>
+            </div>
+            <div class="relative">
+              <input type="text" id="field-name" value="" hidden>
+              <input type="text" id="field-value" value="" hidden>
+              <input type="submit" value="Xác nhận" id="submit-btn" data-enable="1">
+              <div class="loader" id="submit-loader" style="right: 5px;"></div>
+            </div>
+            <div class="form-notif-ctn form-split-line"></div>
+            <div class="form-notif-ctn success-notif">
+              <span>Đổi thông tin thành công</span>
+            </div>
+          </form>
+        </div>
+        </script>
+      </div>
+    </div>
+    <script>
+      $('.account-submit-exit i').on('click', function () {
+        $('.account-submit-bg').css('display', 'none');
+        $('.form-notif-ctn').css('display', 'none');
+        $('#password').val('');
+      });
+    </script>
+    <script>
+      $(document).ready(() => {
+        $('#submit-form').submit(function (e) {submitForm(e)});
+      });
+
+      function submitForm(e) {
+        if ($('#submit-btn').data('enable') == '0')  {
+          return;
+        }
+        e.preventDefault();
+        let fieldName = $('#field-name').val();
+        let fieldValue = $('#field-value').val();
+        let data;
+        if (fieldName == 'name') {
+          data = { 'name': fieldValue, 'password': $('#password').val() };
+        }
+        if (fieldName == 'address') {
+          data = { 'address': fieldValue, 'password': $('#password').val() };
+        }
+        $('#submit-form').submit(false);
+        ajaxStart();
+        $.ajax({
+          type: 'POST',
+          url: '/user/setting/change-' + $('#field-name').val(),
+          data: data,
+          success: function (data) {
+            $('#submit-form').submit(function (e) {submitForm(e)});
+            ajaxStop();
+            if (data.success) {
+              $('.success-notif').css('display', 'block');
+            } else {
+              switch (data.code) {
+                case 'password-incorrect':
+                  $('.auth-error:eq(0)').css('display', 'block');
+                  break;
+                default:
+                  alert('Đã có lỗi xảy ra. Vui lòng thử lại');
+              }
+            }
+          },
+          error: function (data) {
+            $('#login-form').submit(function (e) {submitForm(e)});
+            ajaxStop();
+            alert('Đã có lỗi xảy ra. Vui lòng thử lại');
+          }
+        });
+      }
+    </script>
   </div>
 
   <%- include('layouts/footer') %>

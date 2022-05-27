@@ -14,15 +14,14 @@ function getCartId(token) {
   return decoded.cartId;
 }
 
-function getUserInformation(req, res) {
+function getUserInformation(req, callback) {
   const userId = getUserId(req.cookies['x-access-token']);
   connection.query('SELECT name, phone, email, address FROM Users WHERE user_id=?', [userId], (err, results) => {
     if (err) {
-      console.log(err);
-      return res.json({ success: 0 });
+      return callback(err, null);
     }
 
-    res.json(results[0]);
+    callback(null, results[0]);
   });
 }
 
@@ -46,16 +45,14 @@ function changeName(req, res) {
   }
 
   const userId = getUserId(req.cookies['x-access-token']);
-
   connection.query('SELECT password FROM Users WHERE user_id=?', [userId], async (err, results) => {
     if (err) {
       console.log(err);
       return res.json({ success: 0 });
     }
-
     const match = await bcrypt.compare(req.body.password, results[0].password);
     if (!match) {
-      return res.json({ success: 0, msg: 'Mật khẩu không chính xác' });
+      return res.json({ success: 0, code: 'password-incorrect' });
     }
 
     connection.query('UPDATE Users SET name=? WHERE user_id=?', [req.body.name, userId], (err, results) => {

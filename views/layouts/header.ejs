@@ -54,6 +54,7 @@
         <script>
           $('.hd-account-icon-ctn.dropdown').on('click', function (e) {
             if ($('#cart-number').text() == '') {
+              e.stopImmediatePropagation();
               window.location.href = '/auth/login';
             }
           });

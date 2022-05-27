@@ -56,7 +56,7 @@ body {
 }
 
 .account-right-row-left {
-  width: 15%;
+  width: 20%;
   font-size: 18px;
   text-align: right;
   margin-right: 20px;
@@ -97,21 +97,25 @@ body {
   color: #d33b33;
 }
 
+
+
 .account-right-submit-ctn {
-  margin-top: 30px;
   padding-top: 20px;
-  border-top: .0625rem solid #efefef;
   display: flex;
   flex-direction: column;
   align-items: center;
-  display: none;
 }
 
 .account-right-submit-content-up {
   margin-bottom: 10px;
 }
 .account-right-submit-content-up span {
-  margin-right: 20px;
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+.account-right-submit-ctn div {
+  text-align: center;
 }
 
 .account-right-submit-ctn input {
@@ -122,15 +126,65 @@ body {
   outline: none;
 }
 
-.account-right-submit-ctn button {
+#submit-btn {
   background-color: black;
   color: white;
   border: none;
   cursor: pointer;
   font-size: 18px;
   padding: 10px 20px;
+  border-radius: 0;
+  margin-top: 10px;
+  margin-bottom: 10px;
 
 }
-.account-right-submit-ctn button:hover {
+#submit-btn:hover {
   background-color: #d33b33;
+}
+
+.account-submit-bg {
+  width: 100vw;
+  height: 100vh;
+  background: rgba(51, 51, 51, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999999999999999;
+  justify-content: center;
+  display: none;
+}
+
+.account-submit-ctn {
+  width: fit-content;
+  background-color: white;
+  box-shadow: rgb(149 157 165 / 20%) 0px 8px 24px;
+  padding: 20px;
+}
+
+.account-submit-exit {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+.account-submit-exit i {
+  font-size: 20px;
+  cursor: pointer;
+}
+.account-submit-exit i:hover {
+  color: #d33b33;
+}
+
+.form-notif-ctn {
+  display: none;
+}
+
+.auth-error span {
+  color: #d33b33;
+}
+
+.loader {
+  top: 7px;
+  border: 5px solid #555;
+  border-top: 5px solid #f3f3f3;
 }
