@@ -31,6 +31,7 @@ router.get('/:productId', (req, res, next) => {
     productController.checkUserBoughtProduct(getUserId(req.cookies['x-access-token']), req.params.productId,
       (err, bought) => {
         result.price = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(result.price);
+        console.log(bought);
         res.render('product', {
           title: result.name,
           product: result,

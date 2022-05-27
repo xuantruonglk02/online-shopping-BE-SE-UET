@@ -182,6 +182,11 @@
           </div>
         </div>
         <div class="product-rating-content" id="product-rating-content">
+          <% if (bought == false) { %>
+            <div class="product-rating">
+              <span>Bạn cần mua sản phẩm này mới có thể để lại đánh giá</span>
+            </div>
+          <% } %>
           <% if (bought) { %>
             <div class="product-rating-form" id="product-rating-form">
               <div class="product-rating-form-title">
