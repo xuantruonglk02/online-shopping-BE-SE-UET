@@ -194,7 +194,7 @@ function getAllCategories(req, res) {
     + `FROM Product_Classes pc `
     + `INNER JOIN Product_Lines pl ON pc.class_id = pl.class_id `
     + `GROUP BY pc.class_id `
-    + `ORDER BY pc.create_at, pl.create_at`, (err, results) => {
+    + `ORDER BY pc.class_id ASC, pl.line_id ASC`, (err, results) => {
       if (err) {
         console.log(err);
         return res.json({ success: 0 });
@@ -305,10 +305,9 @@ function searchProductsByKeyword(req, res) {
  * productId : params
  */
 function getAllRatingsOfProduct(req, res) {
-  connection.query('SELECT u.user_id, r.star, r.comment, r.create_at, GROUP_CONCAT(ri.url) AS urls, u.name '
+  connection.query('SELECT u.user_id, r.star, r.comment, r.create_at, u.name '
     + 'FROM Ratings r '
     + 'INNER JOIN Users u ON r.user_id=u.user_id '
-    + 'LEFT JOIN Rating_Images ri ON r.rating_id=ri.rating_id '
     + 'WHERE r.product_id=? '
     + 'GROUP BY r.rating_id '
     + 'ORDER BY r.create_at DESC',
@@ -326,15 +325,9 @@ function getAllRatingsOfProduct(req, res) {
  * productId : params
  * star : body
  * comment : body
- * urls: [url] : body
  */
 function insertUserRating(req, res) {
-  if (!req.body.comment || !req.body.urls || isNaN(req.body.star)) {
-    return res.json({ success: 0 });
-  }
-  try {
-    req.body.urls = JSON.parse(req.body.urls);
-  } catch (err) {
+  if (!req.body.comment || isNaN(req.body.star)) {
     return res.json({ success: 0 });
   }
   req.body.star = parseInt(req.body.star);
@@ -361,22 +354,8 @@ function insertUserRating(req, res) {
               console.log(err);
               return res.json({ success: 0 });
             }
-
-            if (req.body.urls.length == 0) {
-              return res.json({ success: 1 });
-            }
-
-            let ratingId = results.insertId;
-            let query = 'INSERT INTO Rating_Images (rating_id, url) VALUES ' + '(?,?),'.repeat(req.body.urls.length).slice(0, -1);
-            let params = req.body.urls.reduce((p, c) => p.concat([ratingId, c]), []);
-            connection.query(query, params, (err, results) => {
-              if (err) {
-                console.log(err);
-                return res.json({ success: 0 });
-              }
-
-              res.json({ success: 1 });
-            });
+            
+            res.json({ success: 1 });
           });
       });
   });

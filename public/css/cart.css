@@ -73,6 +73,22 @@
   outline: 1px black solid;
 }
 
+.quantity-modify {
+  background-color: black;
+  margin: 0 3px 0 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.quantity-modify a {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 6px 11px 6px 11px;
+}
+
 .total-ctn span {
   white-space: nowrap;
 }
