@@ -197,7 +197,7 @@ function forgetPassword(req, res) {
           return res.json({ success: 0, code: 'email-sending-error' });
         }
 
-        connection.query('INSERT INTO Reset_Password_Token (user_id, email, code, token) VALUES (?,?,?,?)',
+        connection.query('INSERT INTO Reset_Password_Token (user_id, email, token) VALUES (?,?,?)',
           [userId, req.body.email, 0, token], (err, results) => {
             if (err) {
               console.log(err);
