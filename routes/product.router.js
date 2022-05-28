@@ -27,6 +27,7 @@ router.get('/:productId', (req, res, next) => {
       console.log(err);
       return next(createError(500));
     }
+    if (!result) { return next(createError(404)); }
 
     productController.checkUserBoughtProduct(getUserId(req.cookies['x-access-token']), req.params.productId,
       (err, bought) => {
