@@ -1,28 +1,29 @@
 {
-  "name": "online-shopping-backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./bin/www"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^5.0.1",
-    "cookie-parser": "^1.4.6",
-    "crypto": "^1.0.1",
-    "debug": "^4.3.4",
-    "dotenv": "^16.0.0",
-    "ejs": "^3.1.6",
-    "express": "^4.17.3",
-    "http-errors": "^2.0.0",
-    "jsonwebtoken": "^8.5.1",
-    "morgan": "^1.10.0",
-    "mysql": "^2.18.1",
-    "nodemailer": "^6.7.3",
-    "nodemon": "^2.0.15",
-    "validator": "^13.7.0"
-  }
+    "name": "online-shopping-backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "nodemon ./bin/www",
+        "start": "node ./bin/www"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^5.0.1",
+        "cookie-parser": "^1.4.6",
+        "crypto": "^1.0.1",
+        "debug": "^4.3.4",
+        "dotenv": "^16.0.0",
+        "ejs": "^3.1.6",
+        "express": "^4.17.3",
+        "http-errors": "^2.0.0",
+        "jsonwebtoken": "^8.5.1",
+        "morgan": "^1.10.0",
+        "mysql": "^2.18.1",
+        "nodemailer": "^6.7.3",
+        "nodemon": "^2.0.15",
+        "validator": "^13.7.0"
+    }
 }
