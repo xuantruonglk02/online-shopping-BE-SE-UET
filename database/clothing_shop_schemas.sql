@@ -1,13 +1,14 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 4.9.7
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Oct 22, 2022 at 09:14 AM
--- Server version: 10.4.21-MariaDB
--- PHP Version: 8.0.10
+-- Máy chủ: localhost:3306
+-- Thời gian đã tạo: Th7 07, 2022 lúc 10:00 PM
+-- Phiên bản máy phục vụ: 5.7.33-cll-lve
+-- Phiên bản PHP: 7.3.32
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -18,83 +19,63 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `clothing_shop`
+-- Cơ sở dữ liệu: `clothing_shop`
 --
+DROP DATABASE IF EXISTS `clothing_shop`;
+CREATE DATABASE `clothing_shop`;
+USE `clothing_shop`;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `carts`
+-- Cấu trúc bảng cho bảng `bills`
 --
 
-CREATE TABLE `carts` (
-  `id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL DEFAULT 0
+CREATE TABLE `bills` (
+  `bill_id` varchar(13) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `status_id` int(11) NOT NULL DEFAULT '1',
+  `user_name` varchar(30) NOT NULL,
+  `user_phone` varchar(11) NOT NULL,
+  `user_address` varchar(200) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cart_has_products`
+-- Cấu trúc bảng cho bảng `bill_has_product`
 --
 
-CREATE TABLE `cart_has_products` (
-  `cartId` int(11) NOT NULL,
-  `productId` varchar(8) NOT NULL,
-  `sizeId` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL DEFAULT 1,
-  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `orders`
---
-
-CREATE TABLE `orders` (
-  `id` int(11) NOT NULL,
-  `userId` int(11) NOT NULL,
-  `status` varchar(15) NOT NULL DEFAULT 'preparing',
-  `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `order_has_products`
---
-
-CREATE TABLE `order_has_products` (
-  `orderId` int(11) NOT NULL,
-  `productId` varchar(8) NOT NULL,
-  `sizeId` int(11) NOT NULL,
+CREATE TABLE `bill_has_product` (
+  `bill_id` varchar(13) NOT NULL,
+  `product_id` varchar(8) NOT NULL,
+  `size_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Triggers `order_has_products`
+-- Bẫy `bill_has_product`
 --
 DELIMITER $$
-CREATE TRIGGER `after_delete_order_has_products` AFTER DELETE ON `order_has_products` FOR EACH ROW BEGIN
-	UPDATE product_has_sizes
+CREATE TRIGGER `after_delete_bill_has_product` AFTER DELETE ON `bill_has_product` FOR EACH ROW BEGIN
+	UPDATE product_has_size
 		SET quantity = quantity + OLD.quantity
-		WHERE productId = OLD.productId AND sizeId = OLD.sizeId;
+		WHERE product_id = OLD.product_id AND size_id = OLD.size_id;
     UPDATE products
     	SET sold = sold - OLD.quantity
-        WHERE productId = OLD.productId;
+        WHERE product_id = OLD.product_id;
 END
 $$
 DELIMITER ;
 DELIMITER $$
-CREATE TRIGGER `after_insert_order_has_products` AFTER INSERT ON `order_has_products` FOR EACH ROW BEGIN
-	UPDATE product_has_sizes
+CREATE TRIGGER `after_insert_bill_has_product` AFTER INSERT ON `bill_has_product` FOR EACH ROW BEGIN
+	UPDATE product_has_size
 		SET quantity = quantity - NEW.quantity
-		WHERE productId = NEW.productId AND sizeId = NEW.sizeId;
+		WHERE product_id = NEW.product_id AND size_id = NEW.size_id;
     UPDATE products
     	SET sold = sold + NEW.quantity
-        WHERE productId = NEW.productId;
+        WHERE product_id = NEW.product_id;
 END
 $$
 DELIMITER ;
@@ -102,83 +83,112 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `preview_images`
+-- Cấu trúc bảng cho bảng `carts`
+--
+
+CREATE TABLE `carts` (
+  `cart_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `cart_has_product`
+--
+
+CREATE TABLE `cart_has_product` (
+  `cart_id` int(11) NOT NULL,
+  `product_id` varchar(8) NOT NULL,
+  `size_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT '1',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Bẫy `cart_has_product`
+--
+DELIMITER $$
+CREATE TRIGGER `after_delete_product_in_cart` AFTER DELETE ON `cart_has_product` FOR EACH ROW BEGIN
+	UPDATE carts
+		SET quantity = quantity - 1
+        WHERE cart_id = OLD.cart_id;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_insert_product_to_cart` AFTER INSERT ON `cart_has_product` FOR EACH ROW BEGIN
+	UPDATE carts
+		SET quantity = quantity + 1
+        WHERE cart_id = NEW.cart_id;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `order_statuses`
+--
+
+CREATE TABLE `order_statuses` (
+  `id` int(11) NOT NULL,
+  `status` varchar(30) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `preview_images`
 --
 
 CREATE TABLE `preview_images` (
-  `productId` varchar(8) NOT NULL,
+  `product_id` varchar(8) NOT NULL,
   `url` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `products`
+-- Cấu trúc bảng cho bảng `products`
 --
 
 CREATE TABLE `products` (
-  `id` varchar(8) NOT NULL,
-  `categoryId` int(11) NOT NULL,
+  `product_id` varchar(8) NOT NULL,
+  `line_id` varchar(15) NOT NULL,
+  `class_id` varchar(15) NOT NULL,
   `name` varchar(50) NOT NULL,
   `price` int(11) NOT NULL,
-  `sold` int(11) NOT NULL DEFAULT 0,
-  `quantityOfRating` int(11) NOT NULL DEFAULT 0,
+  `sold` int(11) NOT NULL DEFAULT '0',
+  `quantity_of_rating` int(11) NOT NULL DEFAULT '0',
   `rating` float DEFAULT NULL,
   `description` varchar(5000) NOT NULL,
   `thumbnail` varchar(200) NOT NULL,
-  `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `product_categories`
---
-
-CREATE TABLE `product_categories` (
-  `id` int(11) NOT NULL,
-  `parentId` int(11) DEFAULT NULL,
-  `name` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `product_has_sizes`
---
-
-CREATE TABLE `product_has_sizes` (
-  `productId` varchar(8) NOT NULL,
-  `sizeId` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ratings`
---
-
-CREATE TABLE `ratings` (
-  `id` int(11) NOT NULL,
-  `userId` int(11) NOT NULL,
-  `productId` varchar(8) NOT NULL,
-  `star` int(11) NOT NULL,
-  `comment` varchar(500) NOT NULL,
-  `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Triggers `ratings`
+-- Bẫy `products`
 --
 DELIMITER $$
-CREATE TRIGGER `after_insert_rating` AFTER INSERT ON `ratings` FOR EACH ROW BEGIN
-	UPDATE products
-    	SET quantityOfRating = quantityOfRating + 1
-        WHERE productId = NEW.productId;
-    UPDATE products
-    	SET rating = (SELECT AVG(star) FROM ratings WHERE productId = NEW.productId)
-        WHERE productId = NEW.productId;
+CREATE TRIGGER `after_delete_product` AFTER DELETE ON `products` FOR EACH ROW BEGIN
+	UPDATE product_classes
+		SET quantity = quantity - 1
+		WHERE class_id = OLD.class_id;
+    UPDATE product_lines
+		SET quantity = quantity - 1
+		WHERE line_id = OLD.line_id;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_insert_product` AFTER INSERT ON `products` FOR EACH ROW BEGIN
+	UPDATE product_classes
+		SET quantity = quantity + 1
+		WHERE class_id = NEW.class_id;
+    UPDATE product_lines
+		SET quantity = quantity + 1
+		WHERE line_id = NEW.line_id;
 END
 $$
 DELIMITER ;
@@ -186,26 +196,107 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `sizes`
+-- Cấu trúc bảng cho bảng `product_classes`
+--
+
+CREATE TABLE `product_classes` (
+  `class_id` varchar(15) NOT NULL,
+  `name` varchar(15) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `product_has_size`
+--
+
+CREATE TABLE `product_has_size` (
+  `product_id` varchar(8) NOT NULL,
+  `size_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `product_lines`
+--
+
+CREATE TABLE `product_lines` (
+  `line_id` varchar(15) NOT NULL,
+  `class_id` varchar(15) NOT NULL,
+  `name` varchar(15) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `ratings`
+--
+
+CREATE TABLE `ratings` (
+  `rating_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `product_id` varchar(8) NOT NULL,
+  `star` int(11) NOT NULL,
+  `comment` varchar(500) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Bẫy `ratings`
+--
+DELIMITER $$
+CREATE TRIGGER `after_insert_rating` AFTER INSERT ON `ratings` FOR EACH ROW BEGIN
+	UPDATE products
+    	SET quantity_of_rating = quantity_of_rating + 1
+        WHERE product_id = NEW.product_id;
+    UPDATE products
+    	SET rating = (SELECT AVG(star) FROM ratings WHERE product_id = NEW.product_id)
+        WHERE product_id = NEW.product_id;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `reset_password_token`
+--
+
+CREATE TABLE `reset_password_token` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `email` varchar(30) NOT NULL,
+  `token` char(60) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `sizes`
 --
 
 CREATE TABLE `sizes` (
-  `id` int(11) NOT NULL,
+  `size_id` int(11) NOT NULL,
   `text` varchar(3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Cấu trúc bảng cho bảng `users`
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `cartId` int(11) NOT NULL,
-  `role` varchar(8) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `cart_id` int(11) NOT NULL,
+  `admin` tinyint(1) NOT NULL DEFAULT '0',
   `name` varchar(30) NOT NULL,
-  `phoneNumber` varchar(11) NOT NULL,
+  `phone` varchar(11) NOT NULL,
   `email` varchar(30) DEFAULT NULL,
   `password` char(60) NOT NULL,
   `address` varchar(200) DEFAULT NULL
@@ -214,218 +305,238 @@ CREATE TABLE `users` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_tokens`
+-- Cấu trúc bảng cho bảng `verify_email`
 --
 
-CREATE TABLE `user_tokens` (
+CREATE TABLE `verify_email` (
   `id` int(11) NOT NULL,
-  `userId` int(11) DEFAULT NULL,
   `email` varchar(30) NOT NULL,
-  `type` varchar(20) NOT NULL,
   `token` char(60) NOT NULL,
-  `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Indexes for dumped tables
+-- Chỉ mục cho các bảng đã đổ
 --
 
 --
--- Indexes for table `carts`
+-- Chỉ mục cho bảng `bills`
+--
+ALTER TABLE `bills`
+  ADD PRIMARY KEY (`bill_id`),
+  ADD KEY `fk_bill_user1` (`user_id`),
+  ADD KEY `fk_bill_order_status1` (`status_id`);
+
+--
+-- Chỉ mục cho bảng `bill_has_product`
+--
+ALTER TABLE `bill_has_product`
+  ADD PRIMARY KEY (`bill_id`,`product_id`,`size_id`),
+  ADD KEY `fk_bill_has_product_bill1` (`bill_id`),
+  ADD KEY `fk_bill_has_product_product1` (`product_id`),
+  ADD KEY `fk_bill_has_product_size1` (`size_id`);
+
+--
+-- Chỉ mục cho bảng `carts`
 --
 ALTER TABLE `carts`
+  ADD PRIMARY KEY (`cart_id`);
+
+--
+-- Chỉ mục cho bảng `cart_has_product`
+--
+ALTER TABLE `cart_has_product`
+  ADD PRIMARY KEY (`cart_id`,`product_id`,`size_id`),
+  ADD KEY `fk_cart_has_product_cart1` (`cart_id`),
+  ADD KEY `fk_cart_has_product_product1` (`product_id`),
+  ADD KEY `fk_cart_has_product_size1` (`size_id`);
+
+--
+-- Chỉ mục cho bảng `order_statuses`
+--
+ALTER TABLE `order_statuses`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `cart_has_products`
---
-ALTER TABLE `cart_has_products`
-  ADD PRIMARY KEY (`cartId`,`productId`,`sizeId`),
-  ADD KEY `fk_Cart_has_Products_Carts1` (`cartId`) USING BTREE,
-  ADD KEY `fk_Cart_has_Products_Sizes1` (`sizeId`) USING BTREE,
-  ADD KEY `fk_Cart_has_Products_Products1` (`productId`) USING BTREE;
-
---
--- Indexes for table `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_Orders_Users1` (`userId`) USING BTREE;
-
---
--- Indexes for table `order_has_products`
---
-ALTER TABLE `order_has_products`
-  ADD PRIMARY KEY (`orderId`,`productId`,`sizeId`),
-  ADD KEY `fk_Order_has_Products_Sizes1` (`sizeId`) USING BTREE,
-  ADD KEY `fk_Order_has_Products_Orders1` (`orderId`) USING BTREE,
-  ADD KEY `fk_Order_has_Products_Products1` (`productId`) USING BTREE;
-
---
--- Indexes for table `preview_images`
+-- Chỉ mục cho bảng `preview_images`
 --
 ALTER TABLE `preview_images`
-  ADD KEY `fk_Preview_Images_Products1` (`productId`) USING BTREE;
+  ADD KEY `fk_preview_image_product1` (`product_id`);
 
 --
--- Indexes for table `products`
+-- Chỉ mục cho bảng `products`
 --
 ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_Products_Product_Categories1` (`categoryId`);
+  ADD PRIMARY KEY (`product_id`),
+  ADD KEY `fk_product_class1` (`class_id`),
+  ADD KEY `fk_product_line1` (`line_id`);
 
 --
--- Indexes for table `product_categories`
+-- Chỉ mục cho bảng `product_classes`
 --
-ALTER TABLE `product_categories`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_Product_Categories_Product_Categories1` (`parentId`) USING BTREE;
+ALTER TABLE `product_classes`
+  ADD PRIMARY KEY (`class_id`);
 
 --
--- Indexes for table `product_has_sizes`
+-- Chỉ mục cho bảng `product_has_size`
 --
-ALTER TABLE `product_has_sizes`
-  ADD PRIMARY KEY (`productId`,`sizeId`),
-  ADD KEY `fk_Product_has_Sizes_Products1` (`productId`) USING BTREE,
-  ADD KEY `fk_Product_has_Sizes_Sizes1` (`sizeId`) USING BTREE;
+ALTER TABLE `product_has_size`
+  ADD PRIMARY KEY (`product_id`,`size_id`),
+  ADD KEY `fk_product_has_size_product1` (`product_id`),
+  ADD KEY `fk_product_has_size_size1` (`size_id`);
 
 --
--- Indexes for table `ratings`
+-- Chỉ mục cho bảng `product_lines`
+--
+ALTER TABLE `product_lines`
+  ADD PRIMARY KEY (`line_id`),
+  ADD KEY `fk_line_class1` (`class_id`);
+
+--
+-- Chỉ mục cho bảng `ratings`
 --
 ALTER TABLE `ratings`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_Ratings_Users1` (`userId`) USING BTREE,
-  ADD KEY `fk_Ratings_Products1` (`productId`) USING BTREE;
+  ADD PRIMARY KEY (`rating_id`,`user_id`,`product_id`),
+  ADD KEY `fk_rating_user1` (`user_id`),
+  ADD KEY `fk_rating_product1` (`product_id`);
 
 --
--- Indexes for table `sizes`
+-- Chỉ mục cho bảng `reset_password_token`
+--
+ALTER TABLE `reset_password_token`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_reset_password_token_users` (`user_id`);
+
+--
+-- Chỉ mục cho bảng `sizes`
 --
 ALTER TABLE `sizes`
+  ADD PRIMARY KEY (`size_id`);
+
+--
+-- Chỉ mục cho bảng `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`user_id`),
+  ADD KEY `fk_user_cart` (`cart_id`);
+
+--
+-- Chỉ mục cho bảng `verify_email`
+--
+ALTER TABLE `verify_email`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_Users_Carts` (`cartId`) USING BTREE;
-
---
--- Indexes for table `user_tokens`
---
-ALTER TABLE `user_tokens`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_User_Tokens_Users` (`userId`) USING BTREE;
-
---
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT cho các bảng đã đổ
 --
 
 --
--- AUTO_INCREMENT for table `carts`
+-- AUTO_INCREMENT cho bảng `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `orders`
+-- AUTO_INCREMENT cho bảng `order_statuses`
 --
-ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `order_statuses`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `product_categories`
---
-ALTER TABLE `product_categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `ratings`
+-- AUTO_INCREMENT cho bảng `ratings`
 --
 ALTER TABLE `ratings`
+  MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `reset_password_token`
+--
+ALTER TABLE `reset_password_token`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `sizes`
+-- AUTO_INCREMENT cho bảng `sizes`
 --
 ALTER TABLE `sizes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `size_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `verify_email`
+--
+ALTER TABLE `verify_email`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `user_tokens`
---
-ALTER TABLE `user_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
+-- Các ràng buộc cho các bảng đã đổ
 --
 
 --
--- Constraints for table `cart_has_products`
+-- Các ràng buộc cho bảng `bills`
 --
-ALTER TABLE `cart_has_products`
-  ADD CONSTRAINT `fk_Cart_has_Products_Carts1` FOREIGN KEY (`cartId`) REFERENCES `carts` (`id`),
-  ADD CONSTRAINT `fk_Cart_has_Products_Products1` FOREIGN KEY (`productId`) REFERENCES `products` (`id`),
-  ADD CONSTRAINT `fk_Cart_has_Products_Sizes1` FOREIGN KEY (`sizeId`) REFERENCES `sizes` (`id`);
+ALTER TABLE `bills`
+  ADD CONSTRAINT `fk_order_status1` FOREIGN KEY (`status_id`) REFERENCES `order_statuses` (`id`),
+  ADD CONSTRAINT `fk_user1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
--- Constraints for table `orders`
+-- Các ràng buộc cho bảng `bill_has_product`
 --
-ALTER TABLE `orders`
-  ADD CONSTRAINT `fk_Orders_Users1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`);
+ALTER TABLE `bill_has_product`
+  ADD CONSTRAINT `fk_bill_has_product_bill1` FOREIGN KEY (`bill_id`) REFERENCES `bills` (`bill_id`),
+  ADD CONSTRAINT `fk_bill_has_product_product1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
+  ADD CONSTRAINT `fk_bill_has_product_size1` FOREIGN KEY (`size_id`) REFERENCES `sizes` (`size_id`);
 
 --
--- Constraints for table `order_has_products`
+-- Các ràng buộc cho bảng `cart_has_product`
 --
-ALTER TABLE `order_has_products`
-  ADD CONSTRAINT `fk_Order_has_Products_Orders1` FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`),
-  ADD CONSTRAINT `fk_Order_has_Products_Products1` FOREIGN KEY (`productId`) REFERENCES `products` (`id`),
-  ADD CONSTRAINT `fk_Order_has_Products_Sizes1` FOREIGN KEY (`sizeId`) REFERENCES `sizes` (`id`);
+ALTER TABLE `cart_has_product`
+  ADD CONSTRAINT `fk_cart_has_product_cart1` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`cart_id`),
+  ADD CONSTRAINT `fk_cart_has_product_product1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
+  ADD CONSTRAINT `fk_cart_has_product_size1` FOREIGN KEY (`size_id`) REFERENCES `sizes` (`size_id`);
 
 --
--- Constraints for table `preview_images`
+-- Các ràng buộc cho bảng `preview_images`
 --
 ALTER TABLE `preview_images`
-  ADD CONSTRAINT `fk_Preview_Images_Products1` FOREIGN KEY (`productId`) REFERENCES `products` (`id`);
+  ADD CONSTRAINT `fk_preview_image_product1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
 
 --
--- Constraints for table `products`
+-- Các ràng buộc cho bảng `products`
 --
 ALTER TABLE `products`
-  ADD CONSTRAINT `fk_Products_Product_Categories1` FOREIGN KEY (`categoryId`) REFERENCES `product_categories` (`id`);
+  ADD CONSTRAINT `fk_product_class1` FOREIGN KEY (`class_id`) REFERENCES `product_classes` (`class_id`),
+  ADD CONSTRAINT `fk_product_line1` FOREIGN KEY (`line_id`) REFERENCES `product_lines` (`line_id`);
 
 --
--- Constraints for table `product_has_sizes`
+-- Các ràng buộc cho bảng `product_has_size`
 --
-ALTER TABLE `product_has_sizes`
-  ADD CONSTRAINT `fk_Product_has_Sizes_Products1` FOREIGN KEY (`productId`) REFERENCES `products` (`id`),
-  ADD CONSTRAINT `fk_Product_has_Sizes_Sizes1` FOREIGN KEY (`sizeId`) REFERENCES `sizes` (`id`);
+ALTER TABLE `product_has_size`
+  ADD CONSTRAINT `fk_product_has_size_product1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
+  ADD CONSTRAINT `fk_product_has_size_size1` FOREIGN KEY (`size_id`) REFERENCES `sizes` (`size_id`);
 
 --
--- Constraints for table `ratings`
+-- Các ràng buộc cho bảng `product_lines`
+--
+ALTER TABLE `product_lines`
+  ADD CONSTRAINT `fk_line_class1` FOREIGN KEY (`class_id`) REFERENCES `product_classes` (`class_id`);
+
+--
+-- Các ràng buộc cho bảng `ratings`
 --
 ALTER TABLE `ratings`
-  ADD CONSTRAINT `fk_Ratings_Products1` FOREIGN KEY (`productId`) REFERENCES `products` (`id`),
-  ADD CONSTRAINT `fk_Ratings_Users1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_rating_product1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
+  ADD CONSTRAINT `fk_rating_user1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
--- Constraints for table `users`
+-- Các ràng buộc cho bảng `users`
 --
 ALTER TABLE `users`
-  ADD CONSTRAINT `fk_Users_Carts` FOREIGN KEY (`cartId`) REFERENCES `carts` (`id`);
-
---
--- Constraints for table `user_tokens`
---
-ALTER TABLE `user_tokens`
-  ADD CONSTRAINT `fk_User_Tokens_Users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_user_cart` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`cart_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -5,23 +5,23 @@ const authController = require('../controllers/auth.controller');
 const router = express.Router();
 
 router.get('/login', (req, res) => {
-  res.render('login', { title: 'Login' });
+    res.render('login', { title: 'Login' });
 });
 router.get('/signup/register-email', (req, res) => {
-  res.render('signup-email', { title: 'Đăng ký email' });
+    res.render('signup-email', { title: 'Đăng ký email' });
 });
 router.get('/signup/create-account', (req, res) => {
-  res.render('signup-account', { title: 'Tạo tài khoản' });
+    res.render('signup-account', { title: 'Tạo tài khoản' });
 });
 router.get('/logout', (req, res) => {
-  res.clearCookie('x-access-token');
-  res.redirect('/');
+    res.clearCookie('x-access-token');
+    res.redirect('/');
 });
 router.get('/forget-password', (req, res) => {
-  res.render('auth-forget', { title: 'Quên mật khẩu' });
+    res.render('auth-forget', { title: 'Quên mật khẩu' });
 });
 router.get('/reset-password', (req, res) => {
-  res.render('auth-reset', { title: 'Đặt lại mật khẩu' });
+    res.render('auth-reset', { title: 'Đặt lại mật khẩu' });
 });
 
 router.post('/login', authController.login);
