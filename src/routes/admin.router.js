@@ -9,7 +9,7 @@ router.get(
     '/',
     authMiddleware.verifyTokenGET,
     authMiddleware.isAdmin,
-    (req, res) => {
+    (req, res, next) => {
         res.end('admin');
     }
 );

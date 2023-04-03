@@ -14,7 +14,7 @@ const { connection } = require('../models/database');
  * username : body
  * password : body
  */
-function login(req, res) {
+function login(req, res, next) {
     if (!req.body.username || !req.body.password) {
         return res.status(400).json({ success: 0 });
     }
@@ -24,8 +24,8 @@ function login(req, res) {
         [req.body.username],
         async (err, results) => {
             if (err) {
-                console.log(err);
-                return res.status(500).json({ success: 0, error: err });
+                res.status(500).json({ success: 0, error: err.code });
+                return next(new Error(err));
             }
 
             if (!results.length) {
@@ -63,7 +63,7 @@ function login(req, res) {
 /**
  * email : body
  */
-function registerEmail(req, res) {
+function registerEmail(req, res, next) {
     if (!req.body.email) {
         return res.status(400).json({ success: 0 });
     }
@@ -76,8 +76,8 @@ function registerEmail(req, res) {
         [req.body.email],
         (err, results) => {
             if (err) {
-                console.log(err);
-                return res.status(500).json({ success: 0, error: err });
+                res.status(500).json({ success: 0, error: err.code });
+                return next(new Error(err));
             }
             if (results[0].exist) {
                 return res.status(409).json({ success: 0, code: 'exist' });
@@ -85,8 +85,8 @@ function registerEmail(req, res) {
 
             crypto.randomBytes(30, (err, buffer) => {
                 if (err) {
-                    console.log(err);
-                    return res.status(500).json({ success: 0, error: err });
+                    res.status(500).json({ success: 0, error: err.code });
+                    return next(new Error(err));
                 }
 
                 const token = buffer.toString('hex');
@@ -94,12 +94,11 @@ function registerEmail(req, res) {
                     verificationEmailOptions(req.body.email, token),
                     (err, info) => {
                         if (err) {
-                            console.log(err);
-                            return res.status(500).json({
+                            res.status(500).json({
                                 success: 0,
-                                code: 'email-sending-error',
-                                error: err,
+                                error: err.code,
                             });
+                            return next(new Error(err));
                         }
 
                         connection.query(
@@ -107,10 +106,11 @@ function registerEmail(req, res) {
                             [req.body.email, token],
                             (err, results) => {
                                 if (err) {
-                                    console.log(err);
-                                    return res
-                                        .status(500)
-                                        .json({ success: 0, error: err });
+                                    res.status(500).json({
+                                        success: 0,
+                                        error: err.code,
+                                    });
+                                    return next(new Error(err));
                                 }
 
                                 res.json({ success: 1 });
@@ -131,7 +131,7 @@ function registerEmail(req, res) {
  * repassword : body
  * token : body
  */
-function createAccount(req, res) {
+function createAccount(req, res, next) {
     if (
         !req.body.name ||
         !req.body.email ||
@@ -154,8 +154,8 @@ function createAccount(req, res) {
         [req.body.email, req.body.token],
         (err, results) => {
             if (err) {
-                console.log(err);
-                return res.status(500).json({ success: 0, error: err });
+                res.status(500).json({ success: 0, error: err.code });
+                return next(new Error(err));
             }
 
             if (!results.length) {
@@ -177,8 +177,8 @@ function createAccount(req, res) {
                 [req.body.email, req.body.phone],
                 async (err, results) => {
                     if (err) {
-                        console.log(err);
-                        return res.status(500).json({ success: 0, error: err });
+                        res.status(500).json({ success: 0, error: err.code });
+                        return next(new Error(err));
                     }
 
                     if (results[0].exist) {
@@ -195,10 +195,11 @@ function createAccount(req, res) {
                         'INSERT INTO carts VALUES(DEFAULT, DEFAULT)',
                         (err, results) => {
                             if (err) {
-                                console.log(err);
-                                return res
-                                    .status(500)
-                                    .json({ success: 0, error: err });
+                                res.status(500).json({
+                                    success: 0,
+                                    error: err.code,
+                                });
+                                return next(new Error(err));
                             }
 
                             const cartId = results.insertId;
@@ -213,10 +214,11 @@ function createAccount(req, res) {
                                 ],
                                 (err, results) => {
                                     if (err) {
-                                        console.log(err);
-                                        return res
-                                            .status(500)
-                                            .json({ success: 0 });
+                                        res.status(500).json({
+                                            success: 0,
+                                            error: err.code,
+                                        });
+                                        return next(new Error(err));
                                     }
 
                                     const token = jwt.sign(
@@ -258,7 +260,7 @@ function createAccount(req, res) {
 /**
  * email : body
  */
-function forgetPassword(req, res) {
+function forgetPassword(req, res, next) {
     if (!req.body.email) {
         return res.status(400).json({ success: 0 });
     }
@@ -271,8 +273,8 @@ function forgetPassword(req, res) {
         [req.body.email],
         (err, results) => {
             if (err) {
-                console.log(err);
-                return res.status(500).json({ success: 0, error: err });
+                res.status(500).json({ success: 0, error: err.code });
+                return next(new Error(err));
             }
             if (results.length == 0) {
                 return res
@@ -284,8 +286,8 @@ function forgetPassword(req, res) {
 
             crypto.randomBytes(30, (err, buffer) => {
                 if (err) {
-                    console.log(err);
-                    return res.status(500).json({ success: 0, error: err });
+                    res.status(500).json({ success: 0, error: err.code });
+                    return next(new Error(err));
                 }
 
                 const token = buffer.toString('hex');
@@ -293,12 +295,11 @@ function forgetPassword(req, res) {
                     resetPasswordEmailOptions(req.body.email, token),
                     (err, info) => {
                         if (err) {
-                            console.log(err);
-                            return res.status(500).json({
+                            res.status(500).json({
                                 success: 0,
-                                code: 'email-sending-error',
-                                error: err,
+                                error: err.code,
                             });
+                            return next(new Error(err));
                         }
 
                         connection.query(
@@ -306,10 +307,11 @@ function forgetPassword(req, res) {
                             [userId, req.body.email, 0, token],
                             (err, results) => {
                                 if (err) {
-                                    console.log(err);
-                                    return res
-                                        .status(500)
-                                        .json({ success: 0, error: err });
+                                    res.status(500).json({
+                                        success: 0,
+                                        error: err.code,
+                                    });
+                                    return next(new Error(err));
                                 }
 
                                 res.json({ success: 1 });
@@ -328,7 +330,7 @@ function forgetPassword(req, res) {
  * repassword : body
  * token : body
  */
-function resetPassword(req, res) {
+function resetPassword(req, res, next) {
     if (
         !req.body.email ||
         !req.body.password ||
@@ -346,8 +348,8 @@ function resetPassword(req, res) {
         [req.body.email, req.body.token],
         async (err, results) => {
             if (err) {
-                console.log(err);
-                return res.status(500).json({ success: 0, error: err });
+                res.status(500).json({ success: 0, error: err.code });
+                return next(new Error(err));
             }
             if (!results.length) {
                 return res
@@ -371,8 +373,8 @@ function resetPassword(req, res) {
                 [hash, userId],
                 (err, results) => {
                     if (err) {
-                        console.log(err);
-                        return res.status(500).json({ success: 0, error: err });
+                        res.status(500).json({ success: 0, error: err.code });
+                        return next(new Error(err));
                     }
 
                     res.json({ success: 1 });

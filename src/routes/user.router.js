@@ -21,7 +21,7 @@ router.get('/account', authMiddleware.verifyTokenGET, (req, res, next) => {
         });
     });
 });
-router.get('/orders', authMiddleware.verifyTokenGET, (req, res) => {
+router.get('/orders', authMiddleware.verifyTokenGET, (req, res, next) => {
     res.render('user-orders', { title: 'Thông tin đơn hàng' });
 });
 

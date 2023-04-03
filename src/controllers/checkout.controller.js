@@ -7,7 +7,7 @@ const { getUserId } = require('../controllers/user.controller');
  * userAddress : body
  * list: [{productId,sizeId,quantity}] : body
  */
-function checkout(req, res) {
+function checkout(req, res, next) {
     if (!req.body.userName || !req.body.userPhone || !req.body.userAddress) {
         return res.status(400).json({ success: 0, code: 'not-infor' });
     }
@@ -39,8 +39,8 @@ function checkout(req, res) {
 
     connection.beginTransaction((err) => {
         if (err) {
-            console.log(err);
-            return res.status(500).json({ success: 0, error: err });
+            res.status(500).json({ success: 0, error: err.code });
+            return next(new Error(err));
         }
 
         let query =
@@ -54,9 +54,9 @@ function checkout(req, res) {
         );
         connection.query(query, params, (err, results) => {
             if (err) {
-                console.log(err);
                 return connection.rollback(() => {
-                    return res.status(500).json({ success: 0, error: err });
+                    res.status(500).json({ success: 0, error: err.code });
+                    return next(new Error(err));
                 });
             }
             if (results.length > 0) {
@@ -82,11 +82,12 @@ function checkout(req, res) {
                 ],
                 (err, results) => {
                     if (err) {
-                        console.log(err);
                         return connection.rollback(() => {
-                            return res
-                                .status(500)
-                                .json({ success: 0, error: err });
+                            res.status(500).json({
+                                success: 0,
+                                error: err.code,
+                            });
+                            return next(new Error(err));
                         });
                     }
 
@@ -105,11 +106,12 @@ function checkout(req, res) {
                     );
                     connection.query(query, params, (err, results) => {
                         if (err) {
-                            console.log(err);
                             return connection.rollback(() => {
-                                return res
-                                    .status(500)
-                                    .json({ success: 0, error: err });
+                                res.status(500).json({
+                                    success: 0,
+                                    error: err.code,
+                                });
+                                return next(new Error(err));
                             });
                         }
 

@@ -8,14 +8,14 @@ const productController = require('../controllers/product.controller');
 
 const router = express.Router();
 
-router.get('/search', (req, res) => {
+router.get('/search', (req, res, next) => {
     res.render('search', {
         title: req.query.keyword,
         keyword: req.query.keyword,
     });
 });
 
-router.get('/category/:categoryId', (req, res) => {
+router.get('/category/:categoryId', (req, res, next) => {
     res.render('category', {
         title: req.query.name,
     });

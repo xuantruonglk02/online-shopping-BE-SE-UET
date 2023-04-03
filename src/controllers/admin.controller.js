@@ -9,7 +9,7 @@ const { connection, commitTransaction } = require('../models/database');
  * description
  * thumbnail
  */
-function addProduct(req, res) {
+function addProduct(req, res, next) {
     if (
         !req.body.lineId ||
         !req.body.classId ||
@@ -35,8 +35,8 @@ function addProduct(req, res) {
 
     connection.beginTransaction((err) => {
         if (err) {
-            console.log(err);
-            return res.status(500).json({ success: 0, error: err });
+            res.status(500).json({ success: 0, error: err.code });
+            return next(new Error(err));
         }
 
         connection.query(
@@ -51,9 +51,9 @@ function addProduct(req, res) {
             ],
             (err, results) => {
                 if (err) {
-                    console.log(err);
                     return connection.rollback(() => {
-                        return res.status(500).json({ success: 0, error: err });
+                        res.status(500).json({ success: 0, error: err.code });
+                        return next(new Error(err));
                     });
                 }
 
@@ -67,11 +67,12 @@ function addProduct(req, res) {
                 );
                 connection.query(query, params, (err, results) => {
                     if (err) {
-                        console.log(err);
                         return connection.rollback(() => {
-                            return res
-                                .status(500)
-                                .json({ success: 0, error: err });
+                            res.status(500).json({
+                                success: 0,
+                                error: err.code,
+                            });
+                            return next(new Error(err));
                         });
                     }
 
@@ -90,7 +91,7 @@ function addProduct(req, res) {
  * description
  * thumbnail
  */
-function modifyProduct(req, res) {
+function modifyProduct(req, res, next) {
     if (!req.body.productId) {
         return res.status(400).json({ success: 0 });
     }
@@ -129,14 +130,14 @@ function modifyProduct(req, res) {
 
     connection.beginTransaction((err) => {
         if (err) {
-            console.log(err);
-            return res.status(500).json({ success: 0, error: err });
+            res.status(500).json({ success: 0, error: err.code });
+            return next(new Error(err));
         }
 
         connection.query(query, params, (err, results) => {
             if (err) {
-                console.log(err);
-                return res.status(500).json({ success: 0, error: err });
+                res.status(500).json({ success: 0, error: err.code });
+                return next(new Error(err));
             }
 
             if (req.body.sizes) {
@@ -145,10 +146,11 @@ function modifyProduct(req, res) {
                     [req.body.productId],
                     (err, results) => {
                         if (err) {
-                            console.log(err);
-                            return res
-                                .status(500)
-                                .json({ success: 0, error: err });
+                            res.status(500).json({
+                                success: 0,
+                                error: err.code,
+                            });
+                            return next(new Error(err));
                         }
 
                         let query =
@@ -167,10 +169,11 @@ function modifyProduct(req, res) {
                         );
                         connection.query(query, params, (err, results) => {
                             if (err) {
-                                console.log(err);
-                                return res
-                                    .status(500)
-                                    .json({ success: 0, error: err });
+                                res.status(500).json({
+                                    success: 0,
+                                    error: err.code,
+                                });
+                                return next(new Error(err));
                             }
 
                             return commitTransaction(connection, res);
@@ -189,7 +192,7 @@ function modifyProduct(req, res) {
  *
  * productId : body
  */
-function removeProduct(req, res) {
+function removeProduct(req, res, next) {
     if (!req.body.productId) {
         return res.status(400).json({ success: 0 });
     }
@@ -199,8 +202,8 @@ function removeProduct(req, res) {
         [req.body.productId],
         (err, results) => {
             if (err) {
-                console.log(err);
-                return res.status(500).json({ success: 0, error: err });
+                res.status(500).json({ success: 0, error: err.code });
+                return next(new Error(err));
             }
 
             res.json({ success: 1 });
@@ -213,7 +216,7 @@ function removeProduct(req, res) {
  * classId
  * name
  */
-function addCategory(req, res) {
+function addCategory(req, res, next) {
     if (!req.body.type || !req.body.name) {
         return res.status(400).json({ success: 0 });
     }
@@ -235,8 +238,8 @@ function addCategory(req, res) {
 
     connection.query(query, params, (err, results) => {
         if (err) {
-            console.log(err);
-            return res.status(500).json({ success: 0, error: err });
+            res.status(500).json({ success: 0, error: err.code });
+            return next(new Error(err));
         }
 
         res.json({ success: 1 });
@@ -247,7 +250,7 @@ function addCategory(req, res) {
  * begin : body
  * quantity : body
  */
-function getBills(req, res) {
+function getBills(req, res, next) {
     if (!req.body.begin || !req.body.quantity) {
         return res.status(400).json({ success: 0 });
     }
@@ -260,8 +263,8 @@ function getBills(req, res) {
         [req.body.begin, req.body.quantity],
         (err, results) => {
             if (err) {
-                console.log(err);
-                return res.status(500).json({ success: 0, error: err });
+                res.status(500).json({ success: 0, error: err.code });
+                return next(new Error(err));
             }
 
             res.json({ success: 1, results: results });
