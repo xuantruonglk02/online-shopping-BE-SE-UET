@@ -354,7 +354,6 @@ function getAllRatingsOfProduct(req, res, next) {
         [req.params.productId],
         (err, results) => {
             if (err) {
-                console.log(err);
                 res.status(500).json({ success: 0, error: err.code });
                 return next(new Error(err));
             }
