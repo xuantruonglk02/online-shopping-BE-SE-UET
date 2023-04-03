@@ -57,7 +57,7 @@ function getUserInformationForCheckout(req, callback) {
  */
 function changeName(req, res) {
     if (!req.body.name || !req.body.password) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     const userId = getUserId(req.cookies['x-access-token']);
@@ -67,7 +67,7 @@ function changeName(req, res) {
         async (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
             const match = await bcrypt.compare(
                 req.body.password,
@@ -83,7 +83,7 @@ function changeName(req, res) {
                 (err, results) => {
                     if (err) {
                         console.log(err);
-                        return res.json({ success: 0 });
+                        return res.status(500).json({ success: 0, error: err });
                     }
 
                     res.json({ success: 1 });
@@ -99,7 +99,7 @@ function changeName(req, res) {
  */
 function changeEmail(req, res) {
     if (!req.body.email || !req.body.password) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     if (!validator.isEmail(req.body.email)) {
         return res.json({ success: 0, msg: 'Email không hợp lệ' });
@@ -113,7 +113,7 @@ function changeEmail(req, res) {
         async (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             const match = await bcrypt.compare(
@@ -133,7 +133,7 @@ function changeEmail(req, res) {
                 (err, results) => {
                     if (err) {
                         console.log(err);
-                        return res.json({ success: 0 });
+                        return res.status(500).json({ success: 0, error: err });
                     }
 
                     if (results[0].exist) {
@@ -149,7 +149,9 @@ function changeEmail(req, res) {
                         (err, results) => {
                             if (err) {
                                 console.log(err);
-                                return res.json({ success: 0 });
+                                return res
+                                    .status(500)
+                                    .json({ success: 0, error: err });
                             }
 
                             res.json({ success: 1 });
@@ -167,7 +169,7 @@ function changeEmail(req, res) {
  */
 function changePhone(req, res) {
     if (!req.body.phone || !req.body.password) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     if (!validator.isMobilePhone(req.body.phone, 'vi-VN')) {
         return res.json({ success: 0, msg: 'Số điện thoại không hợp lệ' });
@@ -181,7 +183,7 @@ function changePhone(req, res) {
         async (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             const match = await bcrypt.compare(
@@ -201,7 +203,7 @@ function changePhone(req, res) {
                 (err, results) => {
                     if (err) {
                         console.log(err);
-                        return res.json({ success: 0 });
+                        return res.status(500).json({ success: 0, error: err });
                     }
 
                     if (results[0].exist) {
@@ -217,7 +219,9 @@ function changePhone(req, res) {
                         (err, results) => {
                             if (err) {
                                 console.log(err);
-                                return res.json({ success: 0 });
+                                return res
+                                    .status(500)
+                                    .json({ success: 0, error: err });
                             }
 
                             res.json({ success: 1 });
@@ -235,7 +239,7 @@ function changePhone(req, res) {
  */
 function changeAddress(req, res) {
     if (!req.body.address || !req.body.password) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     const userId = getUserId(req.cookies['x-access-token']);
@@ -246,7 +250,7 @@ function changeAddress(req, res) {
         async (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             const match = await bcrypt.compare(
@@ -266,7 +270,7 @@ function changeAddress(req, res) {
                 (err, results) => {
                     if (err) {
                         console.log(err);
-                        return res.json({ success: 0 });
+                        return res.status(500).json({ success: 0, error: err });
                     }
 
                     res.json({ success: 1 });
@@ -282,7 +286,7 @@ function changeAddress(req, res) {
  */
 function changePassword(req, res) {
     if (!req.body.oldPassword || !req.body.newPassword) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     const userId = getUserId(req.cookies['x-access-token']);
@@ -292,7 +296,7 @@ function changePassword(req, res) {
         async (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             const matchOldPassword = await bcrypt.compare(
@@ -325,7 +329,7 @@ function changePassword(req, res) {
                 (err, results) => {
                     if (err) {
                         console.log(err);
-                        return res.json({ success: 0 });
+                        return res.status(500).json({ success: 0, error: err });
                     }
 
                     res.json({ success: 1 });

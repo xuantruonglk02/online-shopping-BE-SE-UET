@@ -20,23 +20,23 @@ function addProduct(req, res) {
         !req.body.sizes ||
         isNaN(req.body.price)
     ) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     req.body.sizes = checkSizesList(req.body.sizes);
     if (!req.body.sizes) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     req.body.price = parseInt(req.body.price);
     if (req.body.price < 1) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     connection.beginTransaction((err) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         connection.query(
@@ -53,7 +53,7 @@ function addProduct(req, res) {
                 if (err) {
                     console.log(err);
                     return connection.rollback(() => {
-                        return res.json({ success: 0 });
+                        return res.status(500).json({ success: 0, error: err });
                     });
                 }
 
@@ -69,7 +69,9 @@ function addProduct(req, res) {
                     if (err) {
                         console.log(err);
                         return connection.rollback(() => {
-                            return res.json({ success: 0 });
+                            return res
+                                .status(500)
+                                .json({ success: 0, error: err });
                         });
                     }
 
@@ -90,7 +92,7 @@ function addProduct(req, res) {
  */
 function modifyProduct(req, res) {
     if (!req.body.productId) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     let query = 'UPDATE products SET',
@@ -102,7 +104,7 @@ function modifyProduct(req, res) {
     if (req.body.price) {
         req.body.price = parseInt(req.body.price);
         if (req.body.price < 1) {
-            return res.json({ success: 0 });
+            return res.status(400).json({ success: 0 });
         }
         query += ' price=?,';
         params.push(req.body.price);
@@ -110,7 +112,7 @@ function modifyProduct(req, res) {
     if (req.body.sizes) {
         req.body.sizes = checkSizesList(req.body.sizes);
         if (!req.body.sizes) {
-            return res.json({ success: 0 });
+            return res.status(400).json({ success: 0 });
         }
     }
     if (req.body.description) {
@@ -128,13 +130,13 @@ function modifyProduct(req, res) {
     connection.beginTransaction((err) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         connection.query(query, params, (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             if (req.body.sizes) {
@@ -144,7 +146,9 @@ function modifyProduct(req, res) {
                     (err, results) => {
                         if (err) {
                             console.log(err);
-                            return res.json({ success: 0 });
+                            return res
+                                .status(500)
+                                .json({ success: 0, error: err });
                         }
 
                         let query =
@@ -164,7 +168,9 @@ function modifyProduct(req, res) {
                         connection.query(query, params, (err, results) => {
                             if (err) {
                                 console.log(err);
-                                return res.json({ success: 0 });
+                                return res
+                                    .status(500)
+                                    .json({ success: 0, error: err });
                             }
 
                             return commitTransaction(connection, res);
@@ -185,7 +191,7 @@ function modifyProduct(req, res) {
  */
 function removeProduct(req, res) {
     if (!req.body.productId) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     connection.query(
@@ -194,7 +200,7 @@ function removeProduct(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             res.json({ success: 1 });
@@ -209,7 +215,7 @@ function removeProduct(req, res) {
  */
 function addCategory(req, res) {
     if (!req.body.type || !req.body.name) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     let query, params;
@@ -218,19 +224,19 @@ function addCategory(req, res) {
         params = [req.body.name];
     } else if (req.body.type === 'line') {
         if (!req.body.classId) {
-            return res.json({ success: 0 });
+            return res.status(400).json({ success: 0 });
         }
 
         query = 'INSERT INTO product_lines (class_id, name) VALUES (?,?)';
         params = [req.body.classId, req.body.name];
     } else {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     connection.query(query, params, (err, results) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         res.json({ success: 1 });
@@ -243,7 +249,7 @@ function addCategory(req, res) {
  */
 function getBills(req, res) {
     if (!req.body.begin || !req.body.quantity) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     req.body.begin = parseInt(req.body.begin);
@@ -255,7 +261,7 @@ function getBills(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             res.json({ success: 1, results: results });
@@ -266,27 +272,26 @@ function getBills(req, res) {
 function checkSizesList(sizes) {
     try {
         sizes = JSON.parse(sizes);
+        if (!sizes.length) {
+            return 0;
+        }
+        for (let i = 0; i < sizes.length; i++) {
+            if (
+                !sizes[i].sizeId ||
+                !sizes[i].quantity ||
+                isNaN(sizes[i].quantity)
+            ) {
+                return 0;
+            }
+            sizes[i].quantity = parseInt(sizes[i].quantity);
+            if (sizes[i].quantity < 1) {
+                return 0;
+            }
+        }
+        return sizes;
     } catch (err) {
-        console.log(err);
-        return 0;
+        throw err;
     }
-    if (!sizes.length) {
-        return 0;
-    }
-    for (let i = 0; i < sizes.length; i++) {
-        if (
-            !sizes[i].sizeId ||
-            !sizes[i].quantity ||
-            isNaN(sizes[i].quantity)
-        ) {
-            return 0;
-        }
-        sizes[i].quantity = parseInt(sizes[i].quantity);
-        if (sizes[i].quantity < 1) {
-            return 0;
-        }
-    }
-    return sizes;
 }
 
 module.exports = {

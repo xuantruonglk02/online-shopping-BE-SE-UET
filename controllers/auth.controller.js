@@ -25,11 +25,11 @@ function login(req, res) {
         async (err, results) => {
             if (err) {
                 console.log(err);
-                return res.status(500).json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             if (!results.length) {
-                return res.json({ success: 0, code: 'username' });
+                return res.status(401).json({ success: 0, code: 'username' });
             }
 
             const match = await bcrypt.compare(
@@ -37,7 +37,7 @@ function login(req, res) {
                 results[0].password
             );
             if (!match) {
-                return res.json({ success: 0, code: 'password' });
+                return res.status(401).json({ success: 0, code: 'password' });
             }
 
             const token = jwt.sign(
@@ -68,7 +68,7 @@ function registerEmail(req, res) {
         return res.status(400).json({ success: 0 });
     }
     if (!validator.isEmail(req.body.email)) {
-        return res.json({ success: 0, code: 'invalid' });
+        return res.status(400).json({ success: 0, code: 'invalid' });
     }
 
     connection.query(
@@ -77,16 +77,16 @@ function registerEmail(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
             if (results[0].exist) {
-                return res.json({ success: 0, code: 'exist' });
+                return res.status(409).json({ success: 0, code: 'exist' });
             }
 
             crypto.randomBytes(30, (err, buffer) => {
                 if (err) {
                     console.log(err);
-                    return res.json({ success: 0 });
+                    return res.status(500).json({ success: 0, error: err });
                 }
 
                 const token = buffer.toString('hex');
@@ -95,9 +95,10 @@ function registerEmail(req, res) {
                     (err, info) => {
                         if (err) {
                             console.log(err);
-                            return res.json({
+                            return res.status(500).json({
                                 success: 0,
                                 code: 'email-sending-error',
+                                error: err,
                             });
                         }
 
@@ -107,7 +108,9 @@ function registerEmail(req, res) {
                             (err, results) => {
                                 if (err) {
                                     console.log(err);
-                                    return res.json({ success: 0 });
+                                    return res
+                                        .status(500)
+                                        .json({ success: 0, error: err });
                                 }
 
                                 res.json({ success: 1 });
@@ -140,10 +143,10 @@ function createAccount(req, res) {
         return res.status(400).json({ success: 0 });
     }
     if (req.body.password !== req.body.repassword) {
-        return res.json({ success: 0, code: 'repassword-wrong' });
+        return res.status(400).json({ success: 0, code: 'repassword-wrong' });
     }
     if (!validator.isMobilePhone(req.body.phone, 'vi-VN')) {
-        return res.json({ success: 0, code: 'phone-wrong' });
+        return res.status(400).json({ success: 0, code: 'phone-wrong' });
     }
 
     connection.query(
@@ -152,17 +155,21 @@ function createAccount(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.status(500).json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             if (!results.length) {
-                return res.json({ success: 0, code: 'verify-not-exist' });
+                return res
+                    .status(400)
+                    .json({ success: 0, code: 'verify-not-exist' });
             }
             if (
                 new Date() - new Date(results[0].created_at) >
                 process.env.EMAIL_TOKEN_EXPIRATION_TIME
             ) {
-                return res.json({ success: 0, code: 'verify-expired' });
+                return res
+                    .status(400)
+                    .json({ success: 0, code: 'verify-expired' });
             }
 
             connection.query(
@@ -171,11 +178,11 @@ function createAccount(req, res) {
                 async (err, results) => {
                     if (err) {
                         console.log(err);
-                        return res.status(500).json({ success: 0 });
+                        return res.status(500).json({ success: 0, error: err });
                     }
 
                     if (results[0].exist) {
-                        return res.json({
+                        return res.status(409).json({
                             success: 0,
                             code: 'email-phone-exist',
                         });
@@ -189,7 +196,9 @@ function createAccount(req, res) {
                         (err, results) => {
                             if (err) {
                                 console.log(err);
-                                return res.status(500).json({ success: 0 });
+                                return res
+                                    .status(500)
+                                    .json({ success: 0, error: err });
                             }
 
                             const cartId = results.insertId;
@@ -254,7 +263,7 @@ function forgetPassword(req, res) {
         return res.status(400).json({ success: 0 });
     }
     if (!validator.isEmail(req.body.email)) {
-        return res.json({ success: 0, code: 'invalid' });
+        return res.status(400).json({ success: 0, code: 'invalid' });
     }
 
     connection.query(
@@ -263,10 +272,12 @@ function forgetPassword(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
             if (results.length == 0) {
-                return res.json({ succes: 0, code: 'email-not-exist' });
+                return res
+                    .status(404)
+                    .json({ succes: 0, code: 'email-not-exist' });
             }
 
             const userId = results[0].user_id;
@@ -274,7 +285,7 @@ function forgetPassword(req, res) {
             crypto.randomBytes(30, (err, buffer) => {
                 if (err) {
                     console.log(err);
-                    return res.json({ success: 0 });
+                    return res.status(500).json({ success: 0, error: err });
                 }
 
                 const token = buffer.toString('hex');
@@ -283,9 +294,10 @@ function forgetPassword(req, res) {
                     (err, info) => {
                         if (err) {
                             console.log(err);
-                            return res.json({
+                            return res.status(500).json({
                                 success: 0,
                                 code: 'email-sending-error',
+                                error: err,
                             });
                         }
 
@@ -295,7 +307,9 @@ function forgetPassword(req, res) {
                             (err, results) => {
                                 if (err) {
                                     console.log(err);
-                                    return res.json({ success: 0 });
+                                    return res
+                                        .status(500)
+                                        .json({ success: 0, error: err });
                                 }
 
                                 res.json({ success: 1 });
@@ -324,7 +338,7 @@ function resetPassword(req, res) {
         res.status(400).json({ success: 0 });
     }
     if (req.body.password !== req.body.repassword) {
-        return res.json({ success: 0, code: 'repassword-wrong' });
+        return res.status(400).json({ success: 0, code: 'repassword-wrong' });
     }
 
     connection.query(
@@ -333,16 +347,20 @@ function resetPassword(req, res) {
         async (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
             if (!results.length) {
-                return res.json({ success: 0, code: 'token-not-exist' });
+                return res
+                    .status(400)
+                    .json({ success: 0, code: 'token-not-exist' });
             }
             if (
                 new Date() - new Date(results[0].created_at) >
                 process.env.RESET_PASSWORD_TOKEN_EXPIRATION_TIME
             ) {
-                return res.json({ success: 0, code: 'token-expired' });
+                return res
+                    .status(400)
+                    .json({ success: 0, code: 'token-expired' });
             }
 
             const userId = results[0].user_id;
@@ -354,7 +372,7 @@ function resetPassword(req, res) {
                 (err, results) => {
                     if (err) {
                         console.log(err);
-                        return res.json({ success: 0 });
+                        return res.status(500).json({ success: 0, error: err });
                     }
 
                     res.json({ success: 1 });

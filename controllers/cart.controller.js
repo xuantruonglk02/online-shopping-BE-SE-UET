@@ -10,7 +10,7 @@ function getQuantityOfProducts(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             res.json({ success: 1, result: results[0] });
@@ -30,7 +30,7 @@ function getAllProductsForCartMenu(req, res) {
     connection.query(query, [cartId], (err, results) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         res.json({ success: 1, results: results });
@@ -51,7 +51,7 @@ function getAllProducts(req, res) {
     connection.query(query, [cartId], (err, results) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         res.json({ success: 1, results: results });
@@ -71,7 +71,7 @@ function addProduct(req, res) {
         isNaN(req.body.sizeId) ||
         isNaN(req.body.quantity)
     ) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     req.body.sizeId = parseInt(req.body.sizeId);
     req.body.quantity = parseInt(req.body.quantity);
@@ -83,10 +83,12 @@ function addProduct(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
             if (results[0].quantity + req.body.quantity > 30) {
-                return res.json({ success: 0, code: 'max-in-cart', max: 30 });
+                return res
+                    .status(400)
+                    .json({ success: 0, code: 'max-in-cart', max: 30 });
             }
 
             connection.query(
@@ -100,7 +102,7 @@ function addProduct(req, res) {
                 (err, results) => {
                     if (err) {
                         console.log(err);
-                        return res.json({ success: 0, code: err.code });
+                        return res.status(500).json({ success: 0, error: err });
                     }
 
                     res.json({ success: 1 });
@@ -145,7 +147,9 @@ function updateCart(req, res) {
     }
 
     if (req.body.list.length > 30) {
-        return res.json({ success: 0, code: 'max-in-cart', max: 30 });
+        return res
+            .status(400)
+            .json({ success: 0, code: 'max-in-cart', max: 30 });
     }
 
     const cartId = getCartId(req.cookies['x-access-token']);
@@ -157,7 +161,7 @@ function updateCart(req, res) {
             (err, results) => {
                 if (err) {
                     console.log(err);
-                    return res.status(500).json({ success: 0 });
+                    return res.status(500).json({ success: 0, error: err });
                 }
 
                 return res.json({ success: 1 });
@@ -167,7 +171,7 @@ function updateCart(req, res) {
         connection.beginTransaction((err) => {
             if (err) {
                 console.log(err);
-                return res.status(500).json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             connection.query(
@@ -176,7 +180,7 @@ function updateCart(req, res) {
                 (err, results) => {
                     if (err) {
                         console.log(err);
-                        return res.status(500).json({ success: 0 });
+                        return res.status(500).json({ success: 0, error: err });
                     }
 
                     let query =
@@ -195,7 +199,9 @@ function updateCart(req, res) {
                     connection.query(query, params, (err, results) => {
                         if (err) {
                             console.log(err);
-                            return res.status(500).json({ success: 0 });
+                            return res
+                                .status(500)
+                                .json({ success: 0, error: err });
                         }
 
                         return commitTransaction(connection, res);
@@ -212,7 +218,7 @@ function updateCart(req, res) {
  */
 function removeProduct(req, res) {
     if (!req.body.productId || !req.body.sizeId) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     const cartId = getCartId(req.cookies['x-access-token']);
@@ -223,7 +229,7 @@ function removeProduct(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             res.json({ success: 1 });
@@ -236,20 +242,20 @@ function removeProduct(req, res) {
  */
 function removeProducts(req, res) {
     if (!req.body.list) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     try {
         req.body.list = JSON.parse(req.body.list);
     } catch (err) {
         console.log(err);
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     if (!req.body.list.length) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     for (let i = 0; i < req.body.list.length; i++) {
         if (!req.body.list[i].productId || !req.body.list[i].sizeId) {
-            return res.json({ success: 0 });
+            return res.status(400).json({ success: 0 });
         }
     }
 
@@ -267,7 +273,7 @@ function removeProducts(req, res) {
     connection.query(query, [cartId].concat(params), (err, results) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         res.json({ success: 1 });

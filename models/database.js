@@ -35,7 +35,7 @@ function commitTransaction(connection, res) {
         if (err) {
             console.log(err);
             return connection.rollback(() => {
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             });
         }
 

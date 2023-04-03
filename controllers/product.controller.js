@@ -30,16 +30,16 @@ function getProductById(productId, callback) {
  */
 function getProductsForCheckout(req, res) {
     if (!req.body.list) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     try {
         req.body.list = JSON.parse(req.body.list);
     } catch (err) {
         console.log(err);
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     if (!(req.body.list instanceof Array) || !req.body.list.length) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     let query =
@@ -47,7 +47,7 @@ function getProductsForCheckout(req, res) {
         'product_id=? OR '.repeat(req.body.list.length).slice(0, -4);
     connection.query(query, req.body.list, (err, results) => {
         if (err) {
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
         res.json({ success: 1, results: results });
     });
@@ -130,7 +130,7 @@ function getProductsByCategory(req, res) {
     connection.query(query, params, (err, results) => {
         if (err) {
             console.log(err);
-            return res.status(500).json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         const rows = results;
@@ -159,7 +159,7 @@ function getNewProducts(req, res) {
         !req.body.quantity ||
         isNaN(req.body.quantity)
     ) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
 
     req.body.begin = parseInt(req.body.begin);
@@ -171,7 +171,7 @@ function getNewProducts(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             res.json({ success: 1, results: results });
@@ -183,7 +183,7 @@ function getAllProductClasses(req, res) {
     connection.query('SELECT * FROM product_classes', (err, results) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         res.json({ success: 1, results: results });
@@ -194,7 +194,7 @@ function getAllProductLines(req, res) {
     connection.query('SELECT * FROM product_lines', (err, results) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         res.json({ success: 1, results: results });
@@ -211,7 +211,7 @@ function getAllProductLinesByClass(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             res.json({ success: 1, results: results });
@@ -230,7 +230,7 @@ function getAllCategories(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             res.json({ success: 1, results: results });
@@ -322,7 +322,7 @@ function searchProductsByKeyword(req, res) {
     connection.query(query, params, (err, results) => {
         if (err) {
             console.log(err);
-            return res.status(500).json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         const rows = results;
@@ -355,7 +355,7 @@ function getAllRatingsOfProduct(req, res) {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.json({ success: 0 });
+                return res.status(500).json({ success: 0, error: err });
             }
 
             res.json({
@@ -374,7 +374,7 @@ function getAllRatingsOfProduct(req, res) {
  */
 function insertUserRating(req, res) {
     if (!req.body.comment || isNaN(req.body.star)) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     req.body.star = parseInt(req.body.star);
 
@@ -382,7 +382,7 @@ function insertUserRating(req, res) {
     checkUserBoughtProduct(userId, req.params.productId, (err, bought) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
         if (!bought) {
             return res.json({ success: 0, code: 'not-buy' });
@@ -394,7 +394,7 @@ function insertUserRating(req, res) {
             (err, results) => {
                 if (err) {
                     console.log(err);
-                    return res.json({ success: 0 });
+                    return res.status(500).json({ success: 0, error: err });
                 }
                 if (results.length > 0) {
                     return res.json({ success: 0, code: 'rating-exist' });
@@ -411,7 +411,9 @@ function insertUserRating(req, res) {
                     (err, results) => {
                         if (err) {
                             console.log(err);
-                            return res.json({ success: 0 });
+                            return res
+                                .status(500)
+                                .json({ success: 0, error: err });
                         }
 
                         res.json({ success: 1 });

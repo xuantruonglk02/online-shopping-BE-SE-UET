@@ -9,19 +9,19 @@ const { getUserId } = require('../controllers/user.controller');
  */
 function checkout(req, res) {
     if (!req.body.userName || !req.body.userPhone || !req.body.userAddress) {
-        return res.json({ success: 0, code: 'not-infor' });
+        return res.status(400).json({ success: 0, code: 'not-infor' });
     }
     if (!req.body.list) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     try {
         req.body.list = JSON.parse(req.body.list);
     } catch (err) {
         console.log(err);
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     if (!req.body.list.length) {
-        return res.json({ success: 0 });
+        return res.status(400).json({ success: 0 });
     }
     for (let i = 0; i < req.body.list.length; i++) {
         if (
@@ -29,18 +29,18 @@ function checkout(req, res) {
             !req.body.list[i].sizeId ||
             isNaN(req.body.list[i].quantity)
         ) {
-            return res.json({ success: 0 });
+            return res.status(400).json({ success: 0 });
         }
         req.body.list[i].quantity = parseInt(req.body.list[i].quantity);
         if (req.body.list[i].quantity < 1) {
-            return res.json({ success: 0 });
+            return res.status(400).json({ success: 0 });
         }
     }
 
     connection.beginTransaction((err) => {
         if (err) {
             console.log(err);
-            return res.json({ success: 0 });
+            return res.status(500).json({ success: 0, error: err });
         }
 
         let query =
@@ -56,12 +56,12 @@ function checkout(req, res) {
             if (err) {
                 console.log(err);
                 return connection.rollback(() => {
-                    return res.json({ success: 0 });
+                    return res.status(500).json({ success: 0, error: err });
                 });
             }
             if (results.length > 0) {
                 return connection.rollback(() => {
-                    return res.json({
+                    return res.status(400).json({
                         success: 0,
                         code: 'not-enough',
                         list: results,
@@ -84,7 +84,9 @@ function checkout(req, res) {
                     if (err) {
                         console.log(err);
                         return connection.rollback(() => {
-                            return res.json({ success: 0 });
+                            return res
+                                .status(500)
+                                .json({ success: 0, error: err });
                         });
                     }
 
@@ -105,7 +107,9 @@ function checkout(req, res) {
                         if (err) {
                             console.log(err);
                             return connection.rollback(() => {
-                                return res.json({ success: 0 });
+                                return res
+                                    .status(500)
+                                    .json({ success: 0, error: err });
                             });
                         }
 
