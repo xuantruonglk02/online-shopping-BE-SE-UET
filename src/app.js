@@ -10,13 +10,7 @@ const expressWinston = require('express-winston');
 require('dotenv').config();
 
 // routers
-const indexRouter = require('./routes/index.router');
-const authRouter = require('./routes/auth.router');
-const userRouter = require('./routes/user.router');
-const cartRouter = require('./routes/cart.router');
-const productRouter = require('./routes/product.router');
-const checkoutRouter = require('./routes/checkout.router');
-const adminRouter = require('./routes/admin.router');
+const router = require('./routes/index');
 
 const app = express();
 
@@ -65,13 +59,7 @@ app.use(
 // });
 
 // routing
-app.use('/', indexRouter);
-app.use('/auth', authRouter);
-app.use('/user', userRouter);
-app.use('/cart', cartRouter);
-app.use('/product', productRouter);
-app.use('/checkout', checkoutRouter);
-app.use('/admin', adminRouter);
+app.use('/', router);
 
 // error logging
 app.use(

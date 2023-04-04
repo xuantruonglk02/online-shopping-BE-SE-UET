@@ -1,108 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <%- include('layouts/head') %>
 
-<head>
-  <%- include('layouts/head') %>
+        <link rel="stylesheet" href="/css/auth.css" />
 
-  <link rel="stylesheet" href="/css/auth.css">
+        <script src="/js/auth-script.js"></script>
+        <script>
+            const params = new URLSearchParams(window.location.search);
+        </script>
+    </head>
 
-  <script src="/js/auth-script.js"></script>
-  <script>
-    const params = new URLSearchParams(window.location.search);
-  </script>
-</head>
+    <body>
+        <div class="main">
+            <div class="auth-background"></div>
+            <div class="page-body row">
+                <div class="auth-left">
+                    <div class="logo-ctn">
+                        <a href="/">
+                            <img src="/images/logo.png" alt="" />
+                        </a>
+                    </div>
+                </div>
+                <div class="auth-right">
+                    <div class="form-ctn">
+                        <h2>Quên mật khẩu</h2>
+                        <form action="" method="" id="forget-form">
+                            <div class="form-input-ctn">
+                                <span
+                                    >Gửi email xác nhận tới địa chỉ email của
+                                    bạn</span
+                                >
+                            </div>
+                            <div class="form-input-ctn">
+                                <input
+                                    type="email"
+                                    id="email"
+                                    placeholder="Email"
+                                    required
+                                />
+                            </div>
+                            <div class="form-input-ctn auth-error">
+                                <span>Địa chỉ email không hợp lệ</span>
+                            </div>
+                            <div class="form-input-ctn auth-error">
+                                <span>Địa chỉ email không chính xác</span>
+                            </div>
+                            <div class="form-input-ctn auth-error">
+                                <span
+                                    >Đã xảy ra lỗi khi gửi email. Vui lòng thử
+                                    lại</span
+                                >
+                            </div>
+                            <div class="form-input-ctn row relative">
+                                <input
+                                    type="submit"
+                                    value="Gửi"
+                                    id="submit-btn"
+                                    data-enable="1"
+                                />
+                                <div
+                                    class="loader"
+                                    id="submit-loader"
+                                    style="right: 5px"
+                                ></div>
+                            </div>
+                            <div
+                                class="form-input-ctn form-split-line"
+                                style="display: none"
+                            ></div>
+                            <div
+                                class="form-input-ctn success-notif"
+                                style="display: none"
+                            >
+                                <span
+                                    >Email xác nhận đã được gửi tới hộp thư của
+                                    bạn. Hãy xác nhận email</span
+                                >
+                            </div>
+                        </form>
+                        <script>
+                            $(document).ready(() => {
+                                $('#forget-form').submit(function (e) {
+                                    submitForm(e);
+                                });
+                            });
 
-<body>
-  <div class="main">
-    <div class="auth-background"></div>
-    <div class="page-body row">
-      <div class="auth-left">
-        <div class="logo-ctn">
-          <a href="/">
-            <img src="/images/logo.png" alt="">
-          </a>
+                            function submitForm(e) {
+                                if ($('#submit-btn').data('enable') == '0') {
+                                    return;
+                                }
+                                e.preventDefault();
+                                $('#forget-form').submit(false);
+                                ajaxStart();
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '/api/auth/forget-password',
+                                    data: {
+                                        email: $('#email').val(),
+                                    },
+                                    success: function (data) {
+                                        $('#forget-form').submit(function (e) {
+                                            submitForm(e);
+                                        });
+                                        ajaxStop();
+                                        if (data.success) {
+                                            ajaxSuccess();
+                                        } else {
+                                            switch (data.code) {
+                                                case 'invalid':
+                                                    $('.auth-error:eq(0)').css(
+                                                        'display',
+                                                        'block'
+                                                    );
+                                                    break;
+                                                case 'email-not-exist':
+                                                    $('.auth-error:eq(1)').css(
+                                                        'display',
+                                                        'block'
+                                                    );
+                                                    break;
+                                                case 'email-sending-error':
+                                                    $('.auth-error:eq(2)').css(
+                                                        'display',
+                                                        'block'
+                                                    );
+                                                    break;
+                                                default:
+                                                    alert('Đã có lỗi xảy ra');
+                                            }
+                                        }
+                                    },
+                                    error: function (data) {
+                                        console.log(data);
+                                        $('#forget-form').submit(function (e) {
+                                            submitForm(e);
+                                        });
+                                        ajaxStop();
+                                        alert('Đã có lỗi xảy ra');
+                                    },
+                                });
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="auth-right">
-        <div class="form-ctn">
-          <h2>Quên mật khẩu</h2>
-          <form action="" method="" id="forget-form">
-            <div class="form-input-ctn">
-              <span>Gửi email xác nhận tới địa chỉ email của bạn</span>
-            </div>
-            <div class="form-input-ctn">
-              <input type="email" id="email" placeholder="Email" required>
-            </div>
-            <div class="form-input-ctn auth-error">
-              <span>Địa chỉ email không hợp lệ</span>
-            </div>
-            <div class="form-input-ctn auth-error">
-              <span>Địa chỉ email không chính xác</span>
-            </div>
-            <div class="form-input-ctn auth-error">
-              <span>Đã xảy ra lỗi khi gửi email. Vui lòng thử lại</span>
-            </div>
-            <div class="form-input-ctn row relative">
-              <input type="submit" value="Gửi" id="submit-btn" data-enable="1">
-              <div class="loader" id="submit-loader" style="right: 5px;"></div>
-            </div>
-            <div class="form-input-ctn form-split-line" style="display: none;"></div>
-            <div class="form-input-ctn success-notif" style="display: none;">
-              <span>Email xác nhận đã được gửi tới hộp thư của bạn. Hãy xác nhận email</span>
-            </div>
-          </form>
-          <script>
-            $(document).ready(() => {
-              $('#forget-form').submit(function (e) {submitForm(e)});
-            });
-
-            function submitForm(e) {
-              if ($('#submit-btn').data('enable') == '0')  {
-                return;
-              }
-              e.preventDefault();
-              $('#forget-form').submit(false);
-              ajaxStart();
-              $.ajax({
-                type: 'POST',
-                url: '/auth/forget-password',
-                data: {
-                  'email': $('#email').val()
-                },
-                success: function (data) {
-                  $('#forget-form').submit(function (e) {submitForm(e)});
-                  ajaxStop();
-                  if (data.success) {
-                    ajaxSuccess();
-                  } else {
-                    switch (data.code) {
-                      case 'invalid':
-                        $('.auth-error:eq(0)').css('display', 'block');
-                        break;
-                      case 'email-not-exist':
-                        $('.auth-error:eq(1)').css('display', 'block');
-                        break;
-                      case 'email-sending-error':
-                        $('.auth-error:eq(2)').css('display', 'block');
-                        break;
-                      default:
-                        alert('Đã có lỗi xảy ra');
-                    }
-                  }
-                },
-                error: function (data) {
-                  console.log(data);
-                  $('#forget-form').submit(function (e) {submitForm(e)});
-                  ajaxStop();
-                  alert('Đã có lỗi xảy ra');
-                }
-              });
-            }
-          </script>
-        </div>
-      </div>
-    </div>
-  </div>
-</body>
-
+    </body>
 </html>

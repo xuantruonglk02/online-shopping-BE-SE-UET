@@ -1,105 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <%- include('layouts/head') %>
 
-<head>
-  <%- include('layouts/head') %>
+        <link rel="stylesheet" href="/css/auth.css" />
 
-  <link rel="stylesheet" href="/css/auth.css">
+        <script src="/js/auth-script.js"></script>
+    </head>
 
-  <script src="/js/auth-script.js"></script>
-</head>
+    <body>
+        <div class="main">
+            <div class="auth-background"></div>
+            <div class="page-body row">
+                <div class="auth-left">
+                    <div class="logo-ctn">
+                        <a href="/">
+                            <img src="/images/logo.png" alt="" />
+                        </a>
+                    </div>
+                </div>
+                <div class="auth-right">
+                    <div class="form-ctn">
+                        <h2>Đăng nhập</h2>
+                        <form action="" method="" id="login-form">
+                            <div class="form-input-ctn">
+                                <input
+                                    type="text"
+                                    name="username"
+                                    id="username"
+                                    placeholder="Email hoặc số điện thoại"
+                                    required
+                                />
+                            </div>
+                            <div class="form-input-ctn auth-error">
+                                <span
+                                    >Email hoặc số điện thoại không chính
+                                    xác</span
+                                >
+                            </div>
+                            <div class="form-input-ctn">
+                                <input
+                                    type="password"
+                                    name="password"
+                                    id="password"
+                                    placeholder="Mật khẩu"
+                                    required
+                                />
+                            </div>
+                            <div class="form-input-ctn auth-error">
+                                <span>Mật khẩu không chính xác</span>
+                            </div>
+                            <div class="form-input-ctn row relative">
+                                <input
+                                    type="submit"
+                                    value="Đăng nhập"
+                                    id="submit-btn"
+                                    data-enable="1"
+                                />
+                                <div
+                                    class="loader"
+                                    id="submit-loader"
+                                    style="right: 5px"
+                                ></div>
+                            </div>
+                            <div class="form-input-ctn form-forget-password">
+                                <a href="/auth/forget-password"
+                                    >Quên mật khẩu?</a
+                                >
+                            </div>
+                            <div class="form-input-ctn form-split-line"></div>
+                            <div class="form-input-ctn new-account-btn-ctn">
+                                <a href="/auth/signup/register-email">
+                                    <div class="new-account-btn">
+                                        Tạo tài khoản mới
+                                    </div>
+                                </a>
+                            </div>
+                        </form>
+                        <script>
+                            $(document).ready(() => {
+                                $('#login-form').submit(function (e) {
+                                    submitForm(e);
+                                });
+                            });
 
-<body>
-  <div class="main">
-    <div class="auth-background"></div>
-    <div class="page-body row">
-      <div class="auth-left">
-        <div class="logo-ctn">
-          <a href="/">
-            <img src="/images/logo.png" alt="">
-          </a>
+                            function submitForm(e) {
+                                if ($('#submit-btn').data('enable') == '0') {
+                                    return;
+                                }
+                                e.preventDefault();
+                                $('#login-form').submit(false);
+                                ajaxStart();
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '/api/auth/login',
+                                    data: {
+                                        username: $('#username').val(),
+                                        password: $('#password').val(),
+                                    },
+                                    success: function (data) {
+                                        $('#login-form').submit(function (e) {
+                                            submitForm(e);
+                                        });
+                                        ajaxStop();
+                                        if (data.success) {
+                                            window.location.href =
+                                                data.redirect;
+                                        } else {
+                                            switch (data.code) {
+                                                case 'username':
+                                                    $('.auth-error:first').css(
+                                                        'display',
+                                                        'block'
+                                                    );
+                                                    break;
+                                                case 'password':
+                                                    $('.auth-error:last').css(
+                                                        'display',
+                                                        'block'
+                                                    );
+                                                    break;
+                                                default:
+                                                    alert('Đã có lỗi xảy ra');
+                                            }
+                                        }
+                                    },
+                                    error: function (data) {
+                                        console.log(data);
+                                        $('#login-form').submit(function (e) {
+                                            submitForm(e);
+                                        });
+                                        ajaxStop();
+                                        alert('Đã có lỗi xảy ra');
+                                    },
+                                });
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="auth-right">
-        <div class="form-ctn">
-          <h2>Đăng nhập</h2>
-          <form action="" method="" id="login-form">
-            <div class="form-input-ctn">
-              <input type="text" name="username" id="username" placeholder="Email hoặc số điện thoại" required>
-            </div>
-            <div class="form-input-ctn auth-error">
-              <span>Email hoặc số điện thoại không chính xác</span>
-            </div>
-            <div class="form-input-ctn">
-              <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
-            </div>
-            <div class="form-input-ctn auth-error">
-              <span>Mật khẩu không chính xác</span>
-            </div>
-            <div class="form-input-ctn row relative">
-              <input type="submit" value="Đăng nhập" id="submit-btn" data-enable="1">
-              <div class="loader" id="submit-loader" style="right: 5px;"></div>
-            </div>
-            <div class="form-input-ctn form-forget-password">
-              <a href="/auth/forget-password">Quên mật khẩu?</a>
-            </div>
-            <div class="form-input-ctn form-split-line"></div>
-            <div class="form-input-ctn new-account-btn-ctn">              
-              <a href="/auth/signup/register-email">
-                <div class="new-account-btn">Tạo tài khoản mới</div>
-              </a>
-            </div>
-          </form>
-          <script>
-            $(document).ready(() => {
-              $('#login-form').submit(function (e) {submitForm(e)});
-            });
-
-            function submitForm(e) {
-              if ($('#submit-btn').data('enable') == '0')  {
-                return;
-              }
-              e.preventDefault();
-              $('#login-form').submit(false);
-              ajaxStart();
-              $.ajax({
-                type: 'POST',
-                url: '/auth/login',
-                data: {
-                  'username': $('#username').val(),
-                  'password': $('#password').val()
-                },
-                success: function (data) {
-                  $('#login-form').submit(function (e) {submitForm(e)});
-                  ajaxStop();
-                  if (data.success) {
-                    window.location.href = data.redirect;
-                  } else {
-                    switch (data.code) {
-                      case 'username':
-                        $('.auth-error:first').css('display', 'block');
-                        break;
-                      case 'password':
-                        $('.auth-error:last').css('display', 'block');
-                        break;
-                      default:
-                        alert('Đã có lỗi xảy ra');
-                    }
-                  }
-                },
-                error: function (data) {
-                  console.log(data);
-                  $('#login-form').submit(function (e) {submitForm(e)});
-                  ajaxStop();
-                  alert('Đã có lỗi xảy ra');
-                }
-              });
-            }
-          </script>
-        </div>
-      </div>
-    </div>
-  </div>
-</body>
-
+    </body>
 </html>
