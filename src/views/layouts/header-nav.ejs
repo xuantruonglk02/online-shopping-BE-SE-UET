@@ -17,7 +17,7 @@
 
 <script>
   $(document).ready(() => {
-    $.post('/product/category/all', (data) => {
+    $.post('/api/product/category/all', (data) => {
       if (!data.success) {
         return console.log(data);
       }

@@ -1,157 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <%- include('layouts/head') %>
 
-<head>
-  <%- include('layouts/head') %>
+        <link rel="stylesheet" href="/css/filter.css" />
 
-  <link rel="stylesheet" href="/css/filter.css">
+        <script src="/js/filter.js"></script>
+    </head>
 
-  <script src="/js/filter.js"></script>
-</head>
+    <body>
+        <%- include('layouts/header') %>
 
-<body>
-  <%- include('layouts/header') %>
-  
-  <div class="main">  
-    <div class="page-body row">
-      <div class="filter-col">
-        <div class="filter-div">
-          <div class="filter-div-title">
-            <h2>Danh mục</h2>
-          </div>
-          <div class="filter-div-content" id="category-filter"></div>
-          <script>
-            $(document).ready(() => {
-              $.post('/product/category/all', (data) => {
-                if (!data.success) {
-                  return;
-                }
-                let categoryId = params.get('classId') == null ? (params.get('lineId') == null ? '' : params.get('lineId')) : params.get('classId');
-                for (let i = 0; i < data.results.length; i++) {
-                  let ul = '<ul>';
-                  let lines = JSON.parse(data.results[i].product_lines);
-                  for (let j = 0; j < lines.length; j++) {
-                    let cls = categoryId == lines[j].lineId ? 'category-selected' : '';
-                    ul += '<li><a class="' + cls + '" href="#" onclick="return false" data-lineid="' + lines[j].lineId + '">' + lines[j].name + '</a></li>';
-                  }
-                  ul += '</ul>';
-                  let cls = categoryId == data.results[i].class_id ? 'category-selected' : '';
-                  $('#category-filter').append(
-                    '<div class="filter-product-class">'
-                    + '<a class="' + cls + '" href="#" onclick="return false" data-classid="' + data.results[i].class_id + '">' + data.results[i].name + '</a>'
-                    + '<div class="filter-product-lines">' + ul + '</div></div>'
-                  );
-                }
-              });
+        <div class="main">
+            <div class="page-body row">
+                <div class="filter-col">
+                    <div class="filter-div">
+                        <div class="filter-div-title">
+                            <h2>Danh mục</h2>
+                        </div>
+                        <div
+                            class="filter-div-content"
+                            id="category-filter"
+                        ></div>
+                        <script>
+                            $(document).ready(() => {
+                                $.post('/api/product/category/all', (data) => {
+                                    if (!data.success) {
+                                        return;
+                                    }
+                                    let categoryId =
+                                        params.get('classId') == null
+                                            ? params.get('lineId') == null
+                                                ? ''
+                                                : params.get('lineId')
+                                            : params.get('classId');
+                                    for (
+                                        let i = 0;
+                                        i < data.results.length;
+                                        i++
+                                    ) {
+                                        let ul = '<ul>';
+                                        let lines = JSON.parse(
+                                            data.results[i].product_lines
+                                        );
+                                        for (let j = 0; j < lines.length; j++) {
+                                            let cls =
+                                                categoryId == lines[j].lineId
+                                                    ? 'category-selected'
+                                                    : '';
+                                            ul +=
+                                                '<li><a class="' +
+                                                cls +
+                                                '" href="#" onclick="return false" data-lineid="' +
+                                                lines[j].lineId +
+                                                '">' +
+                                                lines[j].name +
+                                                '</a></li>';
+                                        }
+                                        ul += '</ul>';
+                                        let cls =
+                                            categoryId ==
+                                            data.results[i].class_id
+                                                ? 'category-selected'
+                                                : '';
+                                        $('#category-filter').append(
+                                            '<div class="filter-product-class">' +
+                                                '<a class="' +
+                                                cls +
+                                                '" href="#" onclick="return false" data-classid="' +
+                                                data.results[i].class_id +
+                                                '">' +
+                                                data.results[i].name +
+                                                '</a>' +
+                                                '<div class="filter-product-lines">' +
+                                                ul +
+                                                '</div></div>'
+                                        );
+                                    }
+                                });
 
-              $(document).on('click', '.filter-product-class a', function (e) {
-                let url = removeParam('lineId', removeParam('classId', window.location.href));
-                if ($(this).data().lineid) {
-                  url += '&lineId=' + $(this).data().lineid;
-                } else if ($(this).data().classid) {
-                  url += '&classId=' + $(this).data().classid;
-                }
-                window.location.href = removeParam('page', url) + '&page=1';
-              });
-            });
-          </script>
-        </div>
-        <div class="filter-div">
-          <div class="filter-div-title">
-            <h2>Khoảng giá</h2>
-          </div>
-          <div class="filter-div-content">
-            <div class="price-filter-group row">
-              <input type="number" name="" id="minPrice" min="1" placeholder="Từ">
-              <div>-</div>
-              <input type="number" name="" id="maxPrice" min="1" placeholder="Đến">
+                                $(document).on(
+                                    'click',
+                                    '.filter-product-class a',
+                                    function (e) {
+                                        let url = removeParam(
+                                            'lineId',
+                                            removeParam(
+                                                'classId',
+                                                window.location.href
+                                            )
+                                        );
+                                        if ($(this).data().lineid) {
+                                            url +=
+                                                '&lineId=' +
+                                                $(this).data().lineid;
+                                        } else if ($(this).data().classid) {
+                                            url +=
+                                                '&classId=' +
+                                                $(this).data().classid;
+                                        }
+                                        window.location.href =
+                                            removeParam('page', url) +
+                                            '&page=1';
+                                    }
+                                );
+                            });
+                        </script>
+                    </div>
+                    <div class="filter-div">
+                        <div class="filter-div-title">
+                            <h2>Khoảng giá</h2>
+                        </div>
+                        <div class="filter-div-content">
+                            <div class="price-filter-group row">
+                                <input
+                                    type="number"
+                                    name=""
+                                    id="minPrice"
+                                    min="1"
+                                    placeholder="Từ"
+                                />
+                                <div>-</div>
+                                <input
+                                    type="number"
+                                    name=""
+                                    id="maxPrice"
+                                    min="1"
+                                    placeholder="Đến"
+                                />
+                            </div>
+                            <div class="price-filter-submit">
+                                <button id="price-filter-submit-btn">
+                                    Áp dụng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-div">
+                        <div class="filter-div-title">
+                            <h2>Đánh giá</h2>
+                        </div>
+                        <div class="filter-div-content">
+                            <div class="rating-filter-option">
+                                <i
+                                    class="fa-solid fa-star"
+                                    id="rating-filter-star-1"
+                                ></i>
+                                <i
+                                    class="fa-solid fa-star"
+                                    id="rating-filter-star-2"
+                                ></i>
+                                <i
+                                    class="fa-solid fa-star"
+                                    id="rating-filter-star-3"
+                                ></i>
+                                <i
+                                    class="fa-solid fa-star"
+                                    id="rating-filter-star-4"
+                                ></i>
+                                <i
+                                    class="fa-solid fa-star"
+                                    id="rating-filter-star-5"
+                                ></i>
+                                <span>trở lên</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="products-col">
+                    <div class="products-sort-filter row">
+                        <div class="products-sort-filter-title">
+                            <span>Sắp xếp theo</span>
+                        </div>
+                        <div
+                            class="products-sort-option"
+                            id="newest"
+                            data-order="newest"
+                        >
+                            <span>Mới nhất</span>
+                        </div>
+                        <div
+                            class="products-sort-option"
+                            id="soldDESC"
+                            data-order="soldDESC"
+                        >
+                            <span>Bán chạy</span>
+                        </div>
+                        <div
+                            class="products-sort-option"
+                            id="ratingDESC"
+                            data-order="ratingDESC"
+                        >
+                            <span>Đánh giá cao</span>
+                        </div>
+                        <div
+                            class="products-sort-option"
+                            id="qoRatingDESC"
+                            data-order="qoRatingDESC"
+                        >
+                            <span>Đánh giá nhiều</span>
+                        </div>
+                        <div class="products-sort-selection">
+                            <select name="" id="sort-selection">
+                                <option value="" disabled selected hidden>
+                                    Giá
+                                </option>
+                                <option id="priceASC" value="priceASC">
+                                    Thấp đến cao
+                                </option>
+                                <option id="priceDESC" value="priceDESC">
+                                    Cao đến thấp
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="products-list-ctn" id="products-list-ctn"></div>
+                    <div class="pages-list-ctn row" id="pages-list-ctn"></div>
+                    <script>
+                        $(document).ready(() => {
+                            $.ajax({
+                                type: 'POST',
+                                url: '/api/product/search',
+                                data: {
+                                    keyword: params.get('keyword'),
+                                    page: params.get('page'),
+                                    classId: params.get('classId'),
+                                    lineId: params.get('lineId'),
+                                    minPrice: params.get('minPrice'),
+                                    maxPrice: params.get('maxPrice'),
+                                    minStar: params.get('minStar'),
+                                    orderBy: params.get('orderBy'),
+                                },
+                                success: function (data) {
+                                    if (data.results.length == 0) {
+                                        return $('#products-list-ctn').append(
+                                            '<p>Không tìm thấy sản phẩm phù hợp</p>'
+                                        );
+                                    }
+                                    data.results.forEach((e) => {
+                                        $('#products-list-ctn').append(
+                                            '<div class="product-ctn"><div class="product-thumb-ctn">' +
+                                                '<a href="/product/' +
+                                                e.product_id +
+                                                '">' +
+                                                '<img src="' +
+                                                e.thumbnail +
+                                                '" alt="">' +
+                                                '</a></div><div class="product-text-ctn"><div class="product-name-ctn">' +
+                                                '<a href="/product/' +
+                                                e.product_id +
+                                                '"><p>' +
+                                                e.name +
+                                                '</p>' +
+                                                '</a></div><div class="product-price-ctn">' +
+                                                '<span>' +
+                                                new Intl.NumberFormat('de-DE', {
+                                                    style: 'currency',
+                                                    currency: 'VND',
+                                                }).format(e.price) +
+                                                '</span>' +
+                                                '</div></div></div>'
+                                        );
+                                    });
+                                    if (data.results.length != 0) {
+                                        $('#pages-list-ctn').append(
+                                            genPageButtons(
+                                                parseInt(params.get('page')),
+                                                Math.floor(
+                                                    data.totalRows / 15
+                                                ) + 1
+                                            )
+                                        );
+                                    }
+                                },
+                                error: function (data) {
+                                    console.log(data);
+                                },
+                            });
+                        });
+                    </script>
+                </div>
             </div>
-            <div class="price-filter-submit">
-              <button id="price-filter-submit-btn">Áp dụng</button>
-            </div>
-          </div>
         </div>
-        <div class="filter-div">
-          <div class="filter-div-title">
-            <h2>Đánh giá</h2>
-          </div>
-          <div class="filter-div-content">
-            <div class="rating-filter-option">
-              <i class="fa-solid fa-star" id="rating-filter-star-1"></i>
-              <i class="fa-solid fa-star" id="rating-filter-star-2"></i>
-              <i class="fa-solid fa-star" id="rating-filter-star-3"></i>
-              <i class="fa-solid fa-star" id="rating-filter-star-4"></i>
-              <i class="fa-solid fa-star" id="rating-filter-star-5"></i>
-              <span>trở lên</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="products-col">
-        <div class="products-sort-filter row">
-          <div class="products-sort-filter-title"><span>Sắp xếp theo</span></div>
-          <div class="products-sort-option" id="newest" data-order="newest"><span>Mới nhất</span></div>
-          <div class="products-sort-option" id="soldDESC" data-order="soldDESC"><span>Bán chạy</span></div>
-          <div class="products-sort-option" id="ratingDESC" data-order="ratingDESC"><span>Đánh giá cao</span></div>
-          <div class="products-sort-option" id="qoRatingDESC" data-order="qoRatingDESC"><span>Đánh giá nhiều</span></div>
-          <div class="products-sort-selection">
-            <select name="" id="sort-selection">
-              <option value="" disabled selected hidden>Giá</option>
-              <option id="priceASC" value="priceASC">Thấp đến cao</option>
-              <option id="priceDESC" value="priceDESC">Cao đến thấp</option>
-            </select>
-          </div>
-        </div>
-        <div class="products-list-ctn" id="products-list-ctn"></div>
-        <div class="pages-list-ctn row" id="pages-list-ctn"></div>
-        <script>
-          $(document).ready(() => {
-            $.ajax({
-              type: 'POST',
-              url: '/product/search',
-              data: {
-                'keyword': params.get('keyword'),
-                'page': params.get('page'),
-                'classId': params.get('classId'),
-                'lineId': params.get('lineId'),
-                'minPrice': params.get('minPrice'),
-                'maxPrice': params.get('maxPrice'),
-                'minStar': params.get('minStar'),
-                'orderBy': params.get('orderBy')
-              },
-              success: function (data) {
-                if (data.results.length == 0) {
-                  return $('#products-list-ctn').append('<p>Không tìm thấy sản phẩm phù hợp</p>');
-                }
-                data.results.forEach((e) => {
-                  $('#products-list-ctn').append(
-                    '<div class="product-ctn"><div class="product-thumb-ctn">'
-                    + '<a href="/product/' + e.product_id + '">'
-                    + '<img src="' + e.thumbnail + '" alt="">'
-                    + '</a></div><div class="product-text-ctn"><div class="product-name-ctn">'
-                    + '<a href="/product/' + e.product_id + '"><p>' + e.name + '</p>'
-                    + '</a></div><div class="product-price-ctn">'
-                    + '<span>' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(e.price) + '</span>'
-                    + '</div></div></div>'
-                  );
-                });
-                if (data.results.length != 0) {
-                  $('#pages-list-ctn').append(genPageButtons(parseInt(params.get('page')), Math.floor(data.totalRows / 15) + 1));
-                }
-              },
-              error: function (data) {
-                console.log(data);
-              }
-            });
-          });
-        </script>
-      </div>
-    </div>
-  </div>
 
-  <%- include('layouts/footer') %>
-
-  <%- include('layouts/script') %>
-</body>
-
+        <%- include('layouts/footer') %> <%- include('layouts/script') %>
+    </body>
 </html>

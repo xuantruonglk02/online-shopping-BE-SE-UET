@@ -168,7 +168,7 @@
         ajaxStart();
         $.ajax({
           type: 'POST',
-          url: '/user/setting/change-' + $('#field-name').val(),
+          url: '/api/user/setting/change-' + $('#field-name').val(),
           data: data,
           success: function (data) {
             $('#submit-form').submit(function (e) {submitForm(e)});
