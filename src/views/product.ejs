@@ -1,326 +1,494 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <%- include('layouts/head') %>
 
-<head>
-  <%- include('layouts/head') %>
+        <link rel="stylesheet" href="/css/product.css" />
 
-  <link rel="stylesheet" href="/css/product.css">
+        <script src="/js/auth-script.js"></script>
+    </head>
 
-  <script src="/js/auth-script.js"></script>
-</head>
+    <body>
+        <%- include('layouts/header') %>
+        <%- include('layouts/slider') %>
 
-<body>
-  <%- include('layouts/header') %>
-
-  <%- include('layouts/slider') %>
-
-  <div class="main">
-    <div class="container">
-      <div class="product-content row">
-        <div class="product-content-left">
-          <div class="product-content-left-big-img">
-            <img src="<%= product.thumbnail %>" alt="">
-          </div>
-          <div class="product-content-left-small-img row">
-            <img src="<%= product.thumbnail %>" alt="">
-            <img src="<%= product.thumbnail %>" alt="">
-            <img src="<%= product.thumbnail %>" alt="">
-          </div>
-          <script>
-            $('.product-content-left-small-img img').on('click', function () {
-              $('.product-content-left-big-img img').attr('src', $(this).attr('src'));
-            });
-          </script>
-        </div>
-        <div class="product-content-right">
-          <div class="">
-            <h1><%= product.name %></h1>
-          </div>
-          <div class="product-rating">
-            <% let roundRating = product.rating %>
-            <% roundRating == null ? roundRating = 0 : roundRating = parseInt(roundRating) %>
-            <% for (let i = 0; i < roundRating; i++) { %>
-              <i class="fa-solid fa-star checked"></i>
-            <% } %>
-            <% for (let i = 0; i < 5 - roundRating; i++) { %>
-              <i class="fa-solid fa-star"></i>
-            <% } %>
-            <span>(<%= product.quantity_of_rating %> đánh giá)</span>
-          </div>
-          <div class="product-content-right-price">
-            <span><%= product.price %></span>
-          </div>
-          <div class="product-content-right-size row">
-            <div class="product-content-right-size-input">
-              <span>Size</span>
-              <div class="product-content-right-size-input-select">
-                <select id="size-select">
-                  <% let sizes = JSON.parse(product.sizes) %>
-                  <% for (let i = 0; i < sizes.length; i++) { %>
-                    <option value="<%= sizes[i].sizeId %>" data-quantity="<%= sizes[i].quantity %>"><%= sizes[i].size %></option>
-                  <% } %>
-                </select>
-              </div>
-            </div>
-            <div class="product-content-right-size-quantity">
-              <span id="quantity-title">Số Lượng: còn <%= sizes[0].quantity %></span>
-              <div class="product-content-right-size-input-quantity row">
-                <div class="quantity-modify">
-                  <a id="quantity-modify-desc" href="#" onclick="return false">-</a>
-                </div>
-                <input type="number" id="quantity-input" min="1" value="1" max="<%= sizes[0].quantity %>">
-                <div class="quantity-modify">
-                  <a id="quantity-modify-asc" href="#" onclick="return false">+</a>
-                </div>
-              </div>
-            </div>
-            <script>
-              $('#size-select').on('change', function () {
-                $('#quantity-input').attr('max', parseInt($('#size-select :selected').data().quantity));
-                $('#quantity-input').val(1);
-                $('#quantity-title').text('Số Lượng: còn ' + $('#size-select :selected').data().quantity);
-                $('#checkout').attr('href', window.location.origin + '/checkout' + '?listIds[]=' + window.location.pathname.split('/')[2] + '&listSizeIds[]=' + $('#size-select').val() + '&listSizes[]=' + $('#size-select option:selected').text() + '&listQuantity[]=' + $('#quantity-input').val());
-              });
-              $('#quantity-modify-desc').on('click', function () {
-                if ($('#quantity-input').val() > 1) {
-                  $('#quantity-input').val(parseInt($('#quantity-input').val()) - 1);
-                  $('#checkout').attr('href', window.location.origin + '/checkout' + '?listIds[]=' + window.location.pathname.split('/')[2] + '&listSizeIds[]=' + $('#size-select').val() + '&listSizes[]=' + $('#size-select option:selected').text() + '&listQuantity[]=' + $('#quantity-input').val());
-                }
-              });
-              $('#quantity-modify-asc').on('click', function () {
-                if ($('#quantity-input').val() < $('#size-select :selected').data().quantity) {
-                  $('#quantity-input').val(parseInt($('#quantity-input').val()) + 1);
-                  $('#checkout').attr('href', window.location.origin + '/checkout' + '?listIds[]=' + window.location.pathname.split('/')[2] + '&listSizeIds[]=' + $('#size-select').val() + '&listSizes[]=' + $('#size-select option:selected').text() + '&listQuantity[]=' + $('#quantity-input').val());
-                }
-              });
-            </script>
-          </div>
-          <div class="product-content-right-button row">
-            <a id="add-to-cart" href="#" onclick="return false">
-              <div><i class="fa-solid fa-cart-shopping"></i>Thêm vào giỏ hàng</div>
-            </a>
-            <a id="checkout" href="/checkout">
-              <div>Mua ngay</div>
-            </a>
-            <script>
-              $(document).ready(() => {
-                $('#checkout').attr('href', window.location.origin + '/checkout' + '?listIds[]=' + window.location.pathname.split('/')[2] + '&listSizeIds[]=' + $('#size-select').val() + '&listSizes[]=' + $('#size-select option:selected').text() + '&listQuantity[]=' + $('#quantity-input').val());
-              });
-              $('#add-to-cart').on('click', function () {
-                $.ajax({
-                  type: 'POST',
-                  url: '/cart/add',
-                  data: {
-                    'productId': document.location.href.substr(document.location.href.lastIndexOf('/') + 1),
-                    'sizeId': $('#size-select :selected').val(),
-                    'quantity': parseInt($('#quantity-input').val())
-                  },
-                  success: function (data) {
-                    if (data.success) {
-                      $('#cart-number').text(parseInt($('#cart-number').text()) + 1);
-                      alert('Thành công');
-                    } else {
-                      switch (data.code) {
-                        case 'ER_DUP_ENTRY':
-                          alert('Sản phẩm đã có sẵn trong giỏ hàng');
-                          break;
-                        case 'max-in-cart':
-                          alert('Số sản phẩm trong giỏ không được vượt quá ' + data.max);
-                          break;
-                        default:
-                          alert('Đã có lỗi xảy ra');
-                      }
-                    }
-                  },
-                  error: function (data) {
-                    console.log(data);
-                    if (data.status == 401) {
-                      window.location.href = data.responseJSON.redirect;
-                    } 
-                  }
-                });
-              });
-            </script>
-          </div>
-          <% if (product.description != '') { %>
-            <div class="product-content-right-botton">
-              <div class="product-content-right-botton-top">
-                &#8564;
-              </div>
-              <div class="product-content-right-botton-des">
-                <div class="product-content-right-botton-title row">
-                  <div class="product-content-right-botton-title-item">
-                    <p>Chi Tiết Sản Phẩm</p>
-                  </div>
-                </div>
-                <% let descs = product.description.split('#') %>
-                <% for (let i = 0; i < descs.length; i++) { %>
-                  <div class="product-content-right-botton">
-                    <div class="product-content-right-botton-chitiet">
-                      <p><%- descs[i].replaceAll('\n', '</p><br><p>') %></p>
+        <div class="main">
+            <div class="container">
+                <div class="product-content row">
+                    <div class="product-content-left">
+                        <div class="product-content-left-big-img">
+                            <img src="<%= product.thumbnail %>" alt="" />
+                        </div>
+                        <div class="product-content-left-small-img row">
+                            <img src="<%= product.thumbnail %>" alt="" />
+                            <img src="<%= product.thumbnail %>" alt="" />
+                            <img src="<%= product.thumbnail %>" alt="" />
+                        </div>
+                        <script>
+                            $('.product-content-left-small-img img').on(
+                                'click',
+                                function () {
+                                    $('.product-content-left-big-img img').attr(
+                                        'src',
+                                        $(this).attr('src'),
+                                    );
+                                },
+                            );
+                        </script>
                     </div>
-                  </div>
-                <% } %>
-              </div>
-            </div>
-          <% } %>
-        </div>
-      </div>
-    </div>
-    <div class="container">
-      <div class="product-ratings-ctn">
-        <div class="container-title row">
-          <h2>Đánh giá sản phẩm</h2>
-          <div class="rating-average-ctn">
-            <% for (let i = 0; i < roundRating; i++) { %>
-              <i class="fa-solid fa-star checked"></i>
-            <% } %>
-            <% for (let i = 0; i < 5 - roundRating; i++) { %>
-              <i class="fa-solid fa-star"></i>
-            <% } %>
-            <span><%= product.rating == null ? 'Chưa có đánh giá' : product.rating + ' trên 5' %></span>
-          </div>
-        </div>
-        <div class="product-rating-content" id="product-rating-content">
-          <% if (bought == false) { %>
-            <div class="product-rating">
-              <span>Bạn cần mua sản phẩm này mới có thể để lại đánh giá</span>
-            </div>
-          <% } %>
-          <% if (bought) { %>
-            <div class="product-rating-form" id="product-rating-form">
-              <div class="product-rating-form-title">
-                <h3>Đánh giá của tôi</h3>
-              </div>
-              <form id="rating-form">
-                <div class="form-comment-ctn">
-                  <textarea id="comment" required></textarea>
+                    <div class="product-content-right">
+                        <div class="">
+                            <h1><%= product.name %></h1>
+                        </div>
+                        <div class="product-rating">
+                            <% let roundRating = product.rating %>
+                            <% roundRating == null ? roundRating = 0 : roundRating = parseInt(roundRating) %>
+                            <% for (let i = 0; i < roundRating; i++) { %>
+                                <i class="fa-solid fa-star checked"></i>
+                            <% } %>
+                            <% for (let i = 0; i < 5 - roundRating; i++) { %>
+                                <i class="fa-solid fa-star"></i>
+                            <% } %>
+                            <span>(<%= product.quantity_of_rating %> đánh giá)</span>
+                        </div>
+                        <div class="product-content-right-price">
+                            <span><%= product.price %></span>
+                        </div>
+                        <div class="product-content-right-size row">
+                            <div class="product-content-right-size-input">
+                                <span>Size</span>
+                                <div class="product-content-right-size-input-select">
+                                    <select id="size-select">
+                                        <% let sizes = JSON.parse(product.sizes) %>
+                                        <% for (let i = 0; i < sizes.length; i++) { %>
+                                            <option
+                                                value="<%= sizes[i].sizeId %>"
+                                                data-quantity="<%= sizes[i].quantity %>"
+                                            >
+                                                <%= sizes[i].size %>
+                                            </option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="product-content-right-size-quantity">
+                                <span id="quantity-title"
+                                    >Số Lượng: còn <%= sizes[0].quantity %></span
+                                >
+                                <div
+                                    class="product-content-right-size-input-quantity row"
+                                >
+                                    <div class="quantity-modify">
+                                        <a
+                                            id="quantity-modify-desc"
+                                            href="#"
+                                            onclick="return false"
+                                            >-</a
+                                        >
+                                    </div>
+                                    <input
+                                        type="number"
+                                        id="quantity-input"
+                                        min="1"
+                                        value="1"
+                                        max="<%= sizes[0].quantity %>"
+                                    />
+                                    <div class="quantity-modify">
+                                        <a
+                                            id="quantity-modify-asc"
+                                            href="#"
+                                            onclick="return false"
+                                            >+</a
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                $('#size-select').on('change', function () {
+                                    $('#quantity-input').attr(
+                                        'max',
+                                        parseInt(
+                                            $('#size-select :selected').data().quantity,
+                                        ),
+                                    );
+                                    $('#quantity-input').val(1);
+                                    $('#quantity-title').text(
+                                        'Số Lượng: còn ' +
+                                            $('#size-select :selected').data().quantity,
+                                    );
+                                    $('#checkout').attr(
+                                        'href',
+                                        window.location.origin +
+                                            '/checkout' +
+                                            '?listIds[]=' +
+                                            window.location.pathname.split('/')[2] +
+                                            '&listSizeIds[]=' +
+                                            $('#size-select').val() +
+                                            '&listSizes[]=' +
+                                            $('#size-select option:selected').text() +
+                                            '&listQuantity[]=' +
+                                            $('#quantity-input').val(),
+                                    );
+                                });
+                                $('#quantity-modify-desc').on('click', function () {
+                                    if ($('#quantity-input').val() > 1) {
+                                        $('#quantity-input').val(
+                                            parseInt($('#quantity-input').val()) - 1,
+                                        );
+                                        $('#checkout').attr(
+                                            'href',
+                                            window.location.origin +
+                                                '/checkout' +
+                                                '?listIds[]=' +
+                                                window.location.pathname.split('/')[2] +
+                                                '&listSizeIds[]=' +
+                                                $('#size-select').val() +
+                                                '&listSizes[]=' +
+                                                $('#size-select option:selected').text() +
+                                                '&listQuantity[]=' +
+                                                $('#quantity-input').val(),
+                                        );
+                                    }
+                                });
+                                $('#quantity-modify-asc').on('click', function () {
+                                    if (
+                                        $('#quantity-input').val() <
+                                        $('#size-select :selected').data().quantity
+                                    ) {
+                                        $('#quantity-input').val(
+                                            parseInt($('#quantity-input').val()) + 1,
+                                        );
+                                        $('#checkout').attr(
+                                            'href',
+                                            window.location.origin +
+                                                '/checkout' +
+                                                '?listIds[]=' +
+                                                window.location.pathname.split('/')[2] +
+                                                '&listSizeIds[]=' +
+                                                $('#size-select').val() +
+                                                '&listSizes[]=' +
+                                                $('#size-select option:selected').text() +
+                                                '&listQuantity[]=' +
+                                                $('#quantity-input').val(),
+                                        );
+                                    }
+                                });
+                            </script>
+                        </div>
+                        <div class="product-content-right-button row">
+                            <a id="add-to-cart" href="#" onclick="return false">
+                                <div>
+                                    <i class="fa-solid fa-cart-shopping"></i>Thêm vào giỏ
+                                    hàng
+                                </div>
+                            </a>
+                            <a id="checkout" href="/checkout">
+                                <div>Mua ngay</div>
+                            </a>
+                            <script>
+                                $(document).ready(() => {
+                                    $('#checkout').attr(
+                                        'href',
+                                        window.location.origin +
+                                            '/checkout' +
+                                            '?listIds[]=' +
+                                            window.location.pathname.split('/')[2] +
+                                            '&listSizeIds[]=' +
+                                            $('#size-select').val() +
+                                            '&listSizes[]=' +
+                                            $('#size-select option:selected').text() +
+                                            '&listQuantity[]=' +
+                                            $('#quantity-input').val(),
+                                    );
+                                });
+                                $('#add-to-cart').on('click', function () {
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '/api/cart/add',
+                                        data: {
+                                            productId: document.location.href.substr(
+                                                document.location.href.lastIndexOf('/') +
+                                                    1,
+                                            ),
+                                            sizeId: $('#size-select :selected').val(),
+                                            quantity: parseInt(
+                                                $('#quantity-input').val(),
+                                            ),
+                                        },
+                                        success: function (data) {
+                                            if (data.success) {
+                                                $('#cart-number').text(
+                                                    parseInt($('#cart-number').text()) +
+                                                        1,
+                                                );
+                                                alert('Thành công');
+                                            } else {
+                                                switch (data.code) {
+                                                    case 'ER_DUP_ENTRY':
+                                                        alert(
+                                                            'Sản phẩm đã có sẵn trong giỏ hàng',
+                                                        );
+                                                        break;
+                                                    case 'max-in-cart':
+                                                        alert(
+                                                            'Số sản phẩm trong giỏ không được vượt quá ' +
+                                                                data.max,
+                                                        );
+                                                        break;
+                                                    default:
+                                                        alert('Đã có lỗi xảy ra');
+                                                }
+                                            }
+                                        },
+                                        error: function (data) {
+                                            console.log(data);
+                                            if (data.status == 401) {
+                                                window.location.href =
+                                                    data.responseJSON.redirect;
+                                            }
+                                        },
+                                    });
+                                });
+                            </script>
+                        </div>
+                        <% if (product.description != '') { %>
+                            <div class="product-content-right-botton">
+                                <div class="product-content-right-botton-top">&#8564;</div>
+                                <div class="product-content-right-botton-des">
+                                    <div class="product-content-right-botton-title row">
+                                        <div class="product-content-right-botton-title-item">
+                                            <p>Chi Tiết Sản Phẩm</p>
+                                        </div>
+                                    </div>
+                                    <% let descs = product.description.split('#') %>
+                                    <% for (let i = 0; i < descs.length; i++) { %>
+                                        <div class="product-content-right-botton">
+                                            <div class="product-content-right-botton-chitiet">
+                                                <p><%- descs[i].replaceAll('\n', '</p><br /><p>') %></p>
+                                            </div>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
                 </div>
-                <div class="form-star-ctn">
-                  <i class="fa-solid fa-star" data-star="1"></i>
-                  <i class="fa-solid fa-star" data-star="2"></i>
-                  <i class="fa-solid fa-star" data-star="3"></i>
-                  <i class="fa-solid fa-star" data-star="4"></i>
-                  <i class="fa-solid fa-star" data-star="5"></i>
-                  <input type="number" id="star" required>
-                  <script>
-                    $('.form-star-ctn i').hover(function () {
-                      let star = $(this).data('star');
-                      for (let i = 0; i < star; i++) {
-                        $('.form-star-ctn i:eq(' + i + ')').addClass('star-hover');
-                      }
-                    }, function () {
-                      $('.form-star-ctn i').removeClass('star-hover');
-                    });
-                    $('.form-star-ctn i').click(function () {
-                      $('.form-star-ctn i').removeClass('checked');
-                      let star = $(this).data('star');
-                      $('#star').val(star);
-                      for (let i = 0; i < star; i++) {
-                        $('.form-star-ctn i:eq(' + i + ')').addClass('checked');
-                      }
-                    });
-                  </script>
-                </div>
-                <div class="form-submit-ctn relative">
-                  <input type="submit" value="Gửi nhận xét" id="submit-btn" data-enable="1">
-                  <div class="loader" id="submit-loader" style="right: 5px;"></div>
-                </div>
-                <script>
-                  $(document).ready(() => {
-                    $('#rating-form').submit(function (e) {submitForm(e)});
-                  });
-            
-                  function submitForm(e) {
-                    if ($('#submit-btn').data('enable') == '0')  {
-                      return;
-                    }
-                    e.preventDefault();
-                    $('#rating-form').submit(false);
-                    ajaxStart();
-                    $.ajax({
-                      type: 'POST',
-                      url: window.location.pathname + '/rate',
-                      data: {
-                        'star': $('#star').val(),
-                        'comment': $('#comment').val(),
-                        'urls': '[]'
-                      },
-                      success: function (data) {
-                        ajaxStop();
-                        if (data.success) {
-                          ajaxSuccess();
-                          $('#product-rating-form').append(
-                            '<div class="product-rating row"><div class="product-rating-left"><div class="user-avt-ctn">'
-                            + '<img src="/images/avatars/default.jpg" alt=""></div></div><div class="product-rating-right">'
-                            + '<div class="product-rating-right-top row"><div class="user-name-ctn"><span>Tôi</span>'
-                            + '</div><div class="product-rating-time-ctn"><span>' + new Date().toLocaleString('vi-VI') + '</span></div></div>'
-                            + '<div class="product-rating-right-star"><div class="product-star-ctn">'
-                            + '<i class="fa-solid fa-star checked"></i>'.repeat($('#star').val()) + '<i class="fa-solid fa-star"></i>'.repeat(5 - $('#star').val())
-                            + '</div></div><div class="product-rating-right-comment"><div class="product-rating-comment-ctn">'
-                            + '<p>' + $('#comment').val() + '</p></div></div></div></div>'
-                          );
-                          $('#rating-form').remove();
-                          $('.product-rating-none').remove();
-                        } else {
-                          $('#rating-form').submit(function (e) {submitForm(e)});
-                          alert('Đã có lỗi xảy ra. Vui lòng thử lại sau');
-                        }
-                      },
-                      error: function (data) {
-                        console.log(data);
-                        $('#rating-form').submit(function (e) {submitForm(e)});
-                        ajaxStop();
-                        alert('Đã có lỗi xảy ra. Vui lòng thử lại sau');
-                      }
-                    });
-                  }
-                </script>
-              </form>
             </div>
-          <% } %>
+            <div class="container">
+                <div class="product-ratings-ctn">
+                    <div class="container-title row">
+                        <h2>Đánh giá sản phẩm</h2>
+                        <div class="rating-average-ctn">
+                            <% for (let i = 0; i < roundRating; i++) { %>
+                                <i class="fa-solid fa-star checked"></i>
+                            <% } %>
+                            <% for (let i = 0; i < 5 - roundRating; i++) { %>
+                                <i class="fa-solid fa-star"></i>
+                            <% } %>
+                            <span
+                                ><%= product.rating == null ? 'Chưa có đánh giá' : product.rating + ' trên 5' %></span
+                            >
+                        </div>
+                    </div>
+                    <div class="product-rating-content" id="product-rating-content">
+                        <% if (bought == false) { %>
+                            <div class="product-rating">
+                                <span
+                                    >Bạn cần mua sản phẩm này mới có thể để lại đánh giá</span
+                                >
+                            </div>
+                        <% } %>
+                        <% if (bought) { %>
+                        <div class="product-rating-form" id="product-rating-form">
+                            <div class="product-rating-form-title">
+                                <h3>Đánh giá của tôi</h3>
+                            </div>
+                            <form id="rating-form">
+                                <div class="form-comment-ctn">
+                                    <textarea id="comment" required></textarea>
+                                </div>
+                                <div class="form-star-ctn">
+                                    <i class="fa-solid fa-star" data-star="1"></i>
+                                    <i class="fa-solid fa-star" data-star="2"></i>
+                                    <i class="fa-solid fa-star" data-star="3"></i>
+                                    <i class="fa-solid fa-star" data-star="4"></i>
+                                    <i class="fa-solid fa-star" data-star="5"></i>
+                                    <input type="number" id="star" required />
+                                    <script>
+                                        $('.form-star-ctn i').hover(
+                                            function () {
+                                                let star = $(this).data('star');
+                                                for (let i = 0; i < star; i++) {
+                                                    $(
+                                                        '.form-star-ctn i:eq(' + i + ')',
+                                                    ).addClass('star-hover');
+                                                }
+                                            },
+                                            function () {
+                                                $('.form-star-ctn i').removeClass(
+                                                    'star-hover',
+                                                );
+                                            },
+                                        );
+                                        $('.form-star-ctn i').click(function () {
+                                            $('.form-star-ctn i').removeClass('checked');
+                                            let star = $(this).data('star');
+                                            $('#star').val(star);
+                                            for (let i = 0; i < star; i++) {
+                                                $(
+                                                    '.form-star-ctn i:eq(' + i + ')',
+                                                ).addClass('checked');
+                                            }
+                                        });
+                                    </script>
+                                </div>
+                                <div class="form-submit-ctn relative">
+                                    <input
+                                        type="submit"
+                                        value="Gửi nhận xét"
+                                        id="submit-btn"
+                                        data-enable="1"
+                                    />
+                                    <div
+                                        class="loader"
+                                        id="submit-loader"
+                                        style="right: 5px"
+                                    ></div>
+                                </div>
+                                <script>
+                                    $(document).ready(() => {
+                                        $('#rating-form').submit(function (e) {
+                                            submitForm(e);
+                                        });
+                                    });
+
+                                    function submitForm(e) {
+                                        if ($('#submit-btn').data('enable') == '0') {
+                                            return;
+                                        }
+                                        e.preventDefault();
+                                        $('#rating-form').submit(false);
+                                        ajaxStart();
+                                        $.ajax({
+                                            type: 'POST',
+                                            url:
+                                                '/api' +
+                                                window.location.pathname +
+                                                '/rate',
+                                            data: {
+                                                star: $('#star').val(),
+                                                comment: $('#comment').val(),
+                                                urls: '[]',
+                                            },
+                                            success: function (data) {
+                                                ajaxStop();
+                                                if (data.success) {
+                                                    ajaxSuccess();
+                                                    $('#product-rating-form').append(
+                                                        '<div class="product-rating row"><div class="product-rating-left"><div class="user-avt-ctn">' +
+                                                            '<img src="/images/avatars/default.jpg" alt=""></div></div><div class="product-rating-right">' +
+                                                            '<div class="product-rating-right-top row"><div class="user-name-ctn"><span>Tôi</span>' +
+                                                            '</div><div class="product-rating-time-ctn"><span>' +
+                                                            new Date().toLocaleString(
+                                                                'vi-VI',
+                                                            ) +
+                                                            '</span></div></div>' +
+                                                            '<div class="product-rating-right-star"><div class="product-star-ctn">' +
+                                                            '<i class="fa-solid fa-star checked"></i>'.repeat(
+                                                                $('#star').val(),
+                                                            ) +
+                                                            '<i class="fa-solid fa-star"></i>'.repeat(
+                                                                5 - $('#star').val(),
+                                                            ) +
+                                                            '</div></div><div class="product-rating-right-comment"><div class="product-rating-comment-ctn">' +
+                                                            '<p>' +
+                                                            $('#comment').val() +
+                                                            '</p></div></div></div></div>',
+                                                    );
+                                                    $('#rating-form').remove();
+                                                    $('.product-rating-none').remove();
+                                                } else {
+                                                    $('#rating-form').submit(function (
+                                                        e,
+                                                    ) {
+                                                        submitForm(e);
+                                                    });
+                                                    alert(
+                                                        'Đã có lỗi xảy ra. Vui lòng thử lại sau',
+                                                    );
+                                                }
+                                            },
+                                            error: function (data) {
+                                                console.log(data);
+                                                $('#rating-form').submit(function (e) {
+                                                    submitForm(e);
+                                                });
+                                                ajaxStop();
+                                                alert(
+                                                    'Đã có lỗi xảy ra. Vui lòng thử lại sau',
+                                                );
+                                            },
+                                        });
+                                    }
+                                </script>
+                            </form>
+                        </div>
+                        <% } %>
+                    </div>
+                    <script>
+                        $(document).ready(() => {
+                            $.ajax({
+                                type: 'POST',
+                                url: '/api' + window.location.pathname + '/rating',
+                                success: function (data) {
+                                    if (data.success) {
+                                        if (data.results.length == 0)
+                                            $('#product-rating-content').append(
+                                                '<div class="product-rating product-rating-none"><span>Sản phẩm này chưa có đánh giá nào</span></div>',
+                                            );
+                                        data.results.forEach((e) => {
+                                            let id;
+                                            if (data.userId == e.user_id) {
+                                                id = 'product-rating-form';
+                                                $('#rating-form').remove();
+                                            } else id = 'product-rating-content';
+                                            $('#' + id).append(
+                                                '<div class="product-rating row"><div class="product-rating-left"><div class="user-avt-ctn">' +
+                                                    '<img src="/images/avatars/default.jpg" alt=""></div></div><div class="product-rating-right">' +
+                                                    '<div class="product-rating-right-top row"><div class="user-name-ctn"><span>' +
+                                                    e.name +
+                                                    '</span>' +
+                                                    '</div><div class="product-rating-time-ctn"><span>' +
+                                                    new Date(e.create_at).toLocaleString(
+                                                        'vi-VI',
+                                                    ) +
+                                                    '</span></div></div>' +
+                                                    '<div class="product-rating-right-star"><div class="product-star-ctn">' +
+                                                    '<i class="fa-solid fa-star checked"></i>'.repeat(
+                                                        e.star,
+                                                    ) +
+                                                    '<i class="fa-solid fa-star"></i>'.repeat(
+                                                        5 - e.star,
+                                                    ) +
+                                                    '</div></div><div class="product-rating-right-comment"><div class="product-rating-comment-ctn">' +
+                                                    '<p>' +
+                                                    e.comment +
+                                                    '</p></div></div></div></div>',
+                                            );
+                                        });
+                                    }
+                                },
+                                error: function (data) {
+                                    console.log(data);
+                                },
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
         </div>
-        <script>
-          $(document).ready(() => {
-            $.ajax({
-              type: 'POST',
-              url: window.location.pathname + '/rating',
-              success: function (data) {
-                if (data.success) {
-                  if (data.results.length == 0) $('#product-rating-content').append('<div class="product-rating product-rating-none"><span>Sản phẩm này chưa có đánh giá nào</span></div>');
-                  data.results.forEach(e => {
-                    let id;
-                    if (data.userId == e.user_id) {
-                      id = 'product-rating-form';
-                      $('#rating-form').remove();
-                    }
-                    else id = 'product-rating-content';
-                    $('#' + id).append(
-                      '<div class="product-rating row"><div class="product-rating-left"><div class="user-avt-ctn">'
-                      + '<img src="/images/avatars/default.jpg" alt=""></div></div><div class="product-rating-right">'
-                      + '<div class="product-rating-right-top row"><div class="user-name-ctn"><span>' + e.name + '</span>'
-                      + '</div><div class="product-rating-time-ctn"><span>' + new Date(e.create_at).toLocaleString('vi-VI') + '</span></div></div>'
-                      + '<div class="product-rating-right-star"><div class="product-star-ctn">'
-                      + '<i class="fa-solid fa-star checked"></i>'.repeat(e.star) + '<i class="fa-solid fa-star"></i>'.repeat(5 - e.star)
-                      + '</div></div><div class="product-rating-right-comment"><div class="product-rating-comment-ctn">'
-                      + '<p>' + e.comment + '</p></div></div></div></div>'
-                    );
-                  });
-                }
-              },
-              error: function (data) {
-                console.log(data);
-              }
-            });
-          });
-        </script>
-      </div>
-    </div>
-  </div>
 
-  <%- include('layouts/footer') %>
-
-  <%- include('layouts/script') %>
-</body>
-
+        <%- include('layouts/footer') %>
+        <%- include('layouts/script') %>
+    </body>
 </html>

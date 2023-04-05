@@ -1,75 +1,98 @@
 <li class="hd-cart-icon-ctn dropdown">
-  <a href="#" onclick="return false;">
-    <i class="header-icon fa-solid fa-cart-shopping"></i>
-    <span class="cart-number" id="cart-number"></span>
-    <script>
-      $(document).ready(() => {
-        $.post('/cart/quantity', (data) => {
-          if (data.success) {
-            $('#cart-number').text(data.result.quantity);
-            if (data.result.quantity == 0) {
-              $('#cart-menu-products').append('<li><h3 style="color: rgb(211, 59, 51); margin-left: 10px;">Giỏ hàng của bạn đang trống</h3></li>');
-            }
-          }
-        });
-      });
-    </script>
-  </a>
-  <ul class="dropdown-menu user-dropdown" role="menu">
-    <li>
-      <div class="user-menu-ctn">
-        <div class="user-menu">
-          <div class="cart-menu-content">
-            <h2>Chi tiết giỏ hàng</h2>
-            <ul class="cart-menu-products" id="cart-menu-products">
-            </ul>
-          </div>
-          <div class="cart-menu-bottom row">
-            <a class="view-cart-btn" href="/cart">Xem giỏ hàng</a>
-          </div>
-        </div>
-      </div>      
-    </li>
-  </ul>
+    <a href="#" onclick="return false;">
+        <i class="header-icon fa-solid fa-cart-shopping"></i>
+        <span class="cart-number" id="cart-number"></span>
+        <script>
+            $(document).ready(() => {
+                $.post('/api/cart/quantity', (data) => {
+                    if (data.success) {
+                        $('#cart-number').text(data.result.quantity);
+                        if (data.result.quantity == 0) {
+                            $('#cart-menu-products').append(
+                                '<li><h3 style="color: rgb(211, 59, 51); margin-left: 10px;">Giỏ hàng của bạn đang trống</h3></li>'
+                            );
+                        }
+                    }
+                });
+            });
+        </script>
+    </a>
+    <ul class="dropdown-menu user-dropdown" role="menu">
+        <li>
+            <div class="user-menu-ctn">
+                <div class="user-menu">
+                    <div class="cart-menu-content">
+                        <h2>Chi tiết giỏ hàng</h2>
+                        <ul
+                            class="cart-menu-products"
+                            id="cart-menu-products"
+                        ></ul>
+                    </div>
+                    <div class="cart-menu-bottom row">
+                        <a class="view-cart-btn" href="/cart">Xem giỏ hàng</a>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
 </li>
 
 <script>
-  $(document).ready(() => {
-    $('.hd-cart-icon-ctn.dropdown').click(function (e) {
-      if ($(this).find('.dropdown-menu').css('display') != 'none') { return; }
-      if ($('#cart-number').text() == '') {
-        e.stopImmediatePropagation();
-        window.location.href = '/auth/login';
-      }
-      $('#cart-menu-products').empty();
+    $(document).ready(() => {
+        $('.hd-cart-icon-ctn.dropdown').click(function (e) {
+            if ($(this).find('.dropdown-menu').css('display') != 'none') {
+                return;
+            }
+            if ($('#cart-number').text() == '') {
+                e.stopImmediatePropagation();
+                window.location.href = '/auth/login';
+            }
+            $('#cart-menu-products').empty();
 
-      $.ajax({
-        type: 'POST',
-        url: '/cart/menu',
-        success: function (data) {
-          if (!data.success) { return; }
-          if (data.results.length == 0) {
-            $('#cart-menu-products').append('<p>Giỏ hàng hiện trống</p>');
-            return;
-          }
-          for (let i = 0; i < data.results.length; i++) {
-            $('#cart-menu-products').append(
-              '<li><div class="row"><div class="cart-menu-thumb-ctn">'
-              + '<a href="/product/' + data.results[i].product_id + '">'
-              + '<img src="' + data.results[i].thumbnail + '" alt=""></a></div><div class="cart-menu-name-ctn">'
-              + '<a href="/product/' + data.results[i].product_id + '"><span>' + data.results[i].name + '</span></a>'
-              + '</div><div class="cart-menu-price-ctn"><span>' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(data.results[i].price) + '</span>'
-              + '</div></div></li>'
-            );
-          }
-        },
-        error: function (data) {
-          console.log(data);
-          if (data.status == 401) {
-            window.location.href = data.responseJSON.redirect;
-          }
-        }
-      });
+            $.ajax({
+                type: 'POST',
+                url: '/api/cart/menu',
+                success: function (data) {
+                    if (!data.success) {
+                        return;
+                    }
+                    if (data.results.length == 0) {
+                        $('#cart-menu-products').append(
+                            '<p>Giỏ hàng hiện trống</p>'
+                        );
+                        return;
+                    }
+                    for (let i = 0; i < data.results.length; i++) {
+                        $('#cart-menu-products').append(
+                            '<li><div class="row"><div class="cart-menu-thumb-ctn">' +
+                                '<a href="/product/' +
+                                data.results[i].product_id +
+                                '">' +
+                                '<img src="' +
+                                data.results[i].thumbnail +
+                                '" alt=""></a></div><div class="cart-menu-name-ctn">' +
+                                '<a href="/product/' +
+                                data.results[i].product_id +
+                                '"><span>' +
+                                data.results[i].name +
+                                '</span></a>' +
+                                '</div><div class="cart-menu-price-ctn"><span>' +
+                                new Intl.NumberFormat('de-DE', {
+                                    style: 'currency',
+                                    currency: 'VND',
+                                }).format(data.results[i].price) +
+                                '</span>' +
+                                '</div></div></li>'
+                        );
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                    if (data.status == 401) {
+                        window.location.href = data.responseJSON.redirect;
+                    }
+                },
+            });
+        });
     });
-  });
 </script>

@@ -1,116 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <%- include('layouts/head') %>
 
-<head>
-  <%- include('layouts/head') %>
+        <link rel="stylesheet" href="/css/auth.css" />
 
-  <link rel="stylesheet" href="/css/auth.css">
+        <script src="/js/auth-script.js"></script>
+        <script>
+            const params = new URLSearchParams(window.location.search);
+        </script>
+    </head>
 
-  <script src="/js/auth-script.js"></script>
-  <script>
-    const params = new URLSearchParams(window.location.search);
-  </script>
-</head>
+    <body>
+        <div class="main">
+            <div class="auth-background"></div>
+            <div class="page-body row">
+                <div class="auth-left">
+                    <div class="logo-ctn">
+                        <a href="/">
+                            <img src="/images/logo.png" alt="" />
+                        </a>
+                    </div>
+                </div>
+                <div class="auth-right">
+                    <div class="form-ctn">
+                        <h2>Đổi mật khẩu</h2>
+                        <form action="" method="" id="reset-form">
+                            <div class="form-input-ctn">
+                                <input
+                                    type="password"
+                                    id="password"
+                                    placeholder="Nhập mật khẩu mới"
+                                    required
+                                />
+                            </div>
+                            <div class="form-input-ctn">
+                                <input
+                                    type="password"
+                                    id="repassword"
+                                    placeholder="Nhập lại mật khẩu"
+                                    required
+                                />
+                            </div>
+                            <div class="form-input-ctn auth-error">
+                                <span>Mật khẩu nhập lại không khớp</span>
+                            </div>
+                            <div class="form-input-ctn auth-error">
+                                <span>Địa chỉ email hoặc token không đúng</span>
+                            </div>
+                            <div class="form-input-ctn auth-error">
+                                <span>Token đã hết hạn</span>
+                            </div>
+                            <div class="form-input-ctn row relative">
+                                <input
+                                    type="submit"
+                                    value="Đổi mật khẩu"
+                                    id="submit-btn"
+                                    data-enable="1"
+                                />
+                                <div
+                                    class="loader"
+                                    id="submit-loader"
+                                    style="right: 5px"
+                                ></div>
+                            </div>
+                            <div
+                                class="form-input-ctn form-split-line"
+                                style="display: none"
+                            ></div>
+                            <div
+                                class="form-input-ctn success-notif"
+                                style="display: none"
+                            >
+                                <span
+                                    >Đổi mật khẩu thành công. Chuyển hướng đăng
+                                    nhập sau 3 giây</span
+                                >
+                            </div>
+                        </form>
+                        <script>
+                            $(document).ready(() => {
+                                $('#reset-form').submit(function (e) {
+                                    submitForm(e);
+                                });
+                            });
 
-<body>
-  <div class="main">
-    <div class="auth-background"></div>
-    <div class="page-body row">
-      <div class="auth-left">
-        <div class="logo-ctn">
-          <a href="/">
-            <img src="/images/logo.png" alt="">
-          </a>
+                            function submitForm(e) {
+                                if ($('#submit-btn').data('enable') == '0') {
+                                    return;
+                                }
+                                e.preventDefault();
+                                $('#reset-form').submit(false);
+                                ajaxStart();
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '/api/auth/reset-password',
+                                    data: {
+                                        password: $('#password').val(),
+                                        repassword: $('#repassword').val(),
+                                        email: params.get('email'),
+                                        token: params.get('token'),
+                                    },
+                                    success: function (data) {
+                                        $('#reset-form').submit(function (e) {
+                                            submitForm(e);
+                                        });
+                                        ajaxStop();
+                                        if (data.success) {
+                                            ajaxSuccess();
+                                            setTimeout(() => {
+                                                window.location.href =
+                                                    '/auth/login';
+                                            }, 3000);
+                                        } else {
+                                            switch (data.code) {
+                                                case 'repassword-wrong':
+                                                    $('.auth-error:eq(0)').css(
+                                                        'display',
+                                                        'block'
+                                                    );
+                                                    break;
+                                                case 'token-not-exist':
+                                                    $('.auth-error:eq(1)').css(
+                                                        'display',
+                                                        'block'
+                                                    );
+                                                    break;
+                                                case 'token-expired':
+                                                    $('.auth-error:eq(2)').css(
+                                                        'display',
+                                                        'block'
+                                                    );
+                                                    break;
+                                                default:
+                                                    alert('Đã có lỗi xảy ra');
+                                            }
+                                        }
+                                    },
+                                    error: function (data) {
+                                        console.log(data);
+                                        $('#reset-form').submit(function (e) {
+                                            submitForm(e);
+                                        });
+                                        ajaxStop();
+                                        alert('Đã có lỗi xảy ra');
+                                    },
+                                });
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="auth-right">
-        <div class="form-ctn">
-          <h2>Đổi mật khẩu</h2>
-          <form action="" method="" id="reset-form">
-            <div class="form-input-ctn">
-              <input type="password" id="password" placeholder="Nhập mật khẩu mới" required>
-            </div>
-            <div class="form-input-ctn">
-              <input type="password" id="repassword" placeholder="Nhập lại mật khẩu" required>
-            </div>
-            <div class="form-input-ctn auth-error">
-              <span>Mật khẩu nhập lại không khớp</span>
-            </div>
-            <div class="form-input-ctn auth-error">
-              <span>Địa chỉ email hoặc token không đúng</span>
-            </div>
-            <div class="form-input-ctn auth-error">
-              <span>Token đã hết hạn</span>
-            </div>
-            <div class="form-input-ctn row relative">
-              <input type="submit" value="Đổi mật khẩu" id="submit-btn" data-enable="1">
-              <div class="loader" id="submit-loader" style="right: 5px;"></div>
-            </div>
-            <div class="form-input-ctn form-split-line" style="display: none;"></div>
-            <div class="form-input-ctn success-notif" style="display: none;">
-              <span>Đổi mật khẩu thành công. Chuyển hướng đăng nhập sau 3 giây</span>
-            </div>
-          </form>
-          <script>
-            $(document).ready(() => {
-              $('#reset-form').submit(function (e) {submitForm(e)});
-            });
 
-            function submitForm(e) {
-              if ($('#submit-btn').data('enable') == '0')  {
-                return;
-              }
-              e.preventDefault();
-              $('#reset-form').submit(false);
-              ajaxStart();
-              $.ajax({
-                type: 'POST',
-                url: '/auth/reset-password',
-                data: {
-                  'password': $('#password').val(),
-                  'repassword': $('#repassword').val(),
-                  'email': params.get('email'),
-                  'token': params.get('token')
-                },
-                success: function (data) {
-                  $('#reset-form').submit(function (e) {submitForm(e)});
-                  ajaxStop();
-                  if (data.success) {
-                    ajaxSuccess();
-                    setTimeout(() => {
-                      window.location.href = '/auth/login';
-                    }, 3000);
-                  } else {
-                    switch (data.code) {
-                      case 'repassword-wrong':
-                        $('.auth-error:eq(0)').css('display', 'block');
-                        break;
-                      case 'token-not-exist':
-                        $('.auth-error:eq(1)').css('display', 'block');
-                        break;
-                      case 'token-expired':
-                        $('.auth-error:eq(2)').css('display', 'block');
-                        break;
-                      default:
-                        alert('Đã có lỗi xảy ra');
-                    }
-                  }
-                },
-                error: function (data) {
-                  console.log(data);
-                  $('#reset-form').submit(function (e) {submitForm(e)});
-                  ajaxStop();
-                  alert('Đã có lỗi xảy ra');
-                }
-              });
-            }
-          </script>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <%- include('layouts/script') %>
-</body>
-
+        <%- include('layouts/script') %>
+    </body>
 </html>

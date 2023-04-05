@@ -11,13 +11,7 @@ const { redisStore } = require('./services/redis.service');
 require('dotenv').config();
 
 // routers
-const indexRouter = require('./routes/index.router');
-const authRouter = require('./routes/auth.router');
-const userRouter = require('./routes/user.router');
-const cartRouter = require('./routes/cart.router');
-const productRouter = require('./routes/product.router');
-const checkoutRouter = require('./routes/checkout.router');
-const adminRouter = require('./routes/admin.router');
+const router = require('./routes/index');
 
 const app = express();
 
@@ -62,13 +56,7 @@ app.use(
 );
 
 // routing
-app.use('/', indexRouter);
-app.use('/auth', authRouter);
-app.use('/user', userRouter);
-app.use('/cart', cartRouter);
-app.use('/product', productRouter);
-app.use('/checkout', checkoutRouter);
-app.use('/admin', adminRouter);
+app.use('/', router);
 
 // error logging
 app.use(
@@ -93,7 +81,7 @@ app.use(function (err, req, res, next) {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
-
+    console.log(err);
     // render the error page
     res.status(err.status || 500);
     res.render('error');
