@@ -14,7 +14,7 @@ router.get("/signup/create-account", (req, res, next) => {
   res.render("signup-account", { title: "Tạo tài khoản" });
 });
 router.get("/logout", (req, res, next) => {
-  req, session.destroy();
+  req.session.destroy();
   res.redirect("/");
 });
 router.get("/forget-password", (req, res, next) => {
