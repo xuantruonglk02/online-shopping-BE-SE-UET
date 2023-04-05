@@ -1,13 +1,10 @@
 const express = require("express");
-
 const authController = require("../controllers/auth.controller");
+const redisClient = require('../services/redis.service')
 
 const router = express.Router();
 
-router.get("/login", (req, res, next) => {
-  console.log(req.session);
-  console.log("name", req.session.name);
-  req.session.name = "vinh";
+router.get("/login",async (req, res, next) => {
   res.render("login", { title: "Login" });
 });
 router.get("/signup/register-email", (req, res, next) => {

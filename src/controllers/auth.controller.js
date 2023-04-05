@@ -40,6 +40,7 @@ function login(req, res, next) {
       }
 
       req.session.userId = results[0].user_id;
+      req.session.admin = results[0].admin;
       res.json({ success: 1, redirect: "/" });
     }
   );
