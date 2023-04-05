@@ -23,7 +23,7 @@ function getProductById(productId, callback) {
 /**
  * list : body : []
  */
-function getProductsForCheckout(req, res, next) {
+function getProductsForCheckout(req, res) {
     if (!req.body.list) {
         return res.status(400).json({ success: 0 });
     }
@@ -58,7 +58,7 @@ function getProductsForCheckout(req, res, next) {
  * minStar : body
  * orderBy : body : newest|priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
-function getProductsByCategory(req, res, next) {
+function getProductsByCategory(req, res) {
     if (
         (req.body.category != 'class' && req.body.category != 'line') ||
         !req.body.page ||
@@ -124,8 +124,7 @@ function getProductsByCategory(req, res, next) {
 
     connection.query(query, params, (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
 
         const rows = results;
@@ -147,7 +146,7 @@ function getProductsByCategory(req, res, next) {
  * begin : body
  * quantity : body
  */
-function getNewProducts(req, res, next) {
+function getNewProducts(req, res) {
     if (
         !req.body.begin ||
         isNaN(req.body.begin) ||
@@ -165,8 +164,7 @@ function getNewProducts(req, res, next) {
         [req.body.begin, req.body.quantity],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             res.json({ success: 1, results: results });
@@ -174,22 +172,20 @@ function getNewProducts(req, res, next) {
     );
 }
 
-function getAllProductClasses(req, res, next) {
+function getAllProductClasses(req, res) {
     connection.query('SELECT * FROM product_classes', (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
 
         res.json({ success: 1, results: results });
     });
 }
 
-function getAllProductLines(req, res, next) {
+function getAllProductLines(req, res) {
     connection.query('SELECT * FROM product_lines', (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
 
         res.json({ success: 1, results: results });
@@ -199,14 +195,13 @@ function getAllProductLines(req, res, next) {
 /**
  * classId : params
  */
-function getAllProductLinesByClass(req, res, next) {
+function getAllProductLinesByClass(req, res) {
     connection.query(
         'SELECT * FROM product_lines WHERE class_id=?',
         [req.params.classId],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             res.json({ success: 1, results: results });
@@ -214,7 +209,7 @@ function getAllProductLinesByClass(req, res, next) {
     );
 }
 
-function getAllCategories(req, res, next) {
+function getAllCategories(req, res) {
     connection.query(
         `SELECT pc.class_id, pc.name, ` +
             `CONCAT("[",GROUP_CONCAT(CONCAT('{"lineId":"',pl.line_id,'","name":"',pl.name,'"}')),"]") AS product_lines ` +
@@ -224,8 +219,7 @@ function getAllCategories(req, res, next) {
             `ORDER BY pc.class_id ASC, pl.line_id ASC`,
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             res.json({ success: 1, results: results });
@@ -244,7 +238,7 @@ function getAllCategories(req, res, next) {
  * minStar : body
  * orderBy : body : newest|priceASC|priceDESC|soldDESC|qoRatingDESC|ratingDESC
  */
-function searchProductsByKeyword(req, res, next) {
+function searchProductsByKeyword(req, res) {
     if (req.body.keyword == '') {
         return res.json({ success: 1, results: [], totalRows: 0 });
     }
@@ -316,8 +310,7 @@ function searchProductsByKeyword(req, res, next) {
 
     connection.query(query, params, (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
 
         const rows = results;
@@ -338,7 +331,7 @@ function searchProductsByKeyword(req, res, next) {
 /**
  * productId : params
  */
-function getAllRatingsOfProduct(req, res, next) {
+function getAllRatingsOfProduct(req, res) {
     connection.query(
         'SELECT u.user_id, r.star, r.comment, r.created_at, u.name ' +
             'FROM ratings r ' +
@@ -349,8 +342,7 @@ function getAllRatingsOfProduct(req, res, next) {
         [req.params.productId],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             res.json({
@@ -367,7 +359,7 @@ function getAllRatingsOfProduct(req, res, next) {
  * star : body
  * comment : body
  */
-function insertUserRating(req, res, next) {
+function insertUserRating(req, res) {
     if (!req.body.comment || isNaN(req.body.star)) {
         return res.status(400).json({ success: 0 });
     }
@@ -376,8 +368,7 @@ function insertUserRating(req, res, next) {
     const userId = req.session.userId;
     checkUserBoughtProduct(userId, req.params.productId, (err, bought) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
         if (!bought) {
             return res.json({ success: 0, code: 'not-buy' });
@@ -388,8 +379,7 @@ function insertUserRating(req, res, next) {
             [userId, req.params.productId],
             (err, results) => {
                 if (err) {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return res.status(500).json({ success: 0, error: err.code });
                 }
                 if (results.length > 0) {
                     return res.json({ success: 0, code: 'rating-exist' });
@@ -400,11 +390,10 @@ function insertUserRating(req, res, next) {
                     [userId, req.params.productId, req.body.star, req.body.comment],
                     (err, results) => {
                         if (err) {
-                            res.status(500).json({
+                            return res.status(500).json({
                                 success: 0,
                                 error: err.code,
                             });
-                            return next(new Error(err));
                         }
 
                         res.json({ success: 1 });

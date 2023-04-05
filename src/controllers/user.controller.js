@@ -37,7 +37,7 @@ function getUserInformationForCheckout(req, callback) {
  * name : body
  * password : body
  */
-function changeName(req, res, next) {
+function changeName(req, res) {
     if (!req.body.name || !req.body.password) {
         return res.status(400).json({ success: 0 });
     }
@@ -48,8 +48,7 @@ function changeName(req, res, next) {
         [userId],
         async (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
             const match = await bcrypt.compare(req.body.password, results[0].password);
             if (!match) {
@@ -61,8 +60,7 @@ function changeName(req, res, next) {
                 [req.body.name, userId],
                 (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return res.status(500).json({ success: 0, error: err.code });
                     }
 
                     res.json({ success: 1 });
@@ -76,7 +74,7 @@ function changeName(req, res, next) {
  * email : body
  * password : body
  */
-function changeEmail(req, res, next) {
+function changeEmail(req, res) {
     if (!req.body.email || !req.body.password) {
         return res.status(400).json({ success: 0 });
     }
@@ -90,8 +88,7 @@ function changeEmail(req, res, next) {
         [userId],
         async (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             const match = await bcrypt.compare(req.body.password, results[0].password);
@@ -107,8 +104,7 @@ function changeEmail(req, res, next) {
                 [req.body.email],
                 (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return res.status(500).json({ success: 0, error: err.code });
                     }
 
                     if (results[0].exist) {
@@ -123,11 +119,10 @@ function changeEmail(req, res, next) {
                         [req.body.email, userId],
                         (err, results) => {
                             if (err) {
-                                res.status(500).json({
+                                return res.status(500).json({
                                     success: 0,
                                     error: err.code,
                                 });
-                                return next(new Error(err));
                             }
 
                             res.json({ success: 1 });
@@ -143,7 +138,7 @@ function changeEmail(req, res, next) {
  * phone : body
  * password : body
  */
-function changePhone(req, res, next) {
+function changePhone(req, res) {
     if (!req.body.phone || !req.body.password) {
         return res.status(400).json({ success: 0 });
     }
@@ -157,8 +152,7 @@ function changePhone(req, res, next) {
         [userId],
         async (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             const match = await bcrypt.compare(req.body.password, results[0].password);
@@ -174,8 +168,7 @@ function changePhone(req, res, next) {
                 [req.body.phone],
                 (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return res.status(500).json({ success: 0, error: err.code });
                     }
 
                     if (results[0].exist) {
@@ -190,11 +183,10 @@ function changePhone(req, res, next) {
                         [req.body.phone, userId],
                         (err, results) => {
                             if (err) {
-                                res.status(500).json({
+                                return res.status(500).json({
                                     success: 0,
                                     error: err.code,
                                 });
-                                return next(new Error(err));
                             }
 
                             res.json({ success: 1 });
@@ -210,7 +202,7 @@ function changePhone(req, res, next) {
  * address : body
  * password : body
  */
-function changeAddress(req, res, next) {
+function changeAddress(req, res) {
     if (!req.body.address || !req.body.password) {
         return res.status(400).json({ success: 0 });
     }
@@ -221,8 +213,7 @@ function changeAddress(req, res, next) {
         [userId],
         async (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             const match = await bcrypt.compare(req.body.password, results[0].password);
@@ -238,8 +229,7 @@ function changeAddress(req, res, next) {
                 [req.body.address, userId],
                 (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return res.status(500).json({ success: 0, error: err.code });
                     }
 
                     res.json({ success: 1 });
@@ -253,7 +243,7 @@ function changeAddress(req, res, next) {
  * oldPassword : body
  * newPassword : body
  */
-function changePassword(req, res, next) {
+function changePassword(req, res) {
     if (!req.body.oldPassword || !req.body.newPassword) {
         return res.status(400).json({ success: 0 });
     }
@@ -264,8 +254,7 @@ function changePassword(req, res, next) {
         [userId],
         async (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             const matchOldPassword = await bcrypt.compare(
@@ -297,8 +286,7 @@ function changePassword(req, res, next) {
                 [hash, userId],
                 (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return res.status(500).json({ success: 0, error: err.code });
                     }
 
                     res.json({ success: 1 });

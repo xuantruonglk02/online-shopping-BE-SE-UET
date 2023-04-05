@@ -1,30 +1,23 @@
 const { connection } = require('../models/database');
 const { redisClient } = require('../services/redis.service');
 
-async function getQuantityOfProducts(req, res, next) {
+async function getQuantityOfProducts(req, res) {
     const userId = req.session.userId;
     const products = await getProductsInCart(userId);
     return res.json({ success: 1, result: { quantity: products.length } });
 }
 
-async function getAllProductsForCartMenu(req, res, next) {
-    try {
-        const userId = req.session.userId;
-        const products = await getProductsInCart(userId);
-        console.log('products', products);
-        const productIds = products.map((product) => product.productId);
-        console.log('productIds', productIds);
-        getProductByIds(productIds, (error, products) => {
-            if (error) {
-                res.status(500).json({ success: 0, error });
-                return next(new Error(error));
-            }
+async function getAllProductsForCartMenu(req, res) {
+    const userId = req.session.userId;
+    const products = await getProductsInCart(userId);
+    const productIds = products.map((product) => product.productId);
+    getProductByIds(productIds, (err, products) => {
+        if (err) {
+            return res.status(500).json({ success: 0, error: err.code });
+        }
 
-            return res.json({ success: 1, results: products });
-        });
-    } catch (error) {
-        console.log(error);
-    }
+        return res.json({ success: 1, results: products });
+    });
 }
 
 async function addProduct(req, res) {
@@ -71,6 +64,23 @@ async function getAllProducts(req, res) {
     const userId = req.session.userId;
     const products = await getProductsInCart(userId);
     res.json({ success: 1, results: products });
+
+    // let query =
+    //     'SELECT p.product_id, p.name, p.price, p.thumbnail, s.size_id, s.text, chp.quantity, phs.quantity AS max_quantity ' +
+    //     'FROM cart_has_product chp ' +
+    //     'INNER JOIN products p ON chp.product_id = p.product_id ' +
+    //     'INNER JOIN sizes s ON chp.size_id = s.size_id ' +
+    //     'INNER JOIN product_has_size phs ON chp.product_id = phs.product_id AND chp.size_id = phs.size_id ' +
+    //     'WHERE chp.cart_id=? ' +
+    //     'ORDER BY chp.created_at DESC';
+    // connection.query(query, [cartId], (err, results) => {
+    //     if (err) {
+    //         res.status(500).json({ success: 0, error: err.code });
+    //         return next(new Error(err));
+    //     }
+
+    //     res.json({ success: 1, results: results });
+    // });
 }
 
 async function removeProduct(req, res) {

@@ -21,7 +21,7 @@ router.get('/category/:categoryId', (req, res, next) => {
 router.get('/:productId', (req, res, next) => {
     productController.getProductById(req.params.productId, (err, result) => {
         if (err) {
-            return next(createError(500));
+            return next(createError(err));
         }
         if (!result) {
             return next(createError(404));

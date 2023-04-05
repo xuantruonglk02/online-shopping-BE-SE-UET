@@ -14,7 +14,7 @@ const { connection } = require('../models/database');
  * username : body
  * password : body
  */
-function login(req, res, next) {
+function login(req, res) {
     if (!req.body.username || !req.body.password) {
         return res.status(400).json({ success: 0 });
     }
@@ -46,7 +46,7 @@ function login(req, res, next) {
 /**
  * email : body
  */
-function registerEmail(req, res, next) {
+function registerEmail(req, res) {
     if (!req.body.email) {
         return res.status(400).json({ success: 0 });
     }
@@ -59,8 +59,7 @@ function registerEmail(req, res, next) {
         [req.body.email],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
             if (results[0].exist) {
                 return res.status(409).json({ success: 0, code: 'exist' });
@@ -68,8 +67,7 @@ function registerEmail(req, res, next) {
 
             crypto.randomBytes(30, (err, buffer) => {
                 if (err) {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return res.status(500).json({ success: 0, error: err.code });
                 }
 
                 const token = buffer.toString('hex');
@@ -77,11 +75,7 @@ function registerEmail(req, res, next) {
                     verificationEmailOptions(req.body.email, token),
                     (err, info) => {
                         if (err) {
-                            res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                            return next(new Error(err));
+                            return res.status(500).json({ success: 0, error: err.code });
                         }
 
                         connection.query(
@@ -89,11 +83,9 @@ function registerEmail(req, res, next) {
                             [req.body.email, token],
                             (err, results) => {
                                 if (err) {
-                                    res.status(500).json({
-                                        success: 0,
-                                        error: err.code,
-                                    });
-                                    return next(new Error(err));
+                                    return res
+                                        .status(500)
+                                        .json({ success: 0, error: err.code });
                                 }
 
                                 res.json({ success: 1 });
@@ -114,7 +106,7 @@ function registerEmail(req, res, next) {
  * repassword : body
  * token : body
  */
-function createAccount(req, res, next) {
+function createAccount(req, res) {
     if (
         !req.body.name ||
         !req.body.email ||
@@ -182,7 +174,7 @@ function createAccount(req, res, next) {
 /**
  * email : body
  */
-function forgetPassword(req, res, next) {
+function forgetPassword(req, res) {
     if (!req.body.email) {
         return res.status(400).json({ success: 0 });
     }
@@ -195,8 +187,7 @@ function forgetPassword(req, res, next) {
         [req.body.email],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
             if (results.length == 0) {
                 return res.status(404).json({ succes: 0, code: 'email-not-exist' });
@@ -206,8 +197,7 @@ function forgetPassword(req, res, next) {
 
             crypto.randomBytes(30, (err, buffer) => {
                 if (err) {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return res.status(500).json({ success: 0, error: err.code });
                 }
 
                 const token = buffer.toString('hex');
@@ -215,11 +205,7 @@ function forgetPassword(req, res, next) {
                     resetPasswordEmailOptions(req.body.email, token),
                     (err, info) => {
                         if (err) {
-                            res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                            return next(new Error(err));
+                            return res.status(500).json({ success: 0, error: err.code });
                         }
 
                         connection.query(
@@ -227,11 +213,9 @@ function forgetPassword(req, res, next) {
                             [userId, req.body.email, 0, token],
                             (err, results) => {
                                 if (err) {
-                                    res.status(500).json({
-                                        success: 0,
-                                        error: err.code,
-                                    });
-                                    return next(new Error(err));
+                                    return res
+                                        .status(500)
+                                        .json({ success: 0, error: err.code });
                                 }
 
                                 res.json({ success: 1 });
@@ -250,7 +234,7 @@ function forgetPassword(req, res, next) {
  * repassword : body
  * token : body
  */
-function resetPassword(req, res, next) {
+function resetPassword(req, res) {
     if (
         !req.body.email ||
         !req.body.password ||
@@ -268,8 +252,7 @@ function resetPassword(req, res, next) {
         [req.body.email, req.body.token],
         async (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
             if (!results.length) {
                 return res.status(400).json({ success: 0, code: 'token-not-exist' });
@@ -289,8 +272,7 @@ function resetPassword(req, res, next) {
                 [hash, userId],
                 (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return res.status(500).json({ success: 0, error: err.code });
                     }
 
                     res.json({ success: 1 });

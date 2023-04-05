@@ -6,7 +6,7 @@ const { connection, commitTransaction } = require('../models/database');
  * userAddress : body
  * list: [{productId,sizeId,quantity}] : body
  */
-function checkout(req, res, next) {
+function checkout(req, res) {
     if (!req.body.userName || !req.body.userPhone || !req.body.userAddress) {
         return res.status(400).json({ success: 0, code: 'not-infor' });
     }
@@ -38,8 +38,7 @@ function checkout(req, res, next) {
 
     connection.beginTransaction((err) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
 
         let query =
@@ -54,8 +53,7 @@ function checkout(req, res, next) {
         connection.query(query, params, (err, results) => {
             if (err) {
                 return connection.rollback(() => {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return res.status(500).json({ success: 0, error: err.code });
                 });
             }
             if (results.length > 0) {
@@ -82,11 +80,7 @@ function checkout(req, res, next) {
                 (err, results) => {
                     if (err) {
                         return connection.rollback(() => {
-                            res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                            return next(new Error(err));
+                            return res.status(500).json({ success: 0, error: err.code });
                         });
                     }
 
@@ -100,11 +94,10 @@ function checkout(req, res, next) {
                     connection.query(query, params, (err, results) => {
                         if (err) {
                             return connection.rollback(() => {
-                                res.status(500).json({
+                                return res.status(500).json({
                                     success: 0,
                                     error: err.code,
                                 });
-                                return next(new Error(err));
                             });
                         }
 
