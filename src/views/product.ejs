@@ -9,7 +9,8 @@
     </head>
 
     <body>
-        <%- include('layouts/header') %> <%- include('layouts/slider') %>
+        <%- include('layouts/header') %>
+        <%- include('layouts/slider') %>
 
         <div class="main">
             <div class="container">
@@ -29,9 +30,9 @@
                                 function () {
                                     $('.product-content-left-big-img img').attr(
                                         'src',
-                                        $(this).attr('src')
+                                        $(this).attr('src'),
                                     );
-                                }
+                                },
                             );
                         </script>
                     </div>
@@ -40,19 +41,15 @@
                             <h1><%= product.name %></h1>
                         </div>
                         <div class="product-rating">
-                            <% let roundRating = product.rating %> <%
-                            roundRating == null ? roundRating = 0 : roundRating
-                            = parseInt(roundRating) %> <% for (let i = 0; i <
-                            roundRating; i++) { %>
-                            <i class="fa-solid fa-star checked"></i>
-                            <% } %> <% for (let i = 0; i < 5 - roundRating; i++)
-                            { %>
-                            <i class="fa-solid fa-star"></i>
+                            <% let roundRating = product.rating %>
+                            <% roundRating == null ? roundRating = 0 : roundRating = parseInt(roundRating) %>
+                            <% for (let i = 0; i < roundRating; i++) { %>
+                                <i class="fa-solid fa-star checked"></i>
                             <% } %>
-                            <span
-                                >(<%= product.quantity_of_rating %> đánh
-                                giá)</span
-                            >
+                            <% for (let i = 0; i < 5 - roundRating; i++) { %>
+                                <i class="fa-solid fa-star"></i>
+                            <% } %>
+                            <span>(<%= product.quantity_of_rating %> đánh giá)</span>
                         </div>
                         <div class="product-content-right-price">
                             <span><%= product.price %></span>
@@ -60,27 +57,23 @@
                         <div class="product-content-right-size row">
                             <div class="product-content-right-size-input">
                                 <span>Size</span>
-                                <div
-                                    class="product-content-right-size-input-select"
-                                >
+                                <div class="product-content-right-size-input-select">
                                     <select id="size-select">
-                                        <% let sizes = JSON.parse(product.sizes)
-                                        %> <% for (let i = 0; i < sizes.length;
-                                        i++) { %>
-                                        <option
-                                            value="<%= sizes[i].sizeId %>"
-                                            data-quantity="<%= sizes[i].quantity %>"
-                                        >
-                                            <%= sizes[i].size %>
-                                        </option>
+                                        <% let sizes = JSON.parse(product.sizes) %>
+                                        <% for (let i = 0; i < sizes.length; i++) { %>
+                                            <option
+                                                value="<%= sizes[i].sizeId %>"
+                                                data-quantity="<%= sizes[i].quantity %>"
+                                            >
+                                                <%= sizes[i].size %>
+                                            </option>
                                         <% } %>
                                     </select>
                                 </div>
                             </div>
                             <div class="product-content-right-size-quantity">
                                 <span id="quantity-title"
-                                    >Số Lượng: còn <%= sizes[0].quantity
-                                    %></span
+                                    >Số Lượng: còn <%= sizes[0].quantity %></span
                                 >
                                 <div
                                     class="product-content-right-size-input-quantity row"
@@ -115,103 +108,78 @@
                                     $('#quantity-input').attr(
                                         'max',
                                         parseInt(
-                                            $('#size-select :selected').data()
-                                                .quantity
-                                        )
+                                            $('#size-select :selected').data().quantity,
+                                        ),
                                     );
                                     $('#quantity-input').val(1);
                                     $('#quantity-title').text(
                                         'Số Lượng: còn ' +
-                                            $('#size-select :selected').data()
-                                                .quantity
+                                            $('#size-select :selected').data().quantity,
                                     );
                                     $('#checkout').attr(
                                         'href',
                                         window.location.origin +
                                             '/checkout' +
                                             '?listIds[]=' +
-                                            window.location.pathname.split(
-                                                '/'
-                                            )[2] +
+                                            window.location.pathname.split('/')[2] +
                                             '&listSizeIds[]=' +
                                             $('#size-select').val() +
                                             '&listSizes[]=' +
-                                            $(
-                                                '#size-select option:selected'
-                                            ).text() +
+                                            $('#size-select option:selected').text() +
                                             '&listQuantity[]=' +
-                                            $('#quantity-input').val()
+                                            $('#quantity-input').val(),
                                     );
                                 });
-                                $('#quantity-modify-desc').on(
-                                    'click',
-                                    function () {
-                                        if ($('#quantity-input').val() > 1) {
-                                            $('#quantity-input').val(
-                                                parseInt(
-                                                    $('#quantity-input').val()
-                                                ) - 1
-                                            );
-                                            $('#checkout').attr(
-                                                'href',
-                                                window.location.origin +
-                                                    '/checkout' +
-                                                    '?listIds[]=' +
-                                                    window.location.pathname.split(
-                                                        '/'
-                                                    )[2] +
-                                                    '&listSizeIds[]=' +
-                                                    $('#size-select').val() +
-                                                    '&listSizes[]=' +
-                                                    $(
-                                                        '#size-select option:selected'
-                                                    ).text() +
-                                                    '&listQuantity[]=' +
-                                                    $('#quantity-input').val()
-                                            );
-                                        }
+                                $('#quantity-modify-desc').on('click', function () {
+                                    if ($('#quantity-input').val() > 1) {
+                                        $('#quantity-input').val(
+                                            parseInt($('#quantity-input').val()) - 1,
+                                        );
+                                        $('#checkout').attr(
+                                            'href',
+                                            window.location.origin +
+                                                '/checkout' +
+                                                '?listIds[]=' +
+                                                window.location.pathname.split('/')[2] +
+                                                '&listSizeIds[]=' +
+                                                $('#size-select').val() +
+                                                '&listSizes[]=' +
+                                                $('#size-select option:selected').text() +
+                                                '&listQuantity[]=' +
+                                                $('#quantity-input').val(),
+                                        );
                                     }
-                                );
-                                $('#quantity-modify-asc').on(
-                                    'click',
-                                    function () {
-                                        if (
-                                            $('#quantity-input').val() <
-                                            $('#size-select :selected').data()
-                                                .quantity
-                                        ) {
-                                            $('#quantity-input').val(
-                                                parseInt(
-                                                    $('#quantity-input').val()
-                                                ) + 1
-                                            );
-                                            $('#checkout').attr(
-                                                'href',
-                                                window.location.origin +
-                                                    '/checkout' +
-                                                    '?listIds[]=' +
-                                                    window.location.pathname.split(
-                                                        '/'
-                                                    )[2] +
-                                                    '&listSizeIds[]=' +
-                                                    $('#size-select').val() +
-                                                    '&listSizes[]=' +
-                                                    $(
-                                                        '#size-select option:selected'
-                                                    ).text() +
-                                                    '&listQuantity[]=' +
-                                                    $('#quantity-input').val()
-                                            );
-                                        }
+                                });
+                                $('#quantity-modify-asc').on('click', function () {
+                                    if (
+                                        $('#quantity-input').val() <
+                                        $('#size-select :selected').data().quantity
+                                    ) {
+                                        $('#quantity-input').val(
+                                            parseInt($('#quantity-input').val()) + 1,
+                                        );
+                                        $('#checkout').attr(
+                                            'href',
+                                            window.location.origin +
+                                                '/checkout' +
+                                                '?listIds[]=' +
+                                                window.location.pathname.split('/')[2] +
+                                                '&listSizeIds[]=' +
+                                                $('#size-select').val() +
+                                                '&listSizes[]=' +
+                                                $('#size-select option:selected').text() +
+                                                '&listQuantity[]=' +
+                                                $('#quantity-input').val(),
+                                        );
                                     }
-                                );
+                                });
                             </script>
                         </div>
                         <div class="product-content-right-button row">
                             <a id="add-to-cart" href="#" onclick="return false">
                                 <div>
-                                    <i class="fa-solid fa-cart-shopping"></i
-                                    >Thêm vào giỏ hàng
+                                    <i class="fa-solid fa-cart-shopping"></i>Thêm vào giỏ
+                                    hàng
                                 </div>
                             </a>
                             <a id="checkout" href="/checkout">
@@ -224,17 +192,13 @@
                                         window.location.origin +
                                             '/checkout' +
                                             '?listIds[]=' +
-                                            window.location.pathname.split(
-                                                '/'
-                                            )[2] +
+                                            window.location.pathname.split('/')[2] +
                                             '&listSizeIds[]=' +
                                             $('#size-select').val() +
                                             '&listSizes[]=' +
-                                            $(
-                                                '#size-select option:selected'
-                                            ).text() +
+                                            $('#size-select option:selected').text() +
                                             '&listQuantity[]=' +
-                                            $('#quantity-input').val()
+                                            $('#quantity-input').val(),
                                     );
                                 });
                                 $('#add-to-cart').on('click', function () {
@@ -242,44 +206,37 @@
                                         type: 'POST',
                                         url: '/api/cart/add',
                                         data: {
-                                            productId:
-                                                document.location.href.substr(
-                                                    document.location.href.lastIndexOf(
-                                                        '/'
-                                                    ) + 1
-                                                ),
-                                            sizeId: $(
-                                                '#size-select :selected'
-                                            ).val(),
+                                            productId: document.location.href.substr(
+                                                document.location.href.lastIndexOf('/') +
+                                                    1,
+                                            ),
+                                            sizeId: $('#size-select :selected').val(),
                                             quantity: parseInt(
-                                                $('#quantity-input').val()
+                                                $('#quantity-input').val(),
                                             ),
                                         },
                                         success: function (data) {
                                             if (data.success) {
                                                 $('#cart-number').text(
-                                                    parseInt(
-                                                        $('#cart-number').text()
-                                                    ) + 1
+                                                    parseInt($('#cart-number').text()) +
+                                                        1,
                                                 );
                                                 alert('Thành công');
                                             } else {
                                                 switch (data.code) {
                                                     case 'ER_DUP_ENTRY':
                                                         alert(
-                                                            'Sản phẩm đã có sẵn trong giỏ hàng'
+                                                            'Sản phẩm đã có sẵn trong giỏ hàng',
                                                         );
                                                         break;
                                                     case 'max-in-cart':
                                                         alert(
                                                             'Số sản phẩm trong giỏ không được vượt quá ' +
-                                                                data.max
+                                                                data.max,
                                                         );
                                                         break;
                                                     default:
-                                                        alert(
-                                                            'Đã có lỗi xảy ra'
-                                                        );
+                                                        alert('Đã có lỗi xảy ra');
                                                 }
                                             }
                                         },
@@ -295,34 +252,24 @@
                             </script>
                         </div>
                         <% if (product.description != '') { %>
-                        <div class="product-content-right-botton">
-                            <div class="product-content-right-botton-top">
-                                &#8564;
-                            </div>
-                            <div class="product-content-right-botton-des">
-                                <div
-                                    class="product-content-right-botton-title row"
-                                >
-                                    <div
-                                        class="product-content-right-botton-title-item"
-                                    >
-                                        <p>Chi Tiết Sản Phẩm</p>
+                            <div class="product-content-right-botton">
+                                <div class="product-content-right-botton-top">&#8564;</div>
+                                <div class="product-content-right-botton-des">
+                                    <div class="product-content-right-botton-title row">
+                                        <div class="product-content-right-botton-title-item">
+                                            <p>Chi Tiết Sản Phẩm</p>
+                                        </div>
                                     </div>
+                                    <% let descs = product.description.split('#') %>
+                                    <% for (let i = 0; i < descs.length; i++) { %>
+                                        <div class="product-content-right-botton">
+                                            <div class="product-content-right-botton-chitiet">
+                                                <p><%- descs[i].replaceAll('\n', '</p><br /><p>') %></p>
+                                            </div>
+                                        </div>
+                                    <% } %>
                                 </div>
-                                <% let descs = product.description.split('#') %>
-                                <% for (let i = 0; i < descs.length; i++) { %>
-                                <div class="product-content-right-botton">
-                                    <div
-                                        class="product-content-right-botton-chitiet"
-                                    >
-                                        <p><%- descs[i].replaceAll('\n', '</p>
-                                        <br />
-                                        <p>') %></p>
-                                    </div>
-                                </div>
-                                <% } %>
                             </div>
-                        </div>
                         <% } %>
                     </div>
                 </div>
@@ -333,33 +280,26 @@
                         <h2>Đánh giá sản phẩm</h2>
                         <div class="rating-average-ctn">
                             <% for (let i = 0; i < roundRating; i++) { %>
-                            <i class="fa-solid fa-star checked"></i>
-                            <% } %> <% for (let i = 0; i < 5 - roundRating; i++)
-                            { %>
-                            <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star checked"></i>
+                            <% } %>
+                            <% for (let i = 0; i < 5 - roundRating; i++) { %>
+                                <i class="fa-solid fa-star"></i>
                             <% } %>
                             <span
-                                ><%= product.rating == null ? 'Chưa có đánh giá'
-                                : product.rating + ' trên 5' %></span
+                                ><%= product.rating == null ? 'Chưa có đánh giá' : product.rating + ' trên 5' %></span
                             >
                         </div>
                     </div>
-                    <div
-                        class="product-rating-content"
-                        id="product-rating-content"
-                    >
+                    <div class="product-rating-content" id="product-rating-content">
                         <% if (bought == false) { %>
-                        <div class="product-rating">
-                            <span
-                                >Bạn cần mua sản phẩm này mới có thể để lại đánh
-                                giá</span
-                            >
-                        </div>
-                        <% } %> <% if (bought) { %>
-                        <div
-                            class="product-rating-form"
-                            id="product-rating-form"
-                        >
+                            <div class="product-rating">
+                                <span
+                                    >Bạn cần mua sản phẩm này mới có thể để lại đánh giá</span
+                                >
+                            </div>
+                        <% } %>
+                        <% if (bought) { %>
+                        <div class="product-rating-form" id="product-rating-form">
                             <div class="product-rating-form-title">
                                 <h3>Đánh giá của tôi</h3>
                             </div>
@@ -368,26 +308,11 @@
                                     <textarea id="comment" required></textarea>
                                 </div>
                                 <div class="form-star-ctn">
-                                    <i
-                                        class="fa-solid fa-star"
-                                        data-star="1"
-                                    ></i>
-                                    <i
-                                        class="fa-solid fa-star"
-                                        data-star="2"
-                                    ></i>
-                                    <i
-                                        class="fa-solid fa-star"
-                                        data-star="3"
-                                    ></i>
-                                    <i
-                                        class="fa-solid fa-star"
-                                        data-star="4"
-                                    ></i>
-                                    <i
-                                        class="fa-solid fa-star"
-                                        data-star="5"
-                                    ></i>
+                                    <i class="fa-solid fa-star" data-star="1"></i>
+                                    <i class="fa-solid fa-star" data-star="2"></i>
+                                    <i class="fa-solid fa-star" data-star="3"></i>
+                                    <i class="fa-solid fa-star" data-star="4"></i>
+                                    <i class="fa-solid fa-star" data-star="5"></i>
                                     <input type="number" id="star" required />
                                     <script>
                                         $('.form-star-ctn i').hover(
@@ -395,34 +320,26 @@
                                                 let star = $(this).data('star');
                                                 for (let i = 0; i < star; i++) {
                                                     $(
-                                                        '.form-star-ctn i:eq(' +
-                                                            i +
-                                                            ')'
+                                                        '.form-star-ctn i:eq(' + i + ')',
                                                     ).addClass('star-hover');
                                                 }
                                             },
                                             function () {
-                                                $(
-                                                    '.form-star-ctn i'
-                                                ).removeClass('star-hover');
-                                            }
+                                                $('.form-star-ctn i').removeClass(
+                                                    'star-hover',
+                                                );
+                                            },
                                         );
-                                        $('.form-star-ctn i').click(
-                                            function () {
+                                        $('.form-star-ctn i').click(function () {
+                                            $('.form-star-ctn i').removeClass('checked');
+                                            let star = $(this).data('star');
+                                            $('#star').val(star);
+                                            for (let i = 0; i < star; i++) {
                                                 $(
-                                                    '.form-star-ctn i'
-                                                ).removeClass('checked');
-                                                let star = $(this).data('star');
-                                                $('#star').val(star);
-                                                for (let i = 0; i < star; i++) {
-                                                    $(
-                                                        '.form-star-ctn i:eq(' +
-                                                            i +
-                                                            ')'
-                                                    ).addClass('checked');
-                                                }
+                                                    '.form-star-ctn i:eq(' + i + ')',
+                                                ).addClass('checked');
                                             }
-                                        );
+                                        });
                                     </script>
                                 </div>
                                 <div class="form-submit-ctn relative">
@@ -446,10 +363,7 @@
                                     });
 
                                     function submitForm(e) {
-                                        if (
-                                            $('#submit-btn').data('enable') ==
-                                            '0'
-                                        ) {
+                                        if ($('#submit-btn').data('enable') == '0') {
                                             return;
                                         }
                                         e.preventDefault();
@@ -470,59 +384,48 @@
                                                 ajaxStop();
                                                 if (data.success) {
                                                     ajaxSuccess();
-                                                    $(
-                                                        '#product-rating-form'
-                                                    ).append(
+                                                    $('#product-rating-form').append(
                                                         '<div class="product-rating row"><div class="product-rating-left"><div class="user-avt-ctn">' +
                                                             '<img src="/images/avatars/default.jpg" alt=""></div></div><div class="product-rating-right">' +
                                                             '<div class="product-rating-right-top row"><div class="user-name-ctn"><span>Tôi</span>' +
                                                             '</div><div class="product-rating-time-ctn"><span>' +
                                                             new Date().toLocaleString(
-                                                                'vi-VI'
+                                                                'vi-VI',
                                                             ) +
                                                             '</span></div></div>' +
                                                             '<div class="product-rating-right-star"><div class="product-star-ctn">' +
                                                             '<i class="fa-solid fa-star checked"></i>'.repeat(
-                                                                $('#star').val()
+                                                                $('#star').val(),
                                                             ) +
                                                             '<i class="fa-solid fa-star"></i>'.repeat(
-                                                                5 -
-                                                                    $(
-                                                                        '#star'
-                                                                    ).val()
+                                                                5 - $('#star').val(),
                                                             ) +
                                                             '</div></div><div class="product-rating-right-comment"><div class="product-rating-comment-ctn">' +
                                                             '<p>' +
-                                                            $(
-                                                                '#comment'
-                                                            ).val() +
-                                                            '</p></div></div></div></div>'
+                                                            $('#comment').val() +
+                                                            '</p></div></div></div></div>',
                                                     );
                                                     $('#rating-form').remove();
-                                                    $(
-                                                        '.product-rating-none'
-                                                    ).remove();
+                                                    $('.product-rating-none').remove();
                                                 } else {
-                                                    $('#rating-form').submit(
-                                                        function (e) {
-                                                            submitForm(e);
-                                                        }
-                                                    );
+                                                    $('#rating-form').submit(function (
+                                                        e,
+                                                    ) {
+                                                        submitForm(e);
+                                                    });
                                                     alert(
-                                                        'Đã có lỗi xảy ra. Vui lòng thử lại sau'
+                                                        'Đã có lỗi xảy ra. Vui lòng thử lại sau',
                                                     );
                                                 }
                                             },
                                             error: function (data) {
                                                 console.log(data);
-                                                $('#rating-form').submit(
-                                                    function (e) {
-                                                        submitForm(e);
-                                                    }
-                                                );
+                                                $('#rating-form').submit(function (e) {
+                                                    submitForm(e);
+                                                });
                                                 ajaxStop();
                                                 alert(
-                                                    'Đã có lỗi xảy ra. Vui lòng thử lại sau'
+                                                    'Đã có lỗi xảy ra. Vui lòng thử lại sau',
                                                 );
                                             },
                                         });
@@ -536,23 +439,19 @@
                         $(document).ready(() => {
                             $.ajax({
                                 type: 'POST',
-                                url:
-                                    '/api' +
-                                    window.location.pathname +
-                                    '/rating',
+                                url: '/api' + window.location.pathname + '/rating',
                                 success: function (data) {
                                     if (data.success) {
                                         if (data.results.length == 0)
                                             $('#product-rating-content').append(
-                                                '<div class="product-rating product-rating-none"><span>Sản phẩm này chưa có đánh giá nào</span></div>'
+                                                '<div class="product-rating product-rating-none"><span>Sản phẩm này chưa có đánh giá nào</span></div>',
                                             );
                                         data.results.forEach((e) => {
                                             let id;
                                             if (data.userId == e.user_id) {
                                                 id = 'product-rating-form';
                                                 $('#rating-form').remove();
-                                            } else
-                                                id = 'product-rating-content';
+                                            } else id = 'product-rating-content';
                                             $('#' + id).append(
                                                 '<div class="product-rating row"><div class="product-rating-left"><div class="user-avt-ctn">' +
                                                     '<img src="/images/avatars/default.jpg" alt=""></div></div><div class="product-rating-right">' +
@@ -560,21 +459,21 @@
                                                     e.name +
                                                     '</span>' +
                                                     '</div><div class="product-rating-time-ctn"><span>' +
-                                                    new Date(
-                                                        e.create_at
-                                                    ).toLocaleString('vi-VI') +
+                                                    new Date(e.create_at).toLocaleString(
+                                                        'vi-VI',
+                                                    ) +
                                                     '</span></div></div>' +
                                                     '<div class="product-rating-right-star"><div class="product-star-ctn">' +
                                                     '<i class="fa-solid fa-star checked"></i>'.repeat(
-                                                        e.star
+                                                        e.star,
                                                     ) +
                                                     '<i class="fa-solid fa-star"></i>'.repeat(
-                                                        5 - e.star
+                                                        5 - e.star,
                                                     ) +
                                                     '</div></div><div class="product-rating-right-comment"><div class="product-rating-comment-ctn">' +
                                                     '<p>' +
                                                     e.comment +
-                                                    '</p></div></div></div></div>'
+                                                    '</p></div></div></div></div>',
                                             );
                                         });
                                     }
@@ -589,6 +488,7 @@
             </div>
         </div>
 
-        <%- include('layouts/footer') %> <%- include('layouts/script') %>
+        <%- include('layouts/footer') %>
+        <%- include('layouts/script') %>
     </body>
 </html>

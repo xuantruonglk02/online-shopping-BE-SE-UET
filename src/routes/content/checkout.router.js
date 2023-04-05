@@ -9,8 +9,7 @@ const router = express.Router();
 router.get('/', authMiddleware.verifyTokenGET, (req, res, next) => {
     userController.getUserInformationForCheckout(req, (err, user) => {
         if (err) {
-            console.log(err);
-            return next(createError(500));
+            return next(createError(err));
         }
         res.render('checkout', {
             title: 'Thanh toán',

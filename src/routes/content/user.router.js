@@ -9,8 +9,7 @@ const router = express.Router();
 router.get('/account', authMiddleware.verifyTokenGET, (req, res, next) => {
     userController.getUserInformation(req, (err, user) => {
         if (err) {
-            console.log(err);
-            return next(createError(500));
+            return next(createError(err));
         }
         res.render('account', {
             title: 'Thông tin tài khoản',

@@ -9,7 +9,7 @@ const { connection, commitTransaction } = require('../models/database');
  * description
  * thumbnail
  */
-function addProduct(req, res, next) {
+function addProduct(req, res) {
     if (
         !req.body.lineId ||
         !req.body.classId ||
@@ -35,8 +35,7 @@ function addProduct(req, res, next) {
 
     connection.beginTransaction((err) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
 
         connection.query(
@@ -52,8 +51,7 @@ function addProduct(req, res, next) {
             (err, results) => {
                 if (err) {
                     return connection.rollback(() => {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return res.status(500).json({ success: 0, error: err.code });
                     });
                 }
 
@@ -63,22 +61,21 @@ function addProduct(req, res, next) {
                     '(?,?,?),'.repeat(req.body.sizes.length).slice(0, -1);
                 let params = req.body.sizes.reduce(
                     (p, c) => p.concat([productId, c.sizeId, c.quantity]),
-                    []
+                    [],
                 );
                 connection.query(query, params, (err, results) => {
                     if (err) {
                         return connection.rollback(() => {
-                            res.status(500).json({
+                            return res.status(500).json({
                                 success: 0,
                                 error: err.code,
                             });
-                            return next(new Error(err));
                         });
                     }
 
                     return commitTransaction(connection, res);
                 });
-            }
+            },
         );
     });
 }
@@ -91,7 +88,7 @@ function addProduct(req, res, next) {
  * description
  * thumbnail
  */
-function modifyProduct(req, res, next) {
+function modifyProduct(req, res) {
     if (!req.body.productId) {
         return res.status(400).json({ success: 0 });
     }
@@ -130,14 +127,12 @@ function modifyProduct(req, res, next) {
 
     connection.beginTransaction((err) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
 
         connection.query(query, params, (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             if (req.body.sizes) {
@@ -146,39 +141,31 @@ function modifyProduct(req, res, next) {
                     [req.body.productId],
                     (err, results) => {
                         if (err) {
-                            res.status(500).json({
+                            return res.status(500).json({
                                 success: 0,
                                 error: err.code,
                             });
-                            return next(new Error(err));
                         }
 
                         let query =
                             'INSERT INTO product_has_size (product_id, size_id, quantity) VALUES ' +
-                            '(?,?,?),'
-                                .repeat(req.body.sizes.length)
-                                .slice(0, -1);
+                            '(?,?,?),'.repeat(req.body.sizes.length).slice(0, -1);
                         let params = req.body.sizes.reduce(
                             (p, c) =>
-                                p.concat([
-                                    req.body.productId,
-                                    c.sizeId,
-                                    c.quantity,
-                                ]),
-                            []
+                                p.concat([req.body.productId, c.sizeId, c.quantity]),
+                            [],
                         );
                         connection.query(query, params, (err, results) => {
                             if (err) {
-                                res.status(500).json({
+                                return res.status(500).json({
                                     success: 0,
                                     error: err.code,
                                 });
-                                return next(new Error(err));
                             }
 
                             return commitTransaction(connection, res);
                         });
-                    }
+                    },
                 );
             } else {
                 return commitTransaction(connection, res);
@@ -192,7 +179,7 @@ function modifyProduct(req, res, next) {
  *
  * productId : body
  */
-function removeProduct(req, res, next) {
+function removeProduct(req, res) {
     if (!req.body.productId) {
         return res.status(400).json({ success: 0 });
     }
@@ -202,12 +189,11 @@ function removeProduct(req, res, next) {
         [req.body.productId],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             res.json({ success: 1 });
-        }
+        },
     );
 }
 
@@ -216,7 +202,7 @@ function removeProduct(req, res, next) {
  * classId
  * name
  */
-function addCategory(req, res, next) {
+function addCategory(req, res) {
     if (!req.body.type || !req.body.name) {
         return res.status(400).json({ success: 0 });
     }
@@ -238,8 +224,7 @@ function addCategory(req, res, next) {
 
     connection.query(query, params, (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
 
         res.json({ success: 1 });
@@ -250,7 +235,7 @@ function addCategory(req, res, next) {
  * begin : body
  * quantity : body
  */
-function getBills(req, res, next) {
+function getBills(req, res) {
     if (!req.body.begin || !req.body.quantity) {
         return res.status(400).json({ success: 0 });
     }
@@ -263,12 +248,11 @@ function getBills(req, res, next) {
         [req.body.begin, req.body.quantity],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return res.status(500).json({ success: 0, error: err.code });
             }
 
             res.json({ success: 1, results: results });
-        }
+        },
     );
 }
 
@@ -279,11 +263,7 @@ function checkSizesList(sizes) {
             return 0;
         }
         for (let i = 0; i < sizes.length; i++) {
-            if (
-                !sizes[i].sizeId ||
-                !sizes[i].quantity ||
-                isNaN(sizes[i].quantity)
-            ) {
+            if (!sizes[i].sizeId || !sizes[i].quantity || isNaN(sizes[i].quantity)) {
                 return 0;
             }
             sizes[i].quantity = parseInt(sizes[i].quantity);

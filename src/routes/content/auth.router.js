@@ -2,7 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 
-router.get('/login', (req, res, next) => {
+router.get('/login', async (req, res, next) => {
     res.render('login', { title: 'Login' });
 });
 router.get('/signup/register-email', (req, res, next) => {
@@ -12,7 +12,7 @@ router.get('/signup/create-account', (req, res, next) => {
     res.render('signup-account', { title: 'Tạo tài khoản' });
 });
 router.get('/logout', (req, res, next) => {
-    res.clearCookie('x-access-token');
+    req.session.destroy();
     res.redirect('/');
 });
 router.get('/forget-password', (req, res, next) => {

@@ -1,5 +1,4 @@
 const { connection, commitTransaction } = require('../models/database');
-const { getUserId } = require('../controllers/user.controller');
 
 /**
  * userName : body
@@ -7,7 +6,7 @@ const { getUserId } = require('../controllers/user.controller');
  * userAddress : body
  * list: [{productId,sizeId,quantity}] : body
  */
-function checkout(req, res, next) {
+function checkout(req, res) {
     if (!req.body.userName || !req.body.userPhone || !req.body.userAddress) {
         return res.status(400).json({ success: 0, code: 'not-infor' });
     }
@@ -39,8 +38,7 @@ function checkout(req, res, next) {
 
     connection.beginTransaction((err) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return res.status(500).json({ success: 0, error: err.code });
         }
 
         let query =
@@ -50,13 +48,12 @@ function checkout(req, res, next) {
                 .slice(0, -3);
         let params = req.body.list.reduce(
             (p, c) => p.concat([c.productId, c.sizeId, c.quantity]),
-            []
+            [],
         );
         connection.query(query, params, (err, results) => {
             if (err) {
                 return connection.rollback(() => {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return res.status(500).json({ success: 0, error: err.code });
                 });
             }
             if (results.length > 0) {
@@ -69,7 +66,7 @@ function checkout(req, res, next) {
                 });
             }
 
-            const userId = getUserId(req.cookies['x-access-token']);
+            const userId = req.session.userId;
             const billId = new Date().getTime();
             connection.query(
                 'INSERT INTO bills (bill_id, user_id, user_name, user_phone, user_address) VALUES (?,?,?,?,?)',
@@ -83,11 +80,7 @@ function checkout(req, res, next) {
                 (err, results) => {
                     if (err) {
                         return connection.rollback(() => {
-                            res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                            return next(new Error(err));
+                            return res.status(500).json({ success: 0, error: err.code });
                         });
                     }
 
@@ -95,29 +88,22 @@ function checkout(req, res, next) {
                         'INSERT INTO bill_has_product (bill_id, product_id, size_id, quantity) VALUES' +
                         ' (?,?,?,?),'.repeat(req.body.list.length).slice(0, -1);
                     let params = req.body.list.reduce(
-                        (p, c) =>
-                            p.concat([
-                                billId,
-                                c.productId,
-                                c.sizeId,
-                                c.quantity,
-                            ]),
-                        []
+                        (p, c) => p.concat([billId, c.productId, c.sizeId, c.quantity]),
+                        [],
                     );
                     connection.query(query, params, (err, results) => {
                         if (err) {
                             return connection.rollback(() => {
-                                res.status(500).json({
+                                return res.status(500).json({
                                     success: 0,
                                     error: err.code,
                                 });
-                                return next(new Error(err));
                             });
                         }
 
                         commitTransaction(connection, res);
                     });
-                }
+                },
             );
         });
     });

@@ -84,51 +84,6 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `carts`
---
-
-CREATE TABLE `carts` (
-  `cart_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `cart_has_product`
---
-
-CREATE TABLE `cart_has_product` (
-  `cart_id` int(11) NOT NULL,
-  `product_id` varchar(8) NOT NULL,
-  `size_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL DEFAULT '1',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Bẫy `cart_has_product`
---
-DELIMITER $$
-CREATE TRIGGER `after_delete_product_in_cart` AFTER DELETE ON `cart_has_product` FOR EACH ROW BEGIN
-	UPDATE carts
-		SET quantity = quantity - 1
-        WHERE cart_id = OLD.cart_id;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `after_insert_product_to_cart` AFTER INSERT ON `cart_has_product` FOR EACH ROW BEGIN
-	UPDATE carts
-		SET quantity = quantity + 1
-        WHERE cart_id = NEW.cart_id;
-END
-$$
-DELIMITER ;
-
--- --------------------------------------------------------
-
---
 -- Cấu trúc bảng cho bảng `order_statuses`
 --
 
@@ -294,7 +249,6 @@ CREATE TABLE `sizes` (
 
 CREATE TABLE `users` (
   `user_id` int(11) NOT NULL,
-  `cart_id` int(11) NOT NULL,
   `admin` tinyint(1) NOT NULL DEFAULT '0',
   `name` varchar(30) NOT NULL,
   `phone` varchar(11) NOT NULL,
@@ -336,21 +290,6 @@ ALTER TABLE `bill_has_product`
   ADD KEY `fk_bill_has_product_bill1` (`bill_id`),
   ADD KEY `fk_bill_has_product_product1` (`product_id`),
   ADD KEY `fk_bill_has_product_size1` (`size_id`);
-
---
--- Chỉ mục cho bảng `carts`
---
-ALTER TABLE `carts`
-  ADD PRIMARY KEY (`cart_id`);
-
---
--- Chỉ mục cho bảng `cart_has_product`
---
-ALTER TABLE `cart_has_product`
-  ADD PRIMARY KEY (`cart_id`,`product_id`,`size_id`),
-  ADD KEY `fk_cart_has_product_cart1` (`cart_id`),
-  ADD KEY `fk_cart_has_product_product1` (`product_id`),
-  ADD KEY `fk_cart_has_product_size1` (`size_id`);
 
 --
 -- Chỉ mục cho bảng `order_statuses`
@@ -418,9 +357,7 @@ ALTER TABLE `sizes`
 -- Chỉ mục cho bảng `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`user_id`),
-  ADD KEY `fk_user_cart` (`cart_id`);
-
+  ADD PRIMARY KEY (`user_id`);
 --
 -- Chỉ mục cho bảng `verify_email`
 --
@@ -430,12 +367,6 @@ ALTER TABLE `verify_email`
 --
 -- AUTO_INCREMENT cho các bảng đã đổ
 --
-
---
--- AUTO_INCREMENT cho bảng `carts`
---
-ALTER TABLE `carts`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `order_statuses`
@@ -493,14 +424,6 @@ ALTER TABLE `bill_has_product`
   ADD CONSTRAINT `fk_bill_has_product_size1` FOREIGN KEY (`size_id`) REFERENCES `sizes` (`size_id`);
 
 --
--- Các ràng buộc cho bảng `cart_has_product`
---
-ALTER TABLE `cart_has_product`
-  ADD CONSTRAINT `fk_cart_has_product_cart1` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`cart_id`),
-  ADD CONSTRAINT `fk_cart_has_product_product1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
-  ADD CONSTRAINT `fk_cart_has_product_size1` FOREIGN KEY (`size_id`) REFERENCES `sizes` (`size_id`);
-
---
 -- Các ràng buộc cho bảng `preview_images`
 --
 ALTER TABLE `preview_images`
@@ -533,11 +456,6 @@ ALTER TABLE `ratings`
   ADD CONSTRAINT `fk_rating_product1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
   ADD CONSTRAINT `fk_rating_user1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
---
--- Các ràng buộc cho bảng `users`
---
-ALTER TABLE `users`
-  ADD CONSTRAINT `fk_user_cart` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`cart_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

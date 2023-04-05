@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: clothing_shop
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: 1
+      MYSQL_PASSWORD: 1
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3309:3306"
+  redis:
+    image: redis:latest
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+volumes:
+  db_data:
+  redis_data:
