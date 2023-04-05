@@ -1,3 +1,4 @@
+const { connection } = require('../models/database');
 const { redisClient } = require('../services/redis.service');
 
 async function getQuantityOfProducts(req, res, next) {
@@ -7,46 +8,60 @@ async function getQuantityOfProducts(req, res, next) {
 }
 
 async function getAllProductsForCartMenu(req, res, next) {
-    const userId = req.session.userId;
+    try {
+        const userId = req.session.userId;
+        const products = await getProductsInCart(userId);
+        console.log('products', products);
+        const productIds = products.map((product) => product.productId);
+        console.log('productIds', productIds);
+        getProductByIds(productIds, (error, products) => {
+            if (error) {
+                res.status(500).json({ success: 0, error });
+                return next(new Error(error));
+            }
 
-    let products = await getProductsInCart(userId);
-    products = products.map((product) => ({
-        product_id: product.product_id,
-        name: product.name,
-        price: product.price,
-        thumbnail: product.thumbnail,
-    }));
-
-    return res.json({ success: 1, results: products });
+            return res.json({ success: 1, results: products });
+        });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 async function addProduct(req, res) {
     // max_quantity is quantity in table product_has_sizes, text is text of size
-    const { product_id } = req.body;
-    const userId = req.session.userId;
+    const { productId, sizeId, quantity } = req.body;
+    if (!productId || !sizeId || !quantity) {
+        return res.status(400).json({ success: 0 });
+    }
 
-    await redisClient.hSet(`cart:${userId}`, `${product_id}`, JSON.stringify(req.body));
+    const userId = req.session.userId;
+    await redisClient.hSet(
+        `cart:${userId}`,
+        `${productId}`,
+        JSON.stringify({ productId, sizeId, quantity }),
+    );
 
     res.json({ success: 1 });
 }
 
 async function updateProductInCart(req, res) {
-    const { product_id, quantity } = req.body;
-
-    if (!product_id || !quantity || isNaN(quantity)) {
+    const { productId, sizeId, quantity } = req.body;
+    if (!productId || !sizeId || !quantity || isNaN(quantity)) {
         return res.status(400).json({ success: 0 });
     }
 
     const userId = req.session.userId;
     const products = await getProductsInCart(userId);
-    const foundProduct = products.find((product) => product.product_id == product_id);
 
-    if (!foundProduct) return res.json({ success: 0, err: 'product_id not found' });
+    const foundProduct = products.find((product) => product.productId === productId);
+    if (!foundProduct) {
+        return res.json({ success: 0, err: 'productId not found' });
+    }
 
     await redisClient.hSet(
         `cart:${userId}`,
-        `${product_id}`,
-        JSON.stringify(foundProduct),
+        `${productId}`,
+        JSON.stringify({ productId, sizeId, quantity }),
     );
 
     return res.json({ success: 1 });
@@ -59,19 +74,20 @@ async function getAllProducts(req, res) {
 }
 
 async function removeProduct(req, res) {
-    const { product_id } = req.body;
-
-    if (!product_id) {
+    const { productId } = req.body;
+    if (!productId) {
         return res.status(400).json({ success: 0 });
     }
 
     const userId = req.session.userId;
     const products = await getProductsInCart(userId);
-    const foundId = products.findIndex((product) => product.product_id == product_id);
 
-    if (foundId < 0) return res.json({ success: 0, err: 'product_id not found' });
+    const foundId = products.findIndex((product) => product.productId === productId);
+    if (foundId < 0) {
+        return res.json({ success: 0, err: 'productId not found' });
+    }
 
-    await redisClient.hDel(`cart:${userId}`, `${product_id}`);
+    await redisClient.hDel(`cart:${userId}`, `${productId}`);
     return res.json({ success: 1 });
 }
 
@@ -79,6 +95,20 @@ async function getProductsInCart(userId) {
     const cart = await redisClient.hGetAll(`cart:${userId}`);
     const products = Object.values(cart).map((objString) => JSON.parse(objString));
     return products;
+}
+
+function getProductByIds(productIds, callback) {
+    const productIdsQuery = productIds.map((id) => '?').join(',');
+    const query =
+        `SELECT product_id, name, price, thumbnail ` +
+        `FROM products WHERE product_id IN (${productIdsQuery})`;
+    connection.query(query, [...productIds], (err, results) => {
+        if (err) {
+            return callback(err, null);
+        }
+
+        callback(null, results);
+    });
 }
 
 module.exports = {

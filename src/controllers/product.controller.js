@@ -5,7 +5,7 @@ const { connection } = require('../models/database');
  * callback
  */
 function getProductById(productId, callback) {
-    let query =
+    const query =
         `SELECT product_id, name, price, sold, quantity_of_rating, rating, description, thumbnail, ` +
         `(SELECT CONCAT('[',GROUP_CONCAT(CONCAT('"',url,'"')),']') FROM preview_images WHERE product_id=? GROUP BY product_id) AS urls, ` +
         `(SELECT CONCAT('[',GROUP_CONCAT(CONCAT('{"sizeId":',phs.size_id,',"size":"',s.text,'","quantity":',phs.quantity,'}')),']') ` +
