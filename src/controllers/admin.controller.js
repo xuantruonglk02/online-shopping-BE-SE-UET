@@ -63,7 +63,7 @@ function addProduct(req, res, next) {
                     '(?,?,?),'.repeat(req.body.sizes.length).slice(0, -1);
                 let params = req.body.sizes.reduce(
                     (p, c) => p.concat([productId, c.sizeId, c.quantity]),
-                    []
+                    [],
                 );
                 connection.query(query, params, (err, results) => {
                     if (err) {
@@ -78,7 +78,7 @@ function addProduct(req, res, next) {
 
                     return commitTransaction(connection, res);
                 });
-            }
+            },
         );
     });
 }
@@ -155,17 +155,11 @@ function modifyProduct(req, res, next) {
 
                         let query =
                             'INSERT INTO product_has_size (product_id, size_id, quantity) VALUES ' +
-                            '(?,?,?),'
-                                .repeat(req.body.sizes.length)
-                                .slice(0, -1);
+                            '(?,?,?),'.repeat(req.body.sizes.length).slice(0, -1);
                         let params = req.body.sizes.reduce(
                             (p, c) =>
-                                p.concat([
-                                    req.body.productId,
-                                    c.sizeId,
-                                    c.quantity,
-                                ]),
-                            []
+                                p.concat([req.body.productId, c.sizeId, c.quantity]),
+                            [],
                         );
                         connection.query(query, params, (err, results) => {
                             if (err) {
@@ -178,7 +172,7 @@ function modifyProduct(req, res, next) {
 
                             return commitTransaction(connection, res);
                         });
-                    }
+                    },
                 );
             } else {
                 return commitTransaction(connection, res);
@@ -207,7 +201,7 @@ function removeProduct(req, res, next) {
             }
 
             res.json({ success: 1 });
-        }
+        },
     );
 }
 
@@ -268,7 +262,7 @@ function getBills(req, res, next) {
             }
 
             res.json({ success: 1, results: results });
-        }
+        },
     );
 }
 
@@ -279,11 +273,7 @@ function checkSizesList(sizes) {
             return 0;
         }
         for (let i = 0; i < sizes.length; i++) {
-            if (
-                !sizes[i].sizeId ||
-                !sizes[i].quantity ||
-                isNaN(sizes[i].quantity)
-            ) {
+            if (!sizes[i].sizeId || !sizes[i].quantity || isNaN(sizes[i].quantity)) {
                 return 0;
             }
             sizes[i].quantity = parseInt(sizes[i].quantity);

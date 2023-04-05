@@ -28,32 +28,32 @@ router.get('/orders', authMiddleware.verifyTokenGET, (req, res, next) => {
 router.post(
     '/account',
     authMiddleware.verifyTokenPOST,
-    userController.getUserInformation
+    userController.getUserInformation,
 );
 router.post(
     '/setting/change-name',
     authMiddleware.verifyTokenPOST,
-    userController.changeName
+    userController.changeName,
 );
 router.post(
     '/setting/change-email',
     authMiddleware.verifyTokenPOST,
-    userController.changeEmail
+    userController.changeEmail,
 );
 router.post(
     '/setting/change-phone',
     authMiddleware.verifyTokenPOST,
-    userController.changePhone
+    userController.changePhone,
 );
 router.post(
     '/setting/change-address',
     authMiddleware.verifyTokenPOST,
-    userController.changeAddress
+    userController.changeAddress,
 );
 router.post(
     '/setting/change-password',
     authMiddleware.verifyTokenPOST,
-    userController.changePassword
+    userController.changePassword,
 );
 
 module.exports = router;

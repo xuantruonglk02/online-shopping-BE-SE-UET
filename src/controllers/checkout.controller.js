@@ -1,5 +1,4 @@
 const { connection, commitTransaction } = require('../models/database');
-const { getUserId } = require('../controllers/user.controller');
 
 /**
  * userName : body
@@ -50,7 +49,7 @@ function checkout(req, res, next) {
                 .slice(0, -3);
         let params = req.body.list.reduce(
             (p, c) => p.concat([c.productId, c.sizeId, c.quantity]),
-            []
+            [],
         );
         connection.query(query, params, (err, results) => {
             if (err) {
@@ -69,7 +68,7 @@ function checkout(req, res, next) {
                 });
             }
 
-            const userId = getUserId(req.cookies['x-access-token']);
+            const userId = req.session.userId;
             const billId = new Date().getTime();
             connection.query(
                 'INSERT INTO bills (bill_id, user_id, user_name, user_phone, user_address) VALUES (?,?,?,?,?)',
@@ -95,14 +94,8 @@ function checkout(req, res, next) {
                         'INSERT INTO bill_has_product (bill_id, product_id, size_id, quantity) VALUES' +
                         ' (?,?,?,?),'.repeat(req.body.list.length).slice(0, -1);
                     let params = req.body.list.reduce(
-                        (p, c) =>
-                            p.concat([
-                                billId,
-                                c.productId,
-                                c.sizeId,
-                                c.quantity,
-                            ]),
-                        []
+                        (p, c) => p.concat([billId, c.productId, c.sizeId, c.quantity]),
+                        [],
                     );
                     connection.query(query, params, (err, results) => {
                         if (err) {
@@ -117,7 +110,7 @@ function checkout(req, res, next) {
 
                         commitTransaction(connection, res);
                     });
-                }
+                },
             );
         });
     });

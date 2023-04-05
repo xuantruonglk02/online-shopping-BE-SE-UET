@@ -1,5 +1,4 @@
 const { connection } = require('../models/database');
-const { getUserId } = require('./user.controller');
 
 /**
  * productId
@@ -12,17 +11,13 @@ function getProductById(productId, callback) {
         `(SELECT CONCAT('[',GROUP_CONCAT(CONCAT('{"sizeId":',phs.size_id,',"size":"',s.text,'","quantity":',phs.quantity,'}')),']') ` +
         `FROM product_has_size phs INNER JOIN sizes s ON phs.size_id=s.size_id WHERE phs.product_id=? GROUP BY phs.product_id) AS sizes ` +
         `FROM products WHERE product_id=?`;
-    connection.query(
-        query,
-        [productId, productId, productId],
-        (err, results) => {
-            if (err) {
-                return callback(err, null);
-            }
-
-            callback(null, results[0]);
+    connection.query(query, [productId, productId, productId], (err, results) => {
+        if (err) {
+            return callback(err, null);
         }
-    );
+
+        callback(null, results[0]);
+    });
 }
 
 /**
@@ -175,7 +170,7 @@ function getNewProducts(req, res, next) {
             }
 
             res.json({ success: 1, results: results });
-        }
+        },
     );
 }
 
@@ -215,7 +210,7 @@ function getAllProductLinesByClass(req, res, next) {
             }
 
             res.json({ success: 1, results: results });
-        }
+        },
     );
 }
 
@@ -234,7 +229,7 @@ function getAllCategories(req, res, next) {
             }
 
             res.json({ success: 1, results: results });
-        }
+        },
     );
 }
 
@@ -361,9 +356,9 @@ function getAllRatingsOfProduct(req, res, next) {
             res.json({
                 success: 1,
                 results: results,
-                userId: getUserId(req.cookies['x-access-token']),
+                userId: req.session.userId,
             });
-        }
+        },
     );
 }
 
@@ -378,7 +373,7 @@ function insertUserRating(req, res, next) {
     }
     req.body.star = parseInt(req.body.star);
 
-    const userId = getUserId(req.cookies['x-access-token']);
+    const userId = req.session.userId;
     checkUserBoughtProduct(userId, req.params.productId, (err, bought) => {
         if (err) {
             res.status(500).json({ success: 0, error: err.code });
@@ -402,12 +397,7 @@ function insertUserRating(req, res, next) {
 
                 connection.query(
                     'INSERT INTO ratings (user_id, product_id, star, comment) VALUES (?,?,?,?)',
-                    [
-                        userId,
-                        req.params.productId,
-                        req.body.star,
-                        req.body.comment,
-                    ],
+                    [userId, req.params.productId, req.body.star, req.body.comment],
                     (err, results) => {
                         if (err) {
                             res.status(500).json({
@@ -418,9 +408,9 @@ function insertUserRating(req, res, next) {
                         }
 
                         res.json({ success: 1 });
-                    }
+                    },
                 );
-            }
+            },
         );
     });
 }
@@ -441,7 +431,7 @@ function checkUserBoughtProduct(userId, productId, callback) {
                 return callback(null, false);
             }
             callback(null, true);
-        }
+        },
     );
 }
 

@@ -4,26 +4,8 @@ const validator = require('validator');
 
 const { connection } = require('../models/database');
 
-function getUserId(token) {
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        return decoded.userId;
-    } catch (err) {
-        return null;
-    }
-}
-
-function getCartId(token) {
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        return decoded.cartId;
-    } catch (err) {
-        return null;
-    }
-}
-
 function getUserInformation(req, callback) {
-    const userId = getUserId(req.cookies['x-access-token']);
+    const userId = req.session.userId;
     connection.query(
         'SELECT name, phone, email, address FROM users WHERE user_id=?',
         [userId],
@@ -33,12 +15,12 @@ function getUserInformation(req, callback) {
             }
 
             callback(null, results[0]);
-        }
+        },
     );
 }
 
 function getUserInformationForCheckout(req, callback) {
-    const userId = getUserId(req.cookies['x-access-token']);
+    const userId = req.session.userId;
     connection.query(
         'SELECT name, phone, address FROM users WHERE user_id=?',
         [userId],
@@ -47,7 +29,7 @@ function getUserInformationForCheckout(req, callback) {
                 return callback(err, null);
             }
             callback(null, results[0]);
-        }
+        },
     );
 }
 
@@ -60,7 +42,7 @@ function changeName(req, res, next) {
         return res.status(400).json({ success: 0 });
     }
 
-    const userId = getUserId(req.cookies['x-access-token']);
+    const userId = req.session.userId;
     connection.query(
         'SELECT password FROM users WHERE user_id=?',
         [userId],
@@ -69,10 +51,7 @@ function changeName(req, res, next) {
                 res.status(500).json({ success: 0, error: err.code });
                 return next(new Error(err));
             }
-            const match = await bcrypt.compare(
-                req.body.password,
-                results[0].password
-            );
+            const match = await bcrypt.compare(req.body.password, results[0].password);
             if (!match) {
                 return res.json({ success: 0, code: 'password-incorrect' });
             }
@@ -87,9 +66,9 @@ function changeName(req, res, next) {
                     }
 
                     res.json({ success: 1 });
-                }
+                },
             );
-        }
+        },
     );
 }
 
@@ -105,8 +84,7 @@ function changeEmail(req, res, next) {
         return res.json({ success: 0, msg: 'Email không hợp lệ' });
     }
 
-    const userId = getUserId(req.cookies['x-access-token']);
-
+    const userId = req.session.userId;
     connection.query(
         'SELECT password FROM users WHERE user_id=?',
         [userId],
@@ -116,10 +94,7 @@ function changeEmail(req, res, next) {
                 return next(new Error(err));
             }
 
-            const match = await bcrypt.compare(
-                req.body.password,
-                results[0].password
-            );
+            const match = await bcrypt.compare(req.body.password, results[0].password);
             if (!match) {
                 return res.json({
                     success: 0,
@@ -156,11 +131,11 @@ function changeEmail(req, res, next) {
                             }
 
                             res.json({ success: 1 });
-                        }
+                        },
                     );
-                }
+                },
             );
-        }
+        },
     );
 }
 
@@ -176,8 +151,7 @@ function changePhone(req, res, next) {
         return res.json({ success: 0, msg: 'Số điện thoại không hợp lệ' });
     }
 
-    const userId = getUserId(req.cookies['x-access-token']);
-
+    const userId = req.session.userId;
     connection.query(
         'SELECT password FROM users WHERE user_id=?',
         [userId],
@@ -187,10 +161,7 @@ function changePhone(req, res, next) {
                 return next(new Error(err));
             }
 
-            const match = await bcrypt.compare(
-                req.body.password,
-                results[0].password
-            );
+            const match = await bcrypt.compare(req.body.password, results[0].password);
             if (!match) {
                 return res.json({
                     success: 0,
@@ -227,11 +198,11 @@ function changePhone(req, res, next) {
                             }
 
                             res.json({ success: 1 });
-                        }
+                        },
                     );
-                }
+                },
             );
-        }
+        },
     );
 }
 
@@ -244,8 +215,7 @@ function changeAddress(req, res, next) {
         return res.status(400).json({ success: 0 });
     }
 
-    const userId = getUserId(req.cookies['x-access-token']);
-
+    const userId = req.session.userId;
     connection.query(
         'SELECT password FROM users WHERE user_id=?',
         [userId],
@@ -255,10 +225,7 @@ function changeAddress(req, res, next) {
                 return next(new Error(err));
             }
 
-            const match = await bcrypt.compare(
-                req.body.password,
-                results[0].password
-            );
+            const match = await bcrypt.compare(req.body.password, results[0].password);
             if (!match) {
                 return res.json({
                     success: 0,
@@ -276,9 +243,9 @@ function changeAddress(req, res, next) {
                     }
 
                     res.json({ success: 1 });
-                }
+                },
             );
-        }
+        },
     );
 }
 
@@ -291,7 +258,7 @@ function changePassword(req, res, next) {
         return res.status(400).json({ success: 0 });
     }
 
-    const userId = getUserId(req.cookies['x-access-token']);
+    const userId = req.session.userId;
     connection.query(
         'SELECT password FROM users WHERE user_id=?',
         [userId],
@@ -303,7 +270,7 @@ function changePassword(req, res, next) {
 
             const matchOldPassword = await bcrypt.compare(
                 req.body.oldPassword,
-                results[0].password
+                results[0].password,
             );
             if (!matchOldPassword) {
                 return res.json({
@@ -313,7 +280,7 @@ function changePassword(req, res, next) {
             }
             const matchNewPassword = await bcrypt.compare(
                 req.body.newPassword,
-                results[0].password
+                results[0].password,
             );
             if (matchNewPassword) {
                 return res.json({
@@ -335,15 +302,13 @@ function changePassword(req, res, next) {
                     }
 
                     res.json({ success: 1 });
-                }
+                },
             );
-        }
+        },
     );
 }
 
 module.exports = {
-    getUserId,
-    getCartId,
     getUserInformation,
     getUserInformationForCheckout,
     changeName,

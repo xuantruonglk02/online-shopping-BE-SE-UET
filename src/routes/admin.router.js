@@ -11,32 +11,32 @@ router.get(
     authMiddleware.isAdmin,
     (req, res, next) => {
         res.end('admin');
-    }
+    },
 );
 
 router.post(
     '/add-product',
     authMiddleware.verifyTokenPOST,
     authMiddleware.isAdmin,
-    adminController.addProduct
+    adminController.addProduct,
 );
 router.post(
     '/modify-product',
     authMiddleware.verifyTokenPOST,
     authMiddleware.isAdmin,
-    adminController.modifyProduct
+    adminController.modifyProduct,
 );
 router.post(
     '/remove-product',
     authMiddleware.verifyTokenPOST,
     authMiddleware.isAdmin,
-    adminController.removeProduct
+    adminController.removeProduct,
 );
 router.post(
     '/get-all-bills',
     authMiddleware.verifyTokenPOST,
     authMiddleware.isAdmin,
-    adminController.getBills
+    adminController.getBills,
 );
 
 module.exports = router;

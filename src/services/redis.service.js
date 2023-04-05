@@ -1,9 +1,18 @@
-const redis = require("redis");
-const client = redis.createClient();
+const redis = require('redis');
+const RedisStore = require('connect-redis').default;
 
-client
-  .connect()
-  .then(() => console.log("connect to redis server successfully"))
-  .catch(console.error);
+// Initialize client
+// Note that the redis server ip must be the same localhost ip
+const redisClient = redis.createClient();
+redisClient
+    .connect()
+    .then(() => console.log('connect to redis server successfully'))
+    .catch(console.error);
 
-module.exports = client;
+// Initialize store.
+const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: 'myapp:',
+});
+
+module.exports = { redisClient, redisStore };
