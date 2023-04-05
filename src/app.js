@@ -51,10 +51,7 @@ app.use(
     cookie: {
       secure: false,
       httpOnly: true,
-      maxAge:
-        //   parseInt(process.env.SESSION_EXPIRE)
-        //   ||
-        10000,
+      maxAge: parseInt(process.env.SESSION_EXPIRE) || 86400,
     },
     resave: false,
   })
@@ -83,19 +80,6 @@ app.use(
     }, // optional: allows to skip some log messages based on request and/or response
   })
 );
-
-// app.use((req, res, next) => {
-//   if (!req.session.returnTo) {
-//     req.session.returnTo = '/';
-//   } else if (req.method === 'GET'
-//     && !req.originalUrl.match(/\/auth\//)
-//     && !req.originalUrl.match(/\/css\//)
-//     && !req.originalUrl.match(/\/js\//)
-//     && !req.originalUrl.match(/(\.ico)$|(\.ico\/)$/)) {
-//     req.session.returnTo = req.originalUrl;
-//   }
-//   next();
-// });
 
 // routing
 app.use("/", indexRouter);
@@ -132,6 +116,8 @@ app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
+
+  console.log(err);
 
   // render the error page
   res.status(err.status || 500);
