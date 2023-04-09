@@ -12,7 +12,7 @@ redisClient
 // Initialize store.
 const redisStore = new RedisStore({
     client: redisClient,
-    prefix: 'myapp:',
+    // prefix: 'myapp:',
 });
 
 module.exports = { redisClient, redisStore };

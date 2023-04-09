@@ -9,6 +9,10 @@
     <body>
         <%- include('layouts/header') %>
 
+        <script>
+            const rootProducts = [];
+        </script>
+
         <div class="main">
             <div class="page-body">
                 <div class="cart-ctn">
@@ -111,6 +115,7 @@
                                         }
                                     } else {
                                         if (
+                                            true ||
                                             parseInt(
                                                 parentTr.getElementsByTagName(
                                                     'input'
@@ -264,17 +269,22 @@
                                             return $('#table-body').append('');
                                         }
                                         data.results.forEach((e) => {
+                                            rootProducts.push({
+                                                productId: e.productId,
+                                                sizeId: e.sizeId,
+                                                quantity: e.quantity,
+                                            });
                                             $('#table-body').append(
                                                 '<tr><td class="checkbox-ctn"><input type="checkbox"></td><td class="thumbnail-ctn"><a href="/product/' +
-                                                    e.product_id +
+                                                    e.productId +
                                                     '">' +
                                                     '<img src="' +
                                                     e.thumbnail +
                                                     '" alt=""></a></td><td class="name-ctn">' +
                                                     '<a href="/product/' +
-                                                    e.product_id +
+                                                    e.productId +
                                                     '"><span id="' +
-                                                    e.product_id +
+                                                    e.productId +
                                                     '">' +
                                                     e.name +
                                                     '</span>' +
@@ -292,17 +302,13 @@
                                                     '</span>' +
                                                     '</td><td class="size-ctn"><div class="size-select-ctn"><select>' +
                                                     '<option value="' +
-                                                    e.size_id +
-                                                    '" data-quantity="' +
-                                                    e.max_quantity +
+                                                    e.sizeId +
                                                     '" selected>' +
                                                     e.text +
                                                     '</option>' +
                                                     '</select></div></td><td class="quantity-ctn"><div class="quantity-input-ctn row"><div class="quantity-modify">' +
                                                     '<a class="quantity-modify-desc" href="#" onclick="return false">-</a></div>' +
-                                                    '<input type="number" min="1" max="' +
-                                                    e.max_quantity +
-                                                    '" value="' +
+                                                    '<input type="number" min="1" value="' +
                                                     e.quantity +
                                                     '">' +
                                                     '<div class="quantity-modify"><a class="quantity-modify-asc" href="#" onclick="return false">+</a>' +
@@ -360,7 +366,13 @@
                                     type: 'POST',
                                     url: '/api/cart/update',
                                     data: {
-                                        list: JSON.stringify(list),
+                                        list: JSON.stringify(
+                                            list.filter((e, i) => (
+                                                e.productId.toString() !== rootProducts[i].productId.toString() ||
+                                                e.sizeId.toString() !== rootProducts[i].sizeId.toString() ||
+                                                e.quantity.toString() !== rootProducts[i].quantity.toString()
+                                            ))
+                                        ),
                                     },
                                     success: function (data) {
                                         if (data.success) {

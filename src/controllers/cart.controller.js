@@ -27,14 +27,42 @@ async function addProduct(req, res) {
         return res.status(400).json({ success: 0 });
     }
 
-    const userId = req.session.userId;
-    await redisClient.hSet(
-        `cart:${userId}`,
-        `${productId}`,
-        JSON.stringify({ productId, sizeId, quantity }),
-    );
+    const query =
+        'SELECT name, price, thumbnail ' + 'FROM products ' + 'WHERE product_id=?';
+    connection.query(query, [productId], async (err, products) => {
+        if (err) {
+            return res.status(500).json({ success: 0, error: err });
+        }
+        if (!products.length) {
+            return res.status(404).json({ success: 0 });
+        }
 
-    res.json({ success: 1 });
+        const query = 'SELECT text FROM sizes WHERE size_id=?';
+        connection.query(query, [sizeId], async (err, sizes) => {
+            if (err) {
+                return res.status(500).json({ success: 0, error: err });
+            }
+            if (!sizes.length) {
+                return res.status(404).json({ success: 0 });
+            }
+
+            const product = {
+                name: products[0].name,
+                price: products[0].price,
+                thumbnail: products[0].thumbnail,
+                sizeId,
+                text: sizes[0].text,
+                quantity,
+            };
+            const userId = req.session.userId;
+            await redisClient.hSet(
+                `cart:${userId}`,
+                `${productId}`,
+                JSON.stringify(product),
+            );
+            res.json({ success: 1 });
+        });
+    });
 }
 
 async function updateProductInCart(req, res) {
@@ -64,23 +92,6 @@ async function getAllProducts(req, res) {
     const userId = req.session.userId;
     const products = await getProductsInCart(userId);
     res.json({ success: 1, results: products });
-
-    // let query =
-    //     'SELECT p.product_id, p.name, p.price, p.thumbnail, s.size_id, s.text, chp.quantity, phs.quantity AS max_quantity ' +
-    //     'FROM cart_has_product chp ' +
-    //     'INNER JOIN products p ON chp.product_id = p.product_id ' +
-    //     'INNER JOIN sizes s ON chp.size_id = s.size_id ' +
-    //     'INNER JOIN product_has_size phs ON chp.product_id = phs.product_id AND chp.size_id = phs.size_id ' +
-    //     'WHERE chp.cart_id=? ' +
-    //     'ORDER BY chp.created_at DESC';
-    // connection.query(query, [cartId], (err, results) => {
-    //     if (err) {
-    //         res.status(500).json({ success: 0, error: err.code });
-    //         return next(new Error(err));
-    //     }
-
-    //     res.json({ success: 1, results: results });
-    // });
 }
 
 async function removeProduct(req, res) {
@@ -103,7 +114,10 @@ async function removeProduct(req, res) {
 
 async function getProductsInCart(userId) {
     const cart = await redisClient.hGetAll(`cart:${userId}`);
-    const products = Object.values(cart).map((objString) => JSON.parse(objString));
+    const products = Object.entries(cart).map(([productId, objString]) => ({
+        ...JSON.parse(objString),
+        productId,
+    }));
     return products;
 }
 
@@ -116,7 +130,6 @@ function getProductByIds(productIds, callback) {
         if (err) {
             return callback(err, null);
         }
-
         callback(null, results);
     });
 }
