@@ -1,4 +1,11 @@
+
 const { connection } = require('../models/database');
+const expressWinston = require("express-winston");
+const winston = require("winston");
+const {error} = require("winston");
+const path = require("path");
+const {clientElasticSearch, indexName} = require("../services/elastichsearch.service");
+
 
 /**
  * productId
@@ -251,81 +258,134 @@ function searchProductsByKeyword(req, res) {
         return res.status(400).json({ success: 0 });
     }
 
-    let query =
-        'SELECT SQL_CALC_FOUND_ROWS product_id, name, price, sold, rating, thumbnail FROM products WHERE name LIKE CONCAT("%",?,"%")';
+    const querySearch = {
+        query: {
+            match: {
+                name: req.body.keyword,
+            },
+        },
+        sort: [
+            ],
+    }
+    // let query =
+    //     'SELECT SQL_CALC_FOUND_ROWS product_id, name, price, sold, rating, thumbnail FROM products WHERE name LIKE CONCAT("%",?,"%")';
     let params = [req.body.keyword];
     if (req.body.classId) {
-        query += ' AND class_id=?';
-        params.push(req.body.classId);
+        querySearch.query.classId = req.body.classId;
+
     }
     if (req.body.lineId) {
-        query += ' AND line_id=?';
-        params.push(req.body.lineId);
+        querySearch.query.lineId = req.body.lineId;
     }
     if (req.body.minPrice && !isNaN(req.body.minPrice)) {
         req.body.minPrice = parseInt(req.body.minPrice);
         if (req.body.minPrice > 0) {
-            query += ' AND price>=?';
-            params.push(req.body.minPrice);
+            querySearch.query.price = {
+                gte: req.body.minPrice,
+            }
         }
     }
     if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
         req.body.maxPrice = parseInt(req.body.maxPrice);
         if (req.body.maxPrice > 0) {
-            query += ' AND price<=?';
-            params.push(req.body.maxPrice);
+            querySearch.query.price = querySearch.query.price
+                ? { ...querySearch.query.price, lte: req.body.maxPrice,}
+                : {lte: req.body.maxPrice,}
         }
     }
     if (req.body.minStar && !isNaN(req.body.minStar)) {
         req.body.minStar = parseInt(req.body.minStar);
         if (req.body.minStar >= 1 && req.body.minStar <= 5) {
-            query += ' AND rating>=?';
-            params.push(req.body.minStar);
+            querySearch.query.rating = {
+                gte: req.body.minStar,
+            }
         }
     }
     switch (req.body.orderBy) {
         case 'priceASC':
-            query += ' ORDER BY price ASC';
+           // query += ' ORDER BY price ASC';
+           querySearch.sort.push({
+               'price': 'asc',"ignore_unmapped" : true
+           })
             break;
-        case 'priceDESC':
-            query += ' ORDER BY price DESC';
+        case 'price':
+            //query += ' ORDER BY price DESC';
+            querySearch.sort.push({
+                'price': 'desc',"ignore_unmapped" : true
+            })
             break;
         case 'soldDESC':
-            query += 'ORDER BY sold DESC';
+            //query += 'ORDER BY sold DESC';
+            querySearch.sort.push({
+                'sold':'desc',"ignore_unmapped" : true
+            })
             break;
         case 'qoRatingDESC':
-            query += ' ORDER BY quantity_of_rating DESC';
+           // query += ' ORDER BY quantity_of_rating DESC';
+            querySearch.sort.push({
+                'quantity_of_rating': 'desc',"ignore_unmapped" : true
+            })
             break;
         case 'ratingDESC':
-            query += ' ORDER BY rating DESC';
+           // query += ' ORDER BY rating DESC';
+            querySearch.sort.push({
+                'rating': 'desc',"ignore_unmapped" : true
+            })
             break;
         case 'newest':
-            query += ' ORDER BY created_at DESC';
+           // query += ' ORDER BY created_at DESC';
+            querySearch.sort.push({
+                'created_at': 'desc',"ignore_unmapped" : true
+            })
             break;
         default:
-            query += ' ORDER BY created_at DESC';
+            //query += ' ORDER BY created_at DESC';
+            querySearch.sort.push({
+                'created_at': 'desc',"ignore_unmapped" : true
+            })
     }
-    query += ' LIMIT ?,15';
-    params.push((req.body.page - 1) * 15);
-
-    connection.query(query, params, (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: 0, error: err.code });
+    //query += ' LIMIT ?,15';
+    // .push((req.body.page - 1) * 15);
+    if (req.body.page && !isNaN(req.body.page)) {
+        req.body.page = parseInt(req.body.page);
+        if (req.body.page > 0) {
+          querySearch.from = req.body.page;
+          querySearch.size = 15;
         }
+    }
 
-        const rows = results;
-        connection.query('SELECT FOUND_ROWS() as count', (err, results) => {
-            if (results[0].count) {
-                res.status(200).json({
-                    success: 1,
-                    results: rows,
-                    totalRows: results[0].count,
-                });
-            } else {
-                res.status(200).json({ success: 1, results: rows });
-            }
-        });
-    });
+    console.log(querySearch);
+    clientElasticSearch.search({
+        index: indexName,
+        body: querySearch,
+    }).then((err, results) => {
+        if (err) {
+            console.error(err);
+            console.log(111111)
+        }
+        else {
+            res.status(200).json({ success: 1, results: results});
+        }
+    })
+
+    // connection.query(query, params, (err, results) => {
+    //     if (err) {
+    //         return res.status(500).json({ success: 0, error: err.code });
+    //     }
+    //
+    //     const rows = results;
+    //     connection.query('SELECT FOUND_ROWS() as count', (err, results) => {
+    //         if (results[0].count) {
+    //             res.status(200).json({
+    //                 success: 1,
+    //                 results: rows,
+    //                 totalRows: results[0].count,
+    //             });
+    //         } else {
+    //             res.status(200).json({ success: 1, results: rows });
+    //         }
+    //     });
+    // });
 }
 
 /**
