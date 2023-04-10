@@ -27,8 +27,7 @@ async function addProduct(req, res) {
         return res.status(400).json({ success: 0 });
     }
 
-    const query =
-        'SELECT name, price, thumbnail ' + 'FROM products ' + 'WHERE product_id=?';
+    const query = 'SELECT name, price, thumbnail FROM products WHERE product_id=?';
     connection.query(query, [productId], async (err, products) => {
         if (err) {
             return res.status(500).json({ success: 0, error: err });
@@ -66,26 +65,88 @@ async function addProduct(req, res) {
 }
 
 async function updateProductInCart(req, res) {
-    const { productId, sizeId, quantity } = req.body;
-    if (!productId || !sizeId || !quantity || isNaN(quantity)) {
-        return res.status(400).json({ success: 0 });
-    }
+    // const { productId, sizeId, quantity } = req.body;
+    // if (!productId || !sizeId || !quantity || isNaN(quantity)) {
+    //     return res.status(400).json({ success: 0 });
+    // }
+    let { list } = req.body;
+    list = JSON.parse(list);
 
     const userId = req.session.userId;
     const products = await getProductsInCart(userId);
-
-    const foundProduct = products.find((product) => product.productId === productId);
-    if (!foundProduct) {
+    console.log(list);
+    console.log(products);
+    const allFound = list.every((e) =>
+        products.find(
+            (product) => product.productId.toString() === e.productId.toString(),
+        ),
+    );
+    if (!allFound) {
         return res.json({ success: 0, err: 'productId not found' });
     }
 
-    await redisClient.hSet(
-        `cart:${userId}`,
-        `${productId}`,
-        JSON.stringify({ productId, sizeId, quantity }),
-    );
+    const query = `SELECT product_id, name, price, thumbnail FROM products WHERE product_id IN (${list
+        .map((e) => '?')
+        .join(',')})`;
+    connection.query(
+        query,
+        list.map((e) => e.productId),
+        async (err, products) => {
+            if (err) {
+                return res.status(500).json({ success: 0, error: err });
+            }
+            if (!products.length) {
+                return res.status(404).json({ success: 0 });
+            }
 
-    return res.json({ success: 1 });
+            const query = `SELECT text FROM sizes WHERE size_id IN (${list
+                .map((e) => '?')
+                .join(',')})`;
+            connection.query(
+                query,
+                list.map((e) => e.sizeId),
+                async (err, sizes) => {
+                    if (err) {
+                        return res.status(500).json({ success: 0, error: err });
+                    }
+                    if (!sizes.length) {
+                        return res.status(404).json({ success: 0 });
+                    }
+
+                    const updateProducts = products.map((product) => {
+                        const e = list.find(
+                            (e) =>
+                                e.productId.toString() === product.product_id.toString(),
+                        );
+                        return {
+                            productId: product.product_id,
+                            name: product.name,
+                            price: product.price,
+                            thumbnail: product.thumbnail,
+                            sizeId,
+                            text: sizes.find(
+                                (size) =>
+                                    size.sizeId.toString() === e?.sizeId?.toString(),
+                            )?.text,
+                            quantity: e?.quantity,
+                        };
+                    });
+
+                    const userId = req.session.userId;
+                    await Promise.all(
+                        updateProducts.map((product) =>
+                            redisClient.hSet(
+                                `cart:${userId}`,
+                                `${product.productId}`,
+                                JSON.stringify(product),
+                            ),
+                        ),
+                    );
+                    res.json({ success: 1 });
+                },
+            );
+        },
+    );
 }
 
 async function getAllProducts(req, res) {

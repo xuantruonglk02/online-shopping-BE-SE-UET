@@ -243,7 +243,7 @@ function getAllCategories(req, res) {
  * minStar : body
  * orderBy : body : newest|priceASC|priceDESC|soldDESC|qoRatingDESC|ratingDESC
  */
-function searchProductsByKeyword(req, res) {
+async function searchProductsByKeyword(req, res) {
     if (req.body.keyword == '') {
         return res.json({ success: 1, results: [], totalRows: 0 });
     }
@@ -258,108 +258,100 @@ function searchProductsByKeyword(req, res) {
 
     const querySearch = {
         query: {
+            // match_all: {},
             match: {
-                name: req.body.keyword,
+                name: 'q p',
+                // name: 'Quần kaki nam QKLTK302',
             },
         },
         sort: [],
     };
 
-    if (req.body.classId) {
-        querySearch.query.classId = req.body.classId;
-    }
-    if (req.body.lineId) {
-        querySearch.query.lineId = req.body.lineId;
-    }
-    if (req.body.minPrice && !isNaN(req.body.minPrice)) {
-        req.body.minPrice = parseInt(req.body.minPrice);
-        if (req.body.minPrice > 0) {
-            querySearch.query.price = {
-                gte: req.body.minPrice,
-            };
-        }
-    }
-    if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
-        req.body.maxPrice = parseInt(req.body.maxPrice);
-        if (req.body.maxPrice > 0) {
-            querySearch.query.price = querySearch.query.price
-                ? { ...querySearch.query.price, lte: req.body.maxPrice }
-                : { lte: req.body.maxPrice };
-        }
-    }
-    if (req.body.minStar && !isNaN(req.body.minStar)) {
-        req.body.minStar = parseInt(req.body.minStar);
-        if (req.body.minStar >= 1 && req.body.minStar <= 5) {
-            querySearch.query.rating = {
-                gte: req.body.minStar,
-            };
-        }
-    }
+    // if (req.body.classId) {
+    //     querySearch.query.classId = req.body.classId;
+    // }
+    // if (req.body.lineId) {
+    //     querySearch.query.lineId = req.body.lineId;
+    // }
+    // if (req.body.minPrice && !isNaN(req.body.minPrice)) {
+    //     req.body.minPrice = parseInt(req.body.minPrice);
+    //     if (req.body.minPrice > 0) {
+    //         querySearch.query.range.price = {
+    //             gte: req.body.minPrice,
+    //         };
+    //     }
+    // }
+    // if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
+    //     req.body.maxPrice = parseInt(req.body.maxPrice);
+    //     if (req.body.maxPrice > 0) {
+    //         querySearch.query.range.price = querySearch.query.range.price
+    //             ? { ...querySearch.query.range.price, lte: req.body.maxPrice }
+    //             : { lte: req.body.maxPrice };
+    //     }
+    // }
+    // if (req.body.minStar && !isNaN(req.body.minStar)) {
+    //     req.body.minStar = parseInt(req.body.minStar);
+    //     if (req.body.minStar >= 1 && req.body.minStar <= 5) {
+    //         querySearch.query.rating = {
+    //             gte: req.body.minStar,
+    //         };
+    //     }
+    // }
     switch (req.body.orderBy) {
         case 'priceASC':
             querySearch.sort.push({
                 price: 'asc',
-                ignore_unmapped: true,
             });
             break;
         case 'price':
             querySearch.sort.push({
                 price: 'desc',
-                ignore_unmapped: true,
             });
             break;
         case 'soldDESC':
             querySearch.sort.push({
                 sold: 'desc',
-                ignore_unmapped: true,
             });
             break;
         case 'qoRatingDESC':
             querySearch.sort.push({
                 quantity_of_rating: 'desc',
-                ignore_unmapped: true,
             });
             break;
         case 'ratingDESC':
             querySearch.sort.push({
                 rating: 'desc',
-                ignore_unmapped: true,
             });
             break;
         case 'newest':
             querySearch.sort.push({
                 created_at: 'desc',
-                ignore_unmapped: true,
             });
             break;
         default:
             querySearch.sort.push({
                 created_at: 'desc',
-                ignore_unmapped: true,
             });
     }
     if (req.body.page && !isNaN(req.body.page)) {
         req.body.page = parseInt(req.body.page);
         if (req.body.page > 0) {
-            querySearch.from = req.body.page;
+            querySearch.from = (req.body.page - 1) * 15;
             querySearch.size = 15;
         }
     }
 
     console.log(querySearch);
-    clientElasticSearch
-        .search({
-            index: indexName,
-            body: querySearch,
-        })
-        .then((err, results) => {
-            if (err) {
-                console.error(err);
-                console.log(111111);
-            } else {
-                res.status(200).json({ success: 1, results: results });
-            }
-        });
+    const result = await clientElasticSearch.search({
+        index: indexName,
+        body: querySearch,
+    });
+    console.log(result);
+    return res.json({
+        success: 1,
+        results: result.hits.hits.map((e) => e._source),
+        totalRows: result.hits.hits.length,
+    });
 }
 
 /**

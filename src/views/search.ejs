@@ -232,7 +232,8 @@
                                     orderBy: params.get('orderBy'),
                                 },
                                 success: function (data) {
-                                    if (data.results.length == 0) {
+                                    console.log(data);
+                                    if (!data.results?.length) {
                                         return $('#products-list-ctn').append(
                                             '<p>Không tìm thấy sản phẩm phù hợp</p>'
                                         );
