@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const winston = require('winston');
 const expressWinston = require('express-winston');
 const session = require('express-session');
+const { getDateStringForLogFile } = require('./helpers/helper');
 
 // load .env
 require('dotenv').config();
@@ -47,7 +48,10 @@ app.use(
     expressWinston.logger({
         transports: [
             new winston.transports.File({
-                filename: path.join(__dirname, '../log/request.log'),
+                filename: path.join(
+                    __dirname,
+                    `../logs/request-${getDateStringForLogFile()}.log`,
+                ),
             }),
         ],
         format: winston.format.combine(winston.format.colorize(), winston.format.json()),
@@ -69,7 +73,10 @@ app.use(
     expressWinston.errorLogger({
         transports: [
             new winston.transports.File({
-                filename: path.join(__dirname, '../log/error.log'),
+                filename: path.join(
+                    __dirname,
+                    `../logs/error-${getDateStringForLogFile()}.log`,
+                ),
                 level: 'error',
             }),
         ],
