@@ -27,27 +27,27 @@ async function getProductById(productId) {
 }
 
 /**
- * list : body : []
+ * list : query : []
  */
 async function getProductsForCheckout(req, res, next) {
     try {
-        if (!req.body.list) {
+        if (!req.query.list) {
             return res.status(400).json({ success: 0 });
         }
         try {
-            req.body.list = JSON.parse(req.body.list);
+            req.query.list = JSON.parse(req.query.list);
         } catch (err) {
             return res.status(400).json({ success: 0 });
         }
-        if (!(req.body.list instanceof Array) || !req.body.list.length) {
+        if (!(req.query.list instanceof Array) || !req.query.list.length) {
             return res.status(400).json({ success: 0 });
         }
 
         const query =
             'SELECT product_id, name, price, thumbnail FROM products WHERE ' +
-            'product_id=? OR '.repeat(req.body.list.length).slice(0, -4);
+            'product_id=? OR '.repeat(req.query.list.length).slice(0, -4);
         // TODO: must use execute
-        const [rows, fields] = await promisePool.query(query, req.body.list);
+        const [rows, fields] = await promisePool.query(query, req.query.list);
         res.json({ success: 1, results: rows });
     } catch (error) {
         return next(createError(error));
@@ -56,55 +56,54 @@ async function getProductsForCheckout(req, res, next) {
 
 /**
  * categoryId : param
- * category : body
- * page : body
- *
- * minPrice : body
- * maxPrice : body
- * minStar : body
- * orderBy : body : newest|priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
+ * category : query
+ * page : query
+ * minPrice : query
+ * maxPrice : query
+ * minStar : query
+ * orderBy : query : newest|priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
 async function getProductsByCategory(req, res, next) {
     try {
         if (
-            (req.body.category != 'class' && req.body.category != 'line') ||
-            !req.body.page ||
-            isNaN(req.body.page)
+            (req.query.category != 'class' && req.query.category != 'line') ||
+            !req.query.page ||
+            isNaN(req.query.page)
         ) {
             return res.status(400).json({ success: 0 });
         }
-        req.body.page = parseInt(req.body.page);
-        if (req.body.page < 0) {
+        req.query.page = parseInt(req.query.page);
+        if (req.query.page < 0) {
             return res.status(400).json({ success: 0 });
         }
 
         let query =
             'SELECT SQL_CALC_FOUND_ROWS product_id, name, price, sold, rating, thumbnail FROM products WHERE ' +
-            req.body.category +
+            req.query.category +
             '_id=?';
         let params = [req.params.categoryId];
-        if (req.body.minPrice && !isNaN(req.body.minPrice)) {
-            req.body.minPrice = parseInt(req.body.minPrice);
-            if (req.body.minPrice > 0) {
+        if (req.query.minPrice && !isNaN(req.query.minPrice)) {
+            req.query.minPrice = parseInt(req.query.minPrice);
+            if (req.query.minPrice > 0) {
                 query += ' AND price>=?';
-                params.push(req.body.minPrice);
+                params.push(req.query.minPrice);
             }
         }
-        if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
-            req.body.maxPrice = parseInt(req.body.maxPrice);
-            if (req.body.maxPrice > 0) {
+        if (req.query.maxPrice && !isNaN(req.query.maxPrice)) {
+            req.query.maxPrice = parseInt(req.query.maxPrice);
+            if (req.query.maxPrice > 0) {
                 query += ' AND price<=?';
-                params.push(req.body.maxPrice);
+                params.push(req.query.maxPrice);
             }
         }
-        if (req.body.minStar && !isNaN(req.body.minStar)) {
-            req.body.minStar = parseInt(req.body.minStar);
-            if (req.body.minStar >= 1 && req.body.minStar <= 5) {
+        if (req.query.minStar && !isNaN(req.query.minStar)) {
+            req.query.minStar = parseInt(req.query.minStar);
+            if (req.query.minStar >= 1 && req.query.minStar <= 5) {
                 query += ' AND rating>=?';
-                params.push(req.body.minStar);
+                params.push(req.query.minStar);
             }
         }
-        switch (req.body.orderBy) {
+        switch (req.query.orderBy) {
             case 'priceASC':
                 query += ' ORDER BY price ASC';
                 break;
@@ -127,7 +126,7 @@ async function getProductsByCategory(req, res, next) {
                 query += ' ORDER BY created_at DESC';
         }
         query += ' LIMIT ?,15';
-        params.push((req.body.page - 1) * 15);
+        params.push((req.query.page - 1) * 15);
 
         // TODO: must use execute
         const [rows, fields] = await promisePool.query(query, params);
@@ -224,44 +223,44 @@ async function getAllCategories(req, res, next) {
 }
 
 /**
- * keyword : body
- * page : body
+ * keyword : query
+ * page : query
  *
- * classId : body
- * lineId : body
- * minPrice : body
- * maxPrice : body
- * minStar : body
- * orderBy : body : newest|priceASC|priceDESC|soldDESC|qoRatingDESC|ratingDESC
+ * classId : query
+ * lineId : query
+ * minPrice : query
+ * maxPrice : query
+ * minStar : query
+ * orderBy : query : newest|priceASC|priceDESC|soldDESC|qoRatingDESC|ratingDESC
  */
 async function searchProductsByKeyword(req, res, next) {
     try {
-        if (req.body.keyword == '') {
+        if (req.query.keyword == '') {
             return res.json({ success: 1, results: [], totalRows: 0 });
         }
-        if (!req.body.keyword || !req.body.page || isNaN(req.body.page)) {
+        if (!req.query.keyword || !req.query.page || isNaN(req.query.page)) {
             return res.status(400).json({ success: 0 });
         }
 
-        req.body.page = parseInt(req.body.page);
-        if (req.body.page < 0) {
+        req.query.page = parseInt(req.query.page);
+        if (req.query.page < 0) {
             return res.status(400).json({ success: 0 });
         }
 
         const querySearch = {
             query: { bool: { must: [] } },
-            sort: [],
+            sort: ['_score'],
         };
 
-        if (req.body.keyword) {
+        if (req.query.keyword) {
             querySearch.query.bool.must.push({
                 bool: {
                     should: [
                         {
-                            match: { name: req.body.keyword },
+                            match: { name: req.query.keyword },
                         },
                         {
-                            match: { description: req.body.keyword },
+                            match: { description: req.query.keyword },
                         },
                     ],
                 },
@@ -269,37 +268,37 @@ async function searchProductsByKeyword(req, res, next) {
         }
 
         // TODO: apply search class and line
-        // if (req.body.classId) {
-        //     querySearch.query.classId = req.body.classId;
+        // if (req.query.classId) {
+        //     querySearch.query.classId = req.query.classId;
         // }
-        // if (req.body.lineId) {
-        //     querySearch.query.lineId = req.body.lineId;
+        // if (req.query.lineId) {
+        //     querySearch.query.lineId = req.query.lineId;
         // }
-        if (req.body.minPrice && !isNaN(req.body.minPrice)) {
-            req.body.minPrice = parseInt(req.body.minPrice);
-            if (req.body.minPrice > 0) {
+        if (req.query.minPrice && !isNaN(req.query.minPrice)) {
+            req.query.minPrice = parseInt(req.query.minPrice);
+            if (req.query.minPrice > 0) {
                 querySearch.query.bool.must.push({
-                    range: { price: { gte: req.body.minPrice } },
+                    range: { price: { gte: req.query.minPrice } },
                 });
             }
         }
-        if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
-            req.body.maxPrice = parseInt(req.body.maxPrice);
-            if (req.body.maxPrice > 0) {
+        if (req.query.maxPrice && !isNaN(req.query.maxPrice)) {
+            req.query.maxPrice = parseInt(req.query.maxPrice);
+            if (req.query.maxPrice > 0) {
                 querySearch.query.bool.must.push({
-                    range: { price: { lte: req.body.maxPrice } },
+                    range: { price: { lte: req.query.maxPrice } },
                 });
             }
         }
-        if (req.body.minStar && !isNaN(req.body.minStar)) {
-            req.body.minStar = parseInt(req.body.minStar);
-            if (req.body.minStar >= 1 && req.body.minStar <= 5) {
+        if (req.query.minStar && !isNaN(req.query.minStar)) {
+            req.query.minStar = parseInt(req.query.minStar);
+            if (req.query.minStar >= 1 && req.query.minStar <= 5) {
                 querySearch.query.bool.must.push({
-                    range: { rating: { gte: req.body.minStar } },
+                    range: { rating: { gte: req.query.minStar } },
                 });
             }
         }
-        switch (req.body.orderBy) {
+        switch (req.query.orderBy) {
             case 'priceASC':
                 querySearch.sort.push({
                     price: { order: 'asc' },
@@ -335,10 +334,10 @@ async function searchProductsByKeyword(req, res, next) {
                     created_at: { order: 'desc' },
                 });
         }
-        if (req.body.page && !isNaN(req.body.page)) {
-            req.body.page = parseInt(req.body.page);
-            if (req.body.page > 0) {
-                querySearch.from = (req.body.page - 1) * 15;
+        if (req.query.page && !isNaN(req.query.page)) {
+            req.query.page = parseInt(req.query.page);
+            if (req.query.page > 0) {
+                querySearch.from = (req.query.page - 1) * 15;
                 querySearch.size = 15;
             }
         }

@@ -203,21 +203,21 @@ async function addCategory(req, res, next) {
 }
 
 /**
- * begin : body
- * quantity : body
+ * begin : query
+ * quantity : query
  */
 async function getBills(req, res, next) {
     try {
-        if (!req.body.begin || !req.body.quantity) {
+        if (!req.query.begin || !req.query.quantity) {
             return res.status(400).json({ success: 0 });
         }
 
-        req.body.begin = parseInt(req.body.begin);
-        req.body.quantity = parseInt(req.body.quantity);
+        req.query.begin = parseInt(req.query.begin);
+        req.query.quantity = parseInt(req.query.quantity);
 
         const [rows, _] = await promisePool.query(
             'SELECT * FROM bills ORDER BY created_at DESC LIMIT ?,?',
-            [req.body.begin, req.body.quantity],
+            [req.query.begin, req.query.quantity],
         );
 
         res.json({ success: 1, results: rows });
