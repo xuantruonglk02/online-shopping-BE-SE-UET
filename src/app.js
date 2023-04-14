@@ -5,10 +5,16 @@ const cookieParser = require('cookie-parser');
 const winston = require('winston');
 const expressWinston = require('express-winston');
 const session = require('express-session');
-const { redisStore } = require('./services/redis.service');
 
 // load .env
 require('dotenv').config();
+
+// connect database
+require('./models/database');
+
+// connect services
+require('./services/elastichsearch.service');
+const { redisStore } = require('./services/redis.service');
 
 // routers
 const router = require('./routes/index');
@@ -23,12 +29,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(
     session({
         store: redisStore,
-        secret: process.env.SESSION_SECRET_KEY,
+        secret: process.env.REDIS_SESSION_SECRET_KEY,
         saveUninitialized: true,
         cookie: {
             secure: false,
             httpOnly: true,
-            maxAge: parseInt(process.env.SESSION_EXPIRE) || 86400,
+            maxAge: parseInt(process.env.REDIS_SESSION_EXPIRE) || 86400,
         },
         resave: false,
     }),

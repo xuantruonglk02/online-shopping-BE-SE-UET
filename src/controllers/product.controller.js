@@ -1,56 +1,56 @@
-const { connection } = require('../models/database');
-const expressWinston = require('express-winston');
-const winston = require('winston');
-const { error } = require('winston');
-const path = require('path');
+const { promisePool } = require('../models/database');
 const { clientElasticSearch, indexName } = require('../services/elastichsearch.service');
 
 /**
  * productId
  * callback
  */
-function getProductById(productId, callback) {
-    const query =
-        `SELECT product_id, name, price, sold, quantity_of_rating, rating, description, thumbnail, ` +
-        `(SELECT CONCAT('[',GROUP_CONCAT(CONCAT('"',url,'"')),']') FROM preview_images WHERE product_id=? GROUP BY product_id) AS urls, ` +
-        `(SELECT CONCAT('[',GROUP_CONCAT(CONCAT('{"sizeId":',phs.size_id,',"size":"',s.text,'","quantity":',phs.quantity,'}')),']') ` +
-        `FROM product_has_size phs INNER JOIN sizes s ON phs.size_id=s.size_id WHERE phs.product_id=? GROUP BY phs.product_id) AS sizes ` +
-        `FROM products WHERE product_id=?`;
-    connection.query(query, [productId, productId, productId], (err, results) => {
-        if (err) {
-            return callback(err, null);
-        }
-
-        callback(null, results[0]);
-    });
+async function getProductById(productId) {
+    try {
+        const query =
+            `SELECT product_id, name, price, sold, quantity_of_rating, rating, description, thumbnail, ` +
+            `(SELECT CONCAT('[',GROUP_CONCAT(CONCAT('"',url,'"')),']') FROM preview_images WHERE product_id=? GROUP BY product_id) AS urls, ` +
+            `(SELECT CONCAT('[',GROUP_CONCAT(CONCAT('{"sizeId":',phs.size_id,',"size":"',s.text,'","quantity":',phs.quantity,'}')),']') ` +
+            `FROM product_has_size phs INNER JOIN sizes s ON phs.size_id=s.size_id WHERE phs.product_id=? GROUP BY phs.product_id) AS sizes ` +
+            `FROM products WHERE product_id=?`;
+        // TODO: must use execute
+        const [rows, fields] = await promisePool.query(query, [
+            productId,
+            productId,
+            productId,
+        ]);
+        return rows?.[0];
+    } catch (error) {
+        throw error;
+    }
 }
 
 /**
  * list : body : []
  */
-function getProductsForCheckout(req, res) {
-    if (!req.body.list) {
-        return res.status(400).json({ success: 0 });
-    }
+async function getProductsForCheckout(req, res, next) {
     try {
-        req.body.list = JSON.parse(req.body.list);
-    } catch (err) {
-        console.log(err);
-        return res.status(400).json({ success: 0 });
-    }
-    if (!(req.body.list instanceof Array) || !req.body.list.length) {
-        return res.status(400).json({ success: 0 });
-    }
-
-    let query =
-        'SELECT product_id, name, price, thumbnail FROM products WHERE ' +
-        'product_id=? OR '.repeat(req.body.list.length).slice(0, -4);
-    connection.query(query, req.body.list, (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: 0, error: err });
+        if (!req.body.list) {
+            return res.status(400).json({ success: 0 });
         }
-        res.json({ success: 1, results: results });
-    });
+        try {
+            req.body.list = JSON.parse(req.body.list);
+        } catch (err) {
+            return res.status(400).json({ success: 0 });
+        }
+        if (!(req.body.list instanceof Array) || !req.body.list.length) {
+            return res.status(400).json({ success: 0 });
+        }
+
+        const query =
+            'SELECT product_id, name, price, thumbnail FROM products WHERE ' +
+            'product_id=? OR '.repeat(req.body.list.length).slice(0, -4);
+        // TODO: must use execute
+        const [rows, fields] = await promisePool.query(query, req.body.list);
+        res.json({ success: 1, results: rows });
+    } catch (error) {
+        return next(error);
+    }
 }
 
 /**
@@ -63,173 +63,163 @@ function getProductsForCheckout(req, res) {
  * minStar : body
  * orderBy : body : newest|priceASC|priceDESC|soldDESC|aoRatingDESC|ratingDESC
  */
-function getProductsByCategory(req, res) {
-    if (
-        (req.body.category != 'class' && req.body.category != 'line') ||
-        !req.body.page ||
-        isNaN(req.body.page)
-    ) {
-        return res.status(400).json({ success: 0 });
-    }
-    req.body.page = parseInt(req.body.page);
-    if (req.body.page < 0) {
-        return res.status(400).json({ success: 0 });
-    }
-
-    let query =
-        'SELECT SQL_CALC_FOUND_ROWS product_id, name, price, sold, rating, thumbnail FROM products WHERE ' +
-        req.body.category +
-        '_id=?';
-    let params = [req.params.categoryId];
-    if (req.body.minPrice && !isNaN(req.body.minPrice)) {
-        req.body.minPrice = parseInt(req.body.minPrice);
-        if (req.body.minPrice > 0) {
-            query += ' AND price>=?';
-            params.push(req.body.minPrice);
+async function getProductsByCategory(req, res, next) {
+    try {
+        if (
+            (req.body.category != 'class' && req.body.category != 'line') ||
+            !req.body.page ||
+            isNaN(req.body.page)
+        ) {
+            return res.status(400).json({ success: 0 });
         }
-    }
-    if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
-        req.body.maxPrice = parseInt(req.body.maxPrice);
-        if (req.body.maxPrice > 0) {
-            query += ' AND price<=?';
-            params.push(req.body.maxPrice);
-        }
-    }
-    if (req.body.minStar && !isNaN(req.body.minStar)) {
-        req.body.minStar = parseInt(req.body.minStar);
-        if (req.body.minStar >= 1 && req.body.minStar <= 5) {
-            query += ' AND rating>=?';
-            params.push(req.body.minStar);
-        }
-    }
-    switch (req.body.orderBy) {
-        case 'priceASC':
-            query += ' ORDER BY price ASC';
-            break;
-        case 'priceDESC':
-            query += ' ORDER BY price DESC';
-            break;
-        case 'soldDESC':
-            query += ' ORDER BY sold DESC';
-            break;
-        case 'qoRatingDESC':
-            query += ' ORDER BY quantity_of_rating DESC';
-            break;
-        case 'ratingDESC':
-            query += ' ORDER BY rating DESC';
-            break;
-        case 'newest':
-            query += ' ORDER BY created_at DESC';
-            break;
-        default:
-            query += ' ORDER BY created_at DESC';
-    }
-    query += ' LIMIT ?,15';
-    params.push((req.body.page - 1) * 15);
-
-    connection.query(query, params, (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: 0, error: err.code });
+        req.body.page = parseInt(req.body.page);
+        if (req.body.page < 0) {
+            return res.status(400).json({ success: 0 });
         }
 
-        const rows = results;
-        connection.query('SELECT FOUND_ROWS() as count', (err, results) => {
-            if (results[0].count) {
-                res.status(200).json({
-                    success: 1,
-                    results: rows,
-                    totalRows: results[0].count,
-                });
-            } else {
-                res.status(200).json({ success: 1, results: rows });
+        let query =
+            'SELECT SQL_CALC_FOUND_ROWS product_id, name, price, sold, rating, thumbnail FROM products WHERE ' +
+            req.body.category +
+            '_id=?';
+        let params = [req.params.categoryId];
+        if (req.body.minPrice && !isNaN(req.body.minPrice)) {
+            req.body.minPrice = parseInt(req.body.minPrice);
+            if (req.body.minPrice > 0) {
+                query += ' AND price>=?';
+                params.push(req.body.minPrice);
             }
+        }
+        if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
+            req.body.maxPrice = parseInt(req.body.maxPrice);
+            if (req.body.maxPrice > 0) {
+                query += ' AND price<=?';
+                params.push(req.body.maxPrice);
+            }
+        }
+        if (req.body.minStar && !isNaN(req.body.minStar)) {
+            req.body.minStar = parseInt(req.body.minStar);
+            if (req.body.minStar >= 1 && req.body.minStar <= 5) {
+                query += ' AND rating>=?';
+                params.push(req.body.minStar);
+            }
+        }
+        switch (req.body.orderBy) {
+            case 'priceASC':
+                query += ' ORDER BY price ASC';
+                break;
+            case 'priceDESC':
+                query += ' ORDER BY price DESC';
+                break;
+            case 'soldDESC':
+                query += ' ORDER BY sold DESC';
+                break;
+            case 'qoRatingDESC':
+                query += ' ORDER BY quantity_of_rating DESC';
+                break;
+            case 'ratingDESC':
+                query += ' ORDER BY rating DESC';
+                break;
+            case 'newest':
+                query += ' ORDER BY created_at DESC';
+                break;
+            default:
+                query += ' ORDER BY created_at DESC';
+        }
+        query += ' LIMIT ?,15';
+        params.push((req.body.page - 1) * 15);
+
+        // TODO: must use execute
+        const [rows, fields] = await promisePool.query(query, params);
+        const [counts, _] = await promisePool.execute('SELECT FOUND_ROWS() as count');
+        res.status(200).json({
+            success: 1,
+            results: rows,
+            totalRows: counts[0].count,
         });
-    });
+    } catch (error) {
+        return next(error);
+    }
 }
 
 /**
  * begin : body
  * quantity : body
  */
-function getNewProducts(req, res) {
-    if (
-        !req.body.begin ||
-        isNaN(req.body.begin) ||
-        !req.body.quantity ||
-        isNaN(req.body.quantity)
-    ) {
-        return res.status(400).json({ success: 0 });
+async function getNewProducts(req, res, next) {
+    try {
+        if (
+            !req.body.begin ||
+            isNaN(req.body.begin) ||
+            !req.body.quantity ||
+            isNaN(req.body.quantity)
+        ) {
+            return res.status(400).json({ success: 0 });
+        }
+
+        req.body.begin = parseInt(req.body.begin);
+        req.body.quantity = parseInt(req.body.quantity);
+
+        const query =
+            'SELECT product_id, name, price, sold, rating, thumbnail FROM products ORDER BY created_at DESC LIMIT ?,?';
+        // TODO: must use execute
+        const [rows, fields] = await promisePool.query(query, [
+            req.body.begin,
+            req.body.quantity,
+        ]);
+        res.json({ success: 1, results: rows });
+    } catch (error) {
+        return next(error);
     }
-
-    req.body.begin = parseInt(req.body.begin);
-    req.body.quantity = parseInt(req.body.quantity);
-
-    connection.query(
-        'SELECT product_id, name, price, sold, rating, thumbnail FROM products ORDER BY created_at DESC LIMIT ?,?',
-        [req.body.begin, req.body.quantity],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ success: 0, error: err.code });
-            }
-
-            res.json({ success: 1, results: results });
-        },
-    );
 }
 
-function getAllProductClasses(req, res) {
-    connection.query('SELECT * FROM product_classes', (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: 0, error: err.code });
-        }
-
-        res.json({ success: 1, results: results });
-    });
+async function getAllProductClasses(req, res, next) {
+    try {
+        const [rows, fields] = await promisePool.execute('SELECT * FROM product_classes');
+        res.json({ success: 1, results: rows });
+    } catch (error) {
+        return next(error);
+    }
 }
 
-function getAllProductLines(req, res) {
-    connection.query('SELECT * FROM product_lines', (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: 0, error: err.code });
-        }
-
-        res.json({ success: 1, results: results });
-    });
+async function getAllProductLines(req, res, next) {
+    try {
+        const [rows, fields] = await promisePool.execute('SELECT * FROM product_lines');
+        res.json({ success: 1, results: rows });
+    } catch (error) {
+        return next(error);
+    }
 }
 
 /**
  * classId : params
  */
-function getAllProductLinesByClass(req, res) {
-    connection.query(
-        'SELECT * FROM product_lines WHERE class_id=?',
-        [req.params.classId],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ success: 0, error: err.code });
-            }
-
-            res.json({ success: 1, results: results });
-        },
-    );
+async function getAllProductLinesByClass(req, res, next) {
+    try {
+        // TODO: must use execute
+        const [rows, fields] = await promisePool.query(
+            'SELECT * FROM product_lines WHERE class_id=?',
+            [req.params.classId],
+        );
+        res.json({ success: 1, results: rows });
+    } catch (error) {
+        return next(error);
+    }
 }
 
-function getAllCategories(req, res) {
-    connection.query(
-        `SELECT pc.class_id, pc.name, ` +
+async function getAllCategories(req, res, next) {
+    try {
+        const query =
+            `SELECT pc.class_id, pc.name, ` +
             `CONCAT("[",GROUP_CONCAT(CONCAT('{"lineId":"',pl.line_id,'","name":"',pl.name,'"}')),"]") AS product_lines ` +
             `FROM product_classes pc ` +
             `INNER JOIN product_lines pl ON pc.class_id = pl.class_id ` +
             `GROUP BY pc.class_id ` +
-            `ORDER BY pc.class_id ASC, pl.line_id ASC`,
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ success: 0, error: err.code });
-            }
-
-            res.json({ success: 1, results: results });
-        },
-    );
+            `ORDER BY pc.class_id ASC, pl.line_id ASC`;
+        const [rows, fields] = await promisePool.execute(query);
+        res.json({ success: 1, results: rows });
+    } catch (error) {
+        return next(error);
+    }
 }
 
 /**
@@ -243,141 +233,152 @@ function getAllCategories(req, res) {
  * minStar : body
  * orderBy : body : newest|priceASC|priceDESC|soldDESC|qoRatingDESC|ratingDESC
  */
-async function searchProductsByKeyword(req, res) {
-    if (req.body.keyword == '') {
-        return res.json({ success: 1, results: [], totalRows: 0 });
-    }
-    if (!req.body.keyword || !req.body.page || isNaN(req.body.page)) {
-        return res.status(400).json({ success: 0 });
-    }
-
-    req.body.page = parseInt(req.body.page);
-    if (req.body.page < 0) {
-        return res.status(400).json({ success: 0 });
-    }
-
-    const querySearch = {
-        query: {
-            // match_all: {},
-            match: {
-                name: 'q p',
-                // name: 'Quần kaki nam QKLTK302',
-            },
-        },
-        sort: [],
-    };
-
-    // if (req.body.classId) {
-    //     querySearch.query.classId = req.body.classId;
-    // }
-    // if (req.body.lineId) {
-    //     querySearch.query.lineId = req.body.lineId;
-    // }
-    // if (req.body.minPrice && !isNaN(req.body.minPrice)) {
-    //     req.body.minPrice = parseInt(req.body.minPrice);
-    //     if (req.body.minPrice > 0) {
-    //         querySearch.query.range.price = {
-    //             gte: req.body.minPrice,
-    //         };
-    //     }
-    // }
-    // if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
-    //     req.body.maxPrice = parseInt(req.body.maxPrice);
-    //     if (req.body.maxPrice > 0) {
-    //         querySearch.query.range.price = querySearch.query.range.price
-    //             ? { ...querySearch.query.range.price, lte: req.body.maxPrice }
-    //             : { lte: req.body.maxPrice };
-    //     }
-    // }
-    // if (req.body.minStar && !isNaN(req.body.minStar)) {
-    //     req.body.minStar = parseInt(req.body.minStar);
-    //     if (req.body.minStar >= 1 && req.body.minStar <= 5) {
-    //         querySearch.query.rating = {
-    //             gte: req.body.minStar,
-    //         };
-    //     }
-    // }
-    switch (req.body.orderBy) {
-        case 'priceASC':
-            querySearch.sort.push({
-                price: 'asc',
-            });
-            break;
-        case 'price':
-            querySearch.sort.push({
-                price: 'desc',
-            });
-            break;
-        case 'soldDESC':
-            querySearch.sort.push({
-                sold: 'desc',
-            });
-            break;
-        case 'qoRatingDESC':
-            querySearch.sort.push({
-                quantity_of_rating: 'desc',
-            });
-            break;
-        case 'ratingDESC':
-            querySearch.sort.push({
-                rating: 'desc',
-            });
-            break;
-        case 'newest':
-            querySearch.sort.push({
-                created_at: 'desc',
-            });
-            break;
-        default:
-            querySearch.sort.push({
-                created_at: 'desc',
-            });
-    }
-    if (req.body.page && !isNaN(req.body.page)) {
-        req.body.page = parseInt(req.body.page);
-        if (req.body.page > 0) {
-            querySearch.from = (req.body.page - 1) * 15;
-            querySearch.size = 15;
+async function searchProductsByKeyword(req, res, next) {
+    try {
+        if (req.body.keyword == '') {
+            return res.json({ success: 1, results: [], totalRows: 0 });
         }
-    }
+        if (!req.body.keyword || !req.body.page || isNaN(req.body.page)) {
+            return res.status(400).json({ success: 0 });
+        }
 
-    console.log(querySearch);
-    const result = await clientElasticSearch.search({
-        index: indexName,
-        body: querySearch,
-    });
-    console.log(result);
-    return res.json({
-        success: 1,
-        results: result.hits.hits.map((e) => e._source),
-        totalRows: result.hits.hits.length,
-    });
+        req.body.page = parseInt(req.body.page);
+        if (req.body.page < 0) {
+            return res.status(400).json({ success: 0 });
+        }
+
+        const querySearch = {
+            query: { bool: { must: [] } },
+            sort: [],
+        };
+
+        if (req.body.keyword) {
+            querySearch.query.bool.must.push({
+                bool: {
+                    should: [
+                        {
+                            match: { name: req.body.keyword },
+                        },
+                        {
+                            match: { description: req.body.keyword },
+                        },
+                    ],
+                },
+            });
+        }
+
+        // TODO: apply search class and line
+        // if (req.body.classId) {
+        //     querySearch.query.classId = req.body.classId;
+        // }
+        // if (req.body.lineId) {
+        //     querySearch.query.lineId = req.body.lineId;
+        // }
+        if (req.body.minPrice && !isNaN(req.body.minPrice)) {
+            req.body.minPrice = parseInt(req.body.minPrice);
+            if (req.body.minPrice > 0) {
+                querySearch.query.bool.must.push({
+                    range: { price: { gte: req.body.minPrice } },
+                });
+            }
+        }
+        if (req.body.maxPrice && !isNaN(req.body.maxPrice)) {
+            req.body.maxPrice = parseInt(req.body.maxPrice);
+            if (req.body.maxPrice > 0) {
+                querySearch.query.bool.must.push({
+                    range: { price: { lte: req.body.maxPrice } },
+                });
+            }
+        }
+        if (req.body.minStar && !isNaN(req.body.minStar)) {
+            req.body.minStar = parseInt(req.body.minStar);
+            if (req.body.minStar >= 1 && req.body.minStar <= 5) {
+                querySearch.query.bool.must.push({
+                    range: { rating: { gte: req.body.minStar } },
+                });
+            }
+        }
+        switch (req.body.orderBy) {
+            case 'priceASC':
+                querySearch.sort.push({
+                    price: { order: 'asc' },
+                });
+                break;
+            case 'priceDESC':
+                querySearch.sort.push({
+                    price: { order: 'desc' },
+                });
+                break;
+            case 'soldDESC':
+                querySearch.sort.push({
+                    sold: { order: 'desc' },
+                });
+                break;
+            case 'qoRatingDESC':
+                querySearch.sort.push({
+                    quantity_of_rating: { order: 'desc' },
+                });
+                break;
+            case 'ratingDESC':
+                querySearch.sort.push({
+                    rating: { order: 'desc' },
+                });
+                break;
+            case 'newest':
+                querySearch.sort.push({
+                    created_at: { order: 'desc' },
+                });
+                break;
+            default:
+                querySearch.sort.push({
+                    created_at: { order: 'desc' },
+                });
+        }
+        if (req.body.page && !isNaN(req.body.page)) {
+            req.body.page = parseInt(req.body.page);
+            if (req.body.page > 0) {
+                querySearch.from = (req.body.page - 1) * 15;
+                querySearch.size = 15;
+            }
+        }
+
+        const result = await clientElasticSearch.search({
+            index: indexName,
+            body: querySearch,
+        });
+        return res.json({
+            success: 1,
+            results: result.hits.hits.map((e) => e._source),
+            totalRows: result.hits.total.value,
+        });
+    } catch (error) {
+        return next(error);
+    }
 }
 
 /**
  * productId : params
  */
-function getAllRatingsOfProduct(req, res) {
-    connection.query(
-        'SELECT u.user_id, r.star, r.comment, r.created_at, u.name ' +
-            'FROM ratings r ' +
-            'INNER JOIN users u ON r.user_id=u.user_id ' +
-            'WHERE r.product_id=? ' +
-            'GROUP BY r.rating_id ' +
-            'ORDER BY r.created_at DESC',
-        [req.params.productId],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ success: 0, error: err.code });
-            }
-
-            res.json({
-                success: 1,
-                results: results,
-                userId: req.session.userId,
-            });
-        },
-    );
+async function getAllRatingsOfProduct(req, res, next) {
+    try {
+        // TODO: must use execute
+        const [rows, fields] = await promisePool.query(
+            'SELECT u.user_id, r.star, r.comment, r.created_at, u.name ' +
+                'FROM ratings r ' +
+                'INNER JOIN users u ON r.user_id=u.user_id ' +
+                'WHERE r.product_id=? ' +
+                'GROUP BY r.rating_id ' +
+                'ORDER BY r.created_at DESC',
+            [req.params.productId],
+        );
+        res.json({
+            success: 1,
+            results: rows,
+            userId: req.session.userId,
+        });
+    } catch (error) {
+        return next(error);
+    }
 }
 
 /**
@@ -385,69 +386,52 @@ function getAllRatingsOfProduct(req, res) {
  * star : body
  * comment : body
  */
-function insertUserRating(req, res) {
-    if (!req.body.comment || isNaN(req.body.star)) {
-        return res.status(400).json({ success: 0 });
-    }
-    req.body.star = parseInt(req.body.star);
-
-    const userId = req.session.userId;
-    checkUserBoughtProduct(userId, req.params.productId, (err, bought) => {
-        if (err) {
-            return res.status(500).json({ success: 0, error: err.code });
+async function insertUserRating(req, res, next) {
+    try {
+        if (!req.body.comment || isNaN(req.body.star)) {
+            return res.status(400).json({ success: 0 });
         }
+        req.body.star = parseInt(req.body.star);
+
+        const userId = req.session.userId;
+
+        const bought = await checkUserBoughtProduct(userId, req.params.productId);
         if (!bought) {
             return res.json({ success: 0, code: 'not-buy' });
         }
 
-        connection.query(
+        // TODO: must use execute
+        const [rows, fields] = await promisePool.query(
             'SELECT rating_id FROM ratings WHERE user_id=? AND product_id=?',
             [userId, req.params.productId],
-            (err, results) => {
-                if (err) {
-                    return res.status(500).json({ success: 0, error: err.code });
-                }
-                if (results.length > 0) {
-                    return res.json({ success: 0, code: 'rating-exist' });
-                }
-
-                connection.query(
-                    'INSERT INTO ratings (user_id, product_id, star, comment) VALUES (?,?,?,?)',
-                    [userId, req.params.productId, req.body.star, req.body.comment],
-                    (err, results) => {
-                        if (err) {
-                            return res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                        }
-
-                        res.json({ success: 1 });
-                    },
-                );
-            },
         );
-    });
+        if (rows.length > 0) {
+            return res.json({ success: 0, code: 'rating-exist' });
+        }
+
+        // TODO: must use execute
+        await promisePool.query(
+            'INSERT INTO ratings (user_id, product_id, star, comment) VALUES (?,?,?,?)',
+            [userId, req.params.productId, req.body.star, req.body.comment],
+        );
+        res.json({ success: 1 });
+    } catch (error) {
+        return next(error);
+    }
 }
 
-function checkUserBoughtProduct(userId, productId, callback) {
-    if (!userId) {
-        return callback(new Error('no-userId'), null);
+async function checkUserBoughtProduct(userId, productId, callback) {
+    try {
+        // TODO: must use execute
+        const [rows, fields] = await promisePool.query(
+            'SELECT bill_id FROM bills WHERE user_id=? AND bill_id IN ' +
+                '(SELECT bill_id FROM bill_has_product WHERE product_id=?)',
+            [userId, productId],
+        );
+        return rows.length !== 0;
+    } catch (error) {
+        throw error;
     }
-    connection.query(
-        'SELECT bill_id FROM bills WHERE user_id=? AND bill_id IN ' +
-            '(SELECT bill_id FROM bill_has_product WHERE product_id=?)',
-        [userId, productId],
-        (err, results) => {
-            if (err) {
-                return callback(err, null);
-            }
-            if (results.length == 0) {
-                return callback(null, false);
-            }
-            callback(null, true);
-        },
-    );
 }
 
 module.exports = {

@@ -7,16 +7,8 @@ const userController = require('../../controllers/user.controller');
 const router = express.Router();
 
 router.get('/', authMiddleware.verifyTokenGET, (req, res, next) => {
-    userController.getUserInformationForCheckout(req, (err, user) => {
-        if (err) {
-            return next(createError(err));
-        }
-        res.render('checkout', {
-            title: 'Thanh toán',
-            userName: user.name,
-            userPhone: user.phone,
-            userAddress: user.address,
-        });
+    res.render('checkout', {
+        title: 'Thanh toán',
     });
 });
 

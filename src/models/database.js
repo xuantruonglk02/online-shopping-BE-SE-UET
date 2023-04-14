@@ -1,48 +1,27 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
-const config = require('../config/database.config');
+let dbPool;
+let promisePool;
 
-var connection;
-var interval;
-
-connect();
-
-function connect() {
-    connection = mysql.createConnection(config);
-    connection.connect((err) => {
-        if (err) {
-            return console.log(err);
-        }
-        console.log('Connected to database.');
+try {
+    // Create the connection pool. The pool-specific settings are the defaults
+    dbPool = mysql.createPool({
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DATABASE,
+        waitForConnections: true,
+        connectionLimit: 10,
+        maxIdle: 10, // max idle connections, the default value is the same as `connectionLimit`
+        idleTimeout: 60000, // idle connections timeout, in milliseconds, the default value 60000
+        queueLimit: 0,
     });
-
-    interval = setInterval(() => {
-        connection.query('SELECT 1 FROM users WHERE false');
-    }, 50000);
-
-    connection.on('error', (err) => {
-        console.log('[database]', err);
-        clearInterval(interval);
-        setTimeout(() => {
-            console.log('Reconnecting to database...');
-            connect();
-        }, 10000);
-    });
-}
-
-function commitTransaction(connection, res) {
-    connection.commit((err) => {
-        if (err) {
-            return connection.rollback(() => {
-                return res.status(500).json({ success: 0, error: err.code });
-            });
-        }
-
-        res.json({ success: 1 });
-    });
+    promisePool = dbPool.promise();
+} catch (error) {
+    throw error;
 }
 
 module.exports = {
-    connection,
-    commitTransaction,
+    promisePool,
 };
