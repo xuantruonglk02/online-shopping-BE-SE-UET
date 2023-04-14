@@ -6,7 +6,7 @@ const {
     transporter,
     verificationEmailOptions,
     resetPasswordEmailOptions,
-} = require('../config/nodemailer.config');
+} = require('../services/nodemailer.service');
 const { promisePool } = require('../models/database');
 
 /**

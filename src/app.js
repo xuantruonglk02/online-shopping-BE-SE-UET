@@ -14,6 +14,7 @@ require('dotenv').config();
 require('./models/database');
 
 // connect services
+require('./services/nodemailer.service');
 require('./services/elastichsearch.service');
 const { redisStore } = require('./services/redis.service');
 
