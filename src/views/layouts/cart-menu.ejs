@@ -4,7 +4,7 @@
         <span class="cart-number" id="cart-number"></span>
         <script>
             $(document).ready(() => {
-                $.post('/api/cart/quantity', (data) => {
+                $.get('/api/cart/quantity', (data) => {
                     if (data.success) {
                         $('#cart-number').text(data.result.quantity);
                         if (data.result.quantity == 0) {
@@ -50,7 +50,7 @@
             $('#cart-menu-products').empty();
 
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 url: '/api/cart/menu',
                 success: function (data) {
                     if (!data.success) {

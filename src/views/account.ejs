@@ -39,7 +39,7 @@
               <span>Tên khách hàng</span>
             </div>
             <div class="account-right-row-right row">
-              <input type="text" id="name" value="<%= name %>" required disabled>
+              <input type="text" id="name" required disabled>
               <div class="account-right-row-btns row">
                 <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
                 <a href="#" onclick="return false" title="Lưu" data-url="/user/setting/change-email"><i class="fa-regular fa-circle-check"></i></a>
@@ -51,7 +51,7 @@
               <span>Email</span>
             </div>
             <div class="account-right-row-right row">
-              <input type="email" id="email" value="<%= email %>" required disabled>
+              <input type="email" id="email" required disabled>
               <div class="account-right-row-btns row">
                 <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
                 <a href="#" onclick="return false" title="Lưu" data-url="/user/setting/change-email"><i class="fa-regular fa-circle-check"></i></a>
@@ -63,7 +63,7 @@
               <span>Số điện thoại</span>
             </div>
             <div class="account-right-row-right row">
-              <input type="text" id="phone" value="<%= phone %>" required disabled>
+              <input type="text" id="phone" required disabled>
               <div class="account-right-row-btns row">
                 <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
                 <a href="#" onclick="return false" title="Lưu" data-url="/user/setting/change-phone"><i class="fa-regular fa-circle-check"></i></a>
@@ -75,7 +75,7 @@
               <span>Địa chỉ</span>
             </div>
             <div class="account-right-row-right row">
-              <input type="text" id="address" value="<%= address %>" required disabled>
+              <input type="text" id="address" required disabled>
               <div class="account-right-row-btns row">
                 <a href="#" onclick="return false" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
                 <a href="#" onclick="return false" title="Lưu" data-url="/user/setting/change-address"><i class="fa-regular fa-circle-check"></i></a>
@@ -101,6 +101,29 @@
             $('#field-name').val($(this).parents()[1].getElementsByTagName('input')[0].id);
             $('#field-value').val($(this).parents()[1].getElementsByTagName('input')[0].value);
             $('.account-submit-bg').css('display', 'flex');
+          });
+
+          $(document).ready(() => {
+            $.ajax({
+              type: 'GET',
+              url: '/api/user/account',
+              success: function (data) {
+                if (!data.success) {
+                  return;
+                }
+                document.getElementById('name').value = data.result.name;
+                document.getElementById('email').value = data.result.email;
+                document.getElementById('phone').value = data.result.phone;
+                document.getElementById('address').value = data.result.address;
+                $('#name').value = data.result.name;
+                $('#email').value = data.result.email;
+                $('#phone').value = data.result.phone;
+                $('#address').value = data.result.address;
+              },
+              error: function (data) {
+                console.log(data);
+              },
+            });
           });
         </script>
       </div>
@@ -167,7 +190,7 @@
         $('#submit-form').submit(false);
         ajaxStart();
         $.ajax({
-          type: 'POST',
+          type: 'PUT',
           url: '/api/user/setting/change-' + $('#field-name').val(),
           data: data,
           success: function (data) {

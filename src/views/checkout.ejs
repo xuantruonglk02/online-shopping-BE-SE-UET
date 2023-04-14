@@ -225,7 +225,7 @@
                                     <script>
                                         $(document).ready(() => {
                                             $.ajax({
-                                                type: 'POST',
+                                                type: 'GET',
                                                 url: '/api/product/checkout-info',
                                                 data: {
                                                     list: JSON.stringify(
@@ -464,7 +464,7 @@
                                                 success: function (data) {
                                                     if (data.success) {
                                                         $.ajax({
-                                                            type: 'POST',
+                                                            type: 'DELETE',
                                                             url: '/api/cart/remove-more',
                                                             data: {
                                                                 list: JSON.stringify(

@@ -438,7 +438,7 @@
                     <script>
                         $(document).ready(() => {
                             $.ajax({
-                                type: 'POST',
+                                type: 'GET',
                                 url: '/api' + window.location.pathname + '/rating',
                                 success: function (data) {
                                     if (data.success) {

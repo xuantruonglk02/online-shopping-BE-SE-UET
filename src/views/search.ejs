@@ -24,7 +24,7 @@
                         ></div>
                         <script>
                             $(document).ready(() => {
-                                $.post('/api/product/category/all', (data) => {
+                                $.get('/api/product/category/all', (data) => {
                                     if (!data.success) {
                                         return;
                                     }
@@ -219,7 +219,7 @@
                     <script>
                         $(document).ready(() => {
                             $.ajax({
-                                type: 'POST',
+                                type: 'GET',
                                 url: '/api/product/search',
                                 data: {
                                     keyword: params.get('keyword'),

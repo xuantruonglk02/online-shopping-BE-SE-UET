@@ -5,22 +5,19 @@ const productController = require('../../controllers/product.controller');
 
 const router = express.Router();
 
-router.post('/new', productController.getNewProducts);
-router.post('/category/all', productController.getAllCategories);
-router.post('/category/class/all', productController.getAllProductClasses);
-router.post('/category/line/all', productController.getAllProductLines);
-router.post(
-    '/category/class/:classId',
-    productController.getAllProductLinesByClass
-);
-router.post('/category/:categoryId', productController.getProductsByCategory);
-router.post('/search', productController.searchProductsByKeyword);
-router.post('/checkout-info', productController.getProductsForCheckout);
-router.post('/:productId/rating', productController.getAllRatingsOfProduct);
+router.get('/new', productController.getNewProducts);
+router.get('/category/all', productController.getAllCategories);
+router.get('/category/class/all', productController.getAllProductClasses);
+router.get('/category/line/all', productController.getAllProductLines);
+router.get('/category/class/:classId', productController.getAllProductLinesByClass);
+router.get('/category/:categoryId', productController.getProductsByCategory);
+router.get('/search', productController.searchProductsByKeyword);
+router.get('/checkout-info', productController.getProductsForCheckout);
+router.get('/:productId/rating', productController.getAllRatingsOfProduct);
 router.post(
     '/:productId/rate',
     authMiddleware.verifyTokenPOST,
-    productController.insertUserRating
+    productController.insertUserRating,
 );
 
 module.exports = router;

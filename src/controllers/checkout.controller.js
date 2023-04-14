@@ -1,3 +1,4 @@
+const createError = require('http-errors');
 const { promisePool } = require('../models/database');
 
 /**
@@ -79,7 +80,7 @@ async function checkout(req, res, next) {
     } catch (error) {
         await connection.rollback();
         promisePool.releaseConnection();
-        return next(error);
+        return next(createError(error));
     } finally {
         promisePool.releaseConnection();
     }

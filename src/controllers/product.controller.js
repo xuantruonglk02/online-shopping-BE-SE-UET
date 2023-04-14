@@ -1,3 +1,4 @@
+const createError = require('http-errors');
 const { promisePool } = require('../models/database');
 const { clientElasticSearch, indexName } = require('../services/elastichsearch.service');
 
@@ -49,7 +50,7 @@ async function getProductsForCheckout(req, res, next) {
         const [rows, fields] = await promisePool.query(query, req.body.list);
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -137,38 +138,38 @@ async function getProductsByCategory(req, res, next) {
             totalRows: counts[0].count,
         });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
 /**
- * begin : body
- * quantity : body
+ * begin : query
+ * quantity : query
  */
 async function getNewProducts(req, res, next) {
     try {
         if (
-            !req.body.begin ||
-            isNaN(req.body.begin) ||
-            !req.body.quantity ||
-            isNaN(req.body.quantity)
+            !req.query.begin ||
+            isNaN(req.query.begin) ||
+            !req.query.quantity ||
+            isNaN(req.query.quantity)
         ) {
             return res.status(400).json({ success: 0 });
         }
 
-        req.body.begin = parseInt(req.body.begin);
-        req.body.quantity = parseInt(req.body.quantity);
+        req.query.begin = parseInt(req.query.begin);
+        req.query.quantity = parseInt(req.query.quantity);
 
         const query =
             'SELECT product_id, name, price, sold, rating, thumbnail FROM products ORDER BY created_at DESC LIMIT ?,?';
         // TODO: must use execute
         const [rows, fields] = await promisePool.query(query, [
-            req.body.begin,
-            req.body.quantity,
+            req.query.begin,
+            req.query.quantity,
         ]);
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -177,7 +178,7 @@ async function getAllProductClasses(req, res, next) {
         const [rows, fields] = await promisePool.execute('SELECT * FROM product_classes');
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -186,7 +187,7 @@ async function getAllProductLines(req, res, next) {
         const [rows, fields] = await promisePool.execute('SELECT * FROM product_lines');
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -202,7 +203,7 @@ async function getAllProductLinesByClass(req, res, next) {
         );
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -218,7 +219,7 @@ async function getAllCategories(req, res, next) {
         const [rows, fields] = await promisePool.execute(query);
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -352,7 +353,7 @@ async function searchProductsByKeyword(req, res, next) {
             totalRows: result.hits.total.value,
         });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -377,7 +378,7 @@ async function getAllRatingsOfProduct(req, res, next) {
             userId: req.session.userId,
         });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -416,11 +417,11 @@ async function insertUserRating(req, res, next) {
         );
         res.json({ success: 1 });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
-async function checkUserBoughtProduct(userId, productId, callback) {
+async function checkUserBoughtProduct(userId, productId) {
     try {
         // TODO: must use execute
         const [rows, fields] = await promisePool.query(

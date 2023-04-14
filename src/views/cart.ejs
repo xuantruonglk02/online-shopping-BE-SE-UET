@@ -259,7 +259,7 @@
                         <script>
                             $(document).ready(() => {
                                 $.ajax({
-                                    type: 'POST',
+                                    type: 'GET',
                                     url: '/api/cart/all',
                                     success: function (data) {
                                         if (!data.success) {
@@ -363,7 +363,7 @@
                                 }
 
                                 $.ajax({
-                                    type: 'POST',
+                                    type: 'PUT',
                                     url: '/api/cart/update',
                                     data: {
                                         list: JSON.stringify(

@@ -1,3 +1,4 @@
+const createError = require('http-errors');
 const { promisePool } = require('../models/database');
 
 /**
@@ -64,7 +65,7 @@ async function addProduct(req, res, next) {
     } catch (error) {
         await connection.rollback();
         promisePool.releaseConnection();
-        return next(error);
+        return next(createError(error));
     } finally {
         promisePool.releaseConnection();
     }
@@ -141,7 +142,7 @@ async function modifyProduct(req, res, next) {
     } catch (error) {
         await connection.rollback();
         promisePool.releaseConnection();
-        return next(error);
+        return next(createError(error));
     } finally {
         promisePool.releaseConnection();
     }
@@ -164,7 +165,7 @@ async function removeProduct(req, res, next) {
 
         res.json({ success: 1 });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -197,7 +198,7 @@ async function addCategory(req, res, next) {
         await promisePool.query(query, params);
         res.json({ success: 1 });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
@@ -221,7 +222,7 @@ async function getBills(req, res, next) {
 
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(error);
+        return next(createError(error));
     }
 }
 
