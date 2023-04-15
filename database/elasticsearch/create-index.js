@@ -1,6 +1,6 @@
 require('dotenv').config();
-const { promisePool } = require('../src/models/database');
 const { Client } = require('@elastic/elasticsearch');
+const { promisePool } = require('../../src/models/database');
 
 const clientElasticSearch = new Client({
     node: `${process.env.ES_HOST}:${process.env.ES_PORT}`,
@@ -10,6 +10,24 @@ const indexSettings = {
     settings: {
         number_of_shards: 1,
         number_of_replicas: 0,
+        analysis: {
+            analyzer: {
+                vi_analyzer: {
+                    tokenizer: 'vi_tokenizer',
+                    filter: ['vi_stopwords', 'lowercase', 'ascii_folding'],
+                },
+            },
+            filter: {
+                vi_stopwords: {
+                    type: 'stop',
+                    stopwords: '_vietnamese_',
+                },
+                ascii_folding: {
+                    type: 'asciifolding',
+                    preserve_original: true,
+                },
+            },
+        },
     },
     mappings: {
         properties: {

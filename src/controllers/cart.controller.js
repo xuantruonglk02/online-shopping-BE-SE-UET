@@ -1,4 +1,3 @@
-const createError = require('http-errors');
 const { promisePool } = require('../models/database');
 const { redisClient } = require('../services/redis.service');
 
@@ -21,7 +20,7 @@ async function getQuantityOfProducts(req, res, next) {
         const products = await getProductsInCart(userId);
         return res.json({ success: 1, result: { quantity: products.length } });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -33,7 +32,7 @@ async function getAllProductsForCartMenu(req, res, next) {
         const products = await getProductByIds(productIds);
         res.json({ success: 1, results: products });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -73,7 +72,7 @@ async function addProduct(req, res, next) {
         await redisClient.hSet(`cart:${userId}`, `${productId}`, JSON.stringify(product));
         res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -148,7 +147,7 @@ async function updateProductInCart(req, res, next) {
         );
         res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -158,7 +157,7 @@ async function getAllProducts(req, res, next) {
         const products = await getProductsInCart(userId);
         res.json({ success: 1, results: products });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -180,7 +179,7 @@ async function removeProduct(req, res, next) {
         await redisClient.hDel(`cart:${userId}`, `${productId}`);
         return res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 

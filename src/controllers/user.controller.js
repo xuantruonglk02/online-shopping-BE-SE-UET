@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const validator = require('validator');
-const createError = require('http-errors');
 const { promisePool } = require('../models/database');
 
 async function getUserInformation(req, res, next) {
@@ -13,7 +12,7 @@ async function getUserInformation(req, res, next) {
         );
         res.json({ success: 1, result: rows?.[0] });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -46,7 +45,7 @@ async function changeName(req, res, next) {
 
         res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -92,7 +91,7 @@ async function changeEmail(req, res, next) {
 
         res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -138,7 +137,7 @@ async function changePhone(req, res, next) {
 
         res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -170,7 +169,7 @@ async function changeAddress(req, res, next) {
 
         res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -221,7 +220,7 @@ async function changePassword(req, res, next) {
 
         res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 

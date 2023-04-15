@@ -1,4 +1,3 @@
-const createError = require('http-errors');
 const { promisePool } = require('../models/database');
 const { clientElasticSearch, indexName } = require('../services/elastichsearch.service');
 
@@ -50,7 +49,7 @@ async function getProductsForCheckout(req, res, next) {
         const [rows, fields] = await promisePool.query(query, req.query.list);
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -137,7 +136,7 @@ async function getProductsByCategory(req, res, next) {
             totalRows: counts[0].count,
         });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -168,7 +167,7 @@ async function getNewProducts(req, res, next) {
         ]);
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -177,7 +176,7 @@ async function getAllProductClasses(req, res, next) {
         const [rows, fields] = await promisePool.execute('SELECT * FROM product_classes');
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -186,7 +185,7 @@ async function getAllProductLines(req, res, next) {
         const [rows, fields] = await promisePool.execute('SELECT * FROM product_lines');
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -202,7 +201,7 @@ async function getAllProductLinesByClass(req, res, next) {
         );
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -218,7 +217,7 @@ async function getAllCategories(req, res, next) {
         const [rows, fields] = await promisePool.execute(query);
         res.json({ success: 1, results: rows });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -352,7 +351,7 @@ async function searchProductsByKeyword(req, res, next) {
             totalRows: result.hits.total.value,
         });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -377,7 +376,7 @@ async function getAllRatingsOfProduct(req, res, next) {
             userId: req.session.userId,
         });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -416,7 +415,7 @@ async function insertUserRating(req, res, next) {
         );
         res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 

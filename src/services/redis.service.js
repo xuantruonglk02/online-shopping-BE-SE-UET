@@ -6,7 +6,7 @@ const RedisStore = require('connect-redis').default;
 const redisClient = redis.createClient();
 redisClient
     .connect()
-    .then(() => console.log('connect to redis server successfully'))
+    .then(() => console.log('Redis: Connect to server successfully'))
     .catch(console.error);
 
 // Initialize store.

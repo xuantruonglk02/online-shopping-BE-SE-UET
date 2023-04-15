@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const crypto = require('crypto');
-const createError = require('http-errors');
 const {
     transporter,
     verificationEmailOptions,
@@ -37,7 +36,7 @@ async function login(req, res, next) {
         req.session.admin = rows?.[0].admin;
         res.json({ success: 1, redirect: '/' });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -72,7 +71,7 @@ async function registerEmail(req, res, next) {
 
         return res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -132,7 +131,7 @@ async function createAccount(req, res, next) {
             redirect: '/',
         });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -168,7 +167,7 @@ async function forgetPassword(req, res, next) {
 
         return res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
@@ -221,7 +220,7 @@ async function resetPassword(req, res, next) {
 
         res.json({ success: 1 });
     } catch (error) {
-        return next(createError(error));
+        return next(error);
     }
 }
 
