@@ -13,18 +13,10 @@ const indexSettings = {
         analysis: {
             analyzer: {
                 vi_analyzer: {
-                    tokenizer: 'vi_tokenizer',
-                    filter: ['vi_stopwords', 'lowercase', 'ascii_folding'],
-                },
-            },
-            filter: {
-                vi_stopwords: {
-                    type: 'stop',
-                    stopwords: '_vietnamese_',
-                },
-                ascii_folding: {
-                    type: 'asciifolding',
-                    preserve_original: true,
+                    type: 'custom',
+                    tokenizer: 'standard',
+                    char_filter: ['html_strip'],
+                    filter: ['icu_folding'],
                 },
             },
         },

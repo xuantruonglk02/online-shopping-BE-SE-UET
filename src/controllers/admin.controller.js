@@ -1,4 +1,5 @@
 const { promisePool } = require('../models/database');
+const { clientElasticSearch, indexName } = require('../services/elastichsearch.service');
 
 /**
  * lineId
@@ -58,6 +59,21 @@ async function addProduct(req, res, next) {
             [],
         );
         await connection.query(query, params);
+
+        await clientElasticSearch.index({
+            index: indexName,
+            body: {
+                product_id: productId,
+                name: req.body.name,
+                price: req.body.price,
+                sold: 0,
+                quantity_of_rating: 0,
+                rating: null,
+                description: req.body.description,
+                thumbnail: req.body.thumbnail,
+                created_at: new Date(),
+            },
+        });
 
         await connection.commit();
         return res.json({ success: 1 });

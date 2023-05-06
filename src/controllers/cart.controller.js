@@ -186,6 +186,7 @@ async function removeProduct(req, res, next) {
 async function getProductsInCart(userId) {
     try {
         const cart = await redisClient.hGetAll(`cart:${userId}`);
+        console.log(cart);
         const products = Object.entries(cart).map(([productId, objString]) => ({
             ...JSON.parse(objString),
             productId,

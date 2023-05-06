@@ -326,7 +326,7 @@
                                                         e.price * e.quantity
                                                     ) +
                                                     '</span>' +
-                                                    '</td><td class="remove-ctn"><a href="#" onclick="return false"><i class="fa-solid fa-xmark"></i></a></td></tr>'
+                                                    '</td><td class="remove-ctn"><a href="#" onclick="removeProduct(' + e.productId + '); return false;"><i class="fa-solid fa-xmark"></i></a></td></tr>'
                                             );
                                         });
                                     },
@@ -397,6 +397,27 @@
                                     },
                                 });
                             });
+                            
+                            function removeProduct(productId) {
+                                $.ajax({
+                                    type: 'DELETE',
+                                    url: '/api/cart/remove',
+                                    data: {
+                                        productId
+                                    },
+                                    success: function (data) {
+                                        if (data.success) {
+                                            alert('Thành công');
+                                        } else {
+                                            alert('Đã có lỗi xảy ra');
+                                        }
+                                    },
+                                    error: function (data) {
+                                        console.log(data);
+                                        alert('Đã có lỗi xảy ra');
+                                    },
+                                });
+                            }
                         </script>
                     </div>
                 </div>
