@@ -39,8 +39,7 @@ function checkout(req, res, next) {
 
     connection.beginTransaction((err) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return next(err);
         }
 
         let query =
@@ -55,8 +54,7 @@ function checkout(req, res, next) {
         connection.query(query, params, (err, results) => {
             if (err) {
                 return connection.rollback(() => {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return next(err);
                 });
             }
             if (results.length > 0) {
@@ -83,11 +81,7 @@ function checkout(req, res, next) {
                 (err, results) => {
                     if (err) {
                         return connection.rollback(() => {
-                            res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                            return next(new Error(err));
+                            return next(err);
                         });
                     }
 
@@ -107,11 +101,7 @@ function checkout(req, res, next) {
                     connection.query(query, params, (err, results) => {
                         if (err) {
                             return connection.rollback(() => {
-                                res.status(500).json({
-                                    success: 0,
-                                    error: err.code,
-                                });
-                                return next(new Error(err));
+                                return next(err);
                             });
                         }
 

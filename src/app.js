@@ -5,6 +5,10 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const winston = require('winston');
 const expressWinston = require('express-winston');
+const {
+    ApiNotFoundErrorResponse,
+    InternalServerErrorResponse,
+} = require('./helpers/responses');
 
 // load .env
 require('dotenv').config();
@@ -79,11 +83,19 @@ app.use(
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
+    if (req.url.slice(0, 5) === '/api/') {
+        return res.json(ApiNotFoundErrorResponse());
+    }
+
     next(createError(404));
 });
 
 // error handler
 app.use(function (err, req, res, next) {
+    if (req.url.slice(0, 5) === '/api/') {
+        return res.json(InternalServerErrorResponse());
+    }
+
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};

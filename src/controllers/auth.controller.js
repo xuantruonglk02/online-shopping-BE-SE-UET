@@ -24,8 +24,7 @@ function login(req, res, next) {
         [req.body.username],
         async (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
 
             if (!results.length) {
@@ -76,8 +75,7 @@ function registerEmail(req, res, next) {
         [req.body.email],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
             if (results[0].exist) {
                 return res.status(409).json({ success: 0, code: 'exist' });
@@ -85,8 +83,7 @@ function registerEmail(req, res, next) {
 
             crypto.randomBytes(30, (err, buffer) => {
                 if (err) {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return next(err);
                 }
 
                 const token = buffer.toString('hex');
@@ -94,11 +91,7 @@ function registerEmail(req, res, next) {
                     verificationEmailOptions(req.body.email, token),
                     (err, info) => {
                         if (err) {
-                            res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                            return next(new Error(err));
+                            return next(err);
                         }
 
                         connection.query(
@@ -106,11 +99,7 @@ function registerEmail(req, res, next) {
                             [req.body.email, token],
                             (err, results) => {
                                 if (err) {
-                                    res.status(500).json({
-                                        success: 0,
-                                        error: err.code,
-                                    });
-                                    return next(new Error(err));
+                                    return next(err);
                                 }
 
                                 res.json({ success: 1 });
@@ -154,8 +143,7 @@ function createAccount(req, res, next) {
         [req.body.email, req.body.token],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
 
             if (!results.length) {
@@ -177,8 +165,7 @@ function createAccount(req, res, next) {
                 [req.body.email, req.body.phone],
                 async (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return next(err);
                     }
 
                     if (results[0].exist) {
@@ -195,11 +182,7 @@ function createAccount(req, res, next) {
                         'INSERT INTO carts VALUES(DEFAULT, DEFAULT)',
                         (err, results) => {
                             if (err) {
-                                res.status(500).json({
-                                    success: 0,
-                                    error: err.code,
-                                });
-                                return next(new Error(err));
+                                return next(err);
                             }
 
                             const cartId = results.insertId;
@@ -214,11 +197,7 @@ function createAccount(req, res, next) {
                                 ],
                                 (err, results) => {
                                     if (err) {
-                                        res.status(500).json({
-                                            success: 0,
-                                            error: err.code,
-                                        });
-                                        return next(new Error(err));
+                                        return next(err);
                                     }
 
                                     const token = jwt.sign(
@@ -273,8 +252,7 @@ function forgetPassword(req, res, next) {
         [req.body.email],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
             if (results.length == 0) {
                 return res
@@ -286,8 +264,7 @@ function forgetPassword(req, res, next) {
 
             crypto.randomBytes(30, (err, buffer) => {
                 if (err) {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return next(err);
                 }
 
                 const token = buffer.toString('hex');
@@ -295,11 +272,7 @@ function forgetPassword(req, res, next) {
                     resetPasswordEmailOptions(req.body.email, token),
                     (err, info) => {
                         if (err) {
-                            res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                            return next(new Error(err));
+                            return next(err);
                         }
 
                         connection.query(
@@ -307,11 +280,7 @@ function forgetPassword(req, res, next) {
                             [userId, req.body.email, 0, token],
                             (err, results) => {
                                 if (err) {
-                                    res.status(500).json({
-                                        success: 0,
-                                        error: err.code,
-                                    });
-                                    return next(new Error(err));
+                                    return next(err);
                                 }
 
                                 res.json({ success: 1 });
@@ -348,8 +317,7 @@ function resetPassword(req, res, next) {
         [req.body.email, req.body.token],
         async (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
             if (!results.length) {
                 return res
@@ -373,8 +341,7 @@ function resetPassword(req, res, next) {
                 [hash, userId],
                 (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return next(err);
                     }
 
                     res.json({ success: 1 });

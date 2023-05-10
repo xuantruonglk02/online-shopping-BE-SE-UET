@@ -47,7 +47,7 @@ function getProductsForCheckout(req, res, next) {
         'product_id=? OR '.repeat(req.body.list.length).slice(0, -4);
     connection.query(query, req.body.list, (err, results) => {
         if (err) {
-            return res.status(500).json({ success: 0, error: err });
+            return next(err);
         }
         res.json({ success: 1, results: results });
     });
@@ -129,8 +129,7 @@ function getProductsByCategory(req, res, next) {
 
     connection.query(query, params, (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return next(err);
         }
 
         const rows = results;
@@ -170,8 +169,7 @@ function getNewProducts(req, res, next) {
         [req.body.begin, req.body.quantity],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
 
             res.json({ success: 1, results: results });
@@ -182,8 +180,7 @@ function getNewProducts(req, res, next) {
 function getAllProductClasses(req, res, next) {
     connection.query('SELECT * FROM product_classes', (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return next(err);
         }
 
         res.json({ success: 1, results: results });
@@ -193,8 +190,7 @@ function getAllProductClasses(req, res, next) {
 function getAllProductLines(req, res, next) {
     connection.query('SELECT * FROM product_lines', (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return next(err);
         }
 
         res.json({ success: 1, results: results });
@@ -210,8 +206,7 @@ function getAllProductLinesByClass(req, res, next) {
         [req.params.classId],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
 
             res.json({ success: 1, results: results });
@@ -229,8 +224,7 @@ function getAllCategories(req, res, next) {
             `ORDER BY pc.class_id ASC, pl.line_id ASC`,
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
 
             res.json({ success: 1, results: results });
@@ -321,8 +315,7 @@ function searchProductsByKeyword(req, res, next) {
 
     connection.query(query, params, (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return next(err);
         }
 
         const rows = results;
@@ -354,8 +347,7 @@ function getAllRatingsOfProduct(req, res, next) {
         [req.params.productId],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
 
             res.json({
@@ -381,8 +373,7 @@ function insertUserRating(req, res, next) {
     const userId = getUserId(req.cookies['x-access-token']);
     checkUserBoughtProduct(userId, req.params.productId, (err, bought) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return next(err);
         }
         if (!bought) {
             return res.json({ success: 0, code: 'not-buy' });
@@ -393,8 +384,7 @@ function insertUserRating(req, res, next) {
             [userId, req.params.productId],
             (err, results) => {
                 if (err) {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return next(err);
                 }
                 if (results.length > 0) {
                     return res.json({ success: 0, code: 'rating-exist' });
@@ -410,11 +400,7 @@ function insertUserRating(req, res, next) {
                     ],
                     (err, results) => {
                         if (err) {
-                            res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                            return next(new Error(err));
+                            return next(err);
                         }
 
                         res.json({ success: 1 });

@@ -9,8 +9,7 @@ function getQuantityOfProducts(req, res, next) {
         [cartId],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
 
             res.json({ success: 1, result: results[0] });
@@ -29,8 +28,7 @@ function getAllProductsForCartMenu(req, res, next) {
         'GROUP BY chp.product_id';
     connection.query(query, [cartId], (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return next(err);
         }
 
         res.json({ success: 1, results: results });
@@ -50,8 +48,7 @@ function getAllProducts(req, res, next) {
         'ORDER BY chp.created_at DESC';
     connection.query(query, [cartId], (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return next(err);
         }
 
         res.json({ success: 1, results: results });
@@ -82,8 +79,7 @@ function addProduct(req, res, next) {
         [cartId],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
             if (results[0].quantity + req.body.quantity > 30) {
                 return res
@@ -101,8 +97,7 @@ function addProduct(req, res, next) {
                 ],
                 (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return next(err);
                     }
 
                     res.json({ success: 1 });
@@ -160,8 +155,7 @@ function updateCart(req, res, next) {
             [cartId],
             (err, results) => {
                 if (err) {
-                    res.status(500).json({ success: 0, error: err.code });
-                    return next(new Error(err));
+                    return next(err);
                 }
 
                 return res.json({ success: 1 });
@@ -170,8 +164,7 @@ function updateCart(req, res, next) {
     } else {
         connection.beginTransaction((err) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
 
             connection.query(
@@ -179,8 +172,7 @@ function updateCart(req, res, next) {
                 [cartId],
                 (err, results) => {
                     if (err) {
-                        res.status(500).json({ success: 0, error: err.code });
-                        return next(new Error(err));
+                        return next(err);
                     }
 
                     let query =
@@ -198,11 +190,7 @@ function updateCart(req, res, next) {
                     );
                     connection.query(query, params, (err, results) => {
                         if (err) {
-                            res.status(500).json({
-                                success: 0,
-                                error: err.code,
-                            });
-                            return next(new Error(err));
+                            return next(err);
                         }
 
                         return commitTransaction(connection, res);
@@ -229,8 +217,7 @@ function removeProduct(req, res, next) {
         [cartId, req.body.productId, req.body.sizeId],
         (err, results) => {
             if (err) {
-                res.status(500).json({ success: 0, error: err.code });
-                return next(new Error(err));
+                return next(err);
             }
 
             res.json({ success: 1 });
@@ -273,8 +260,7 @@ function removeProducts(req, res, next) {
     const cartId = getCartId(req.cookies['x-access-token']);
     connection.query(query, [cartId].concat(params), (err, results) => {
         if (err) {
-            res.status(500).json({ success: 0, error: err.code });
-            return next(new Error(err));
+            return next(err);
         }
 
         res.json({ success: 1 });
