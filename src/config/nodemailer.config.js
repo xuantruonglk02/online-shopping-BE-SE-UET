@@ -36,7 +36,7 @@ function orderEmailOptions(_to, _id) {
         to: _to,
         subject: `Xác nhận đơn hàng ${_id}.`,
         text: `Xác nhận đơn hàng ${_id}.`,
-        html: `<p>Xem chi tiết tại <a href="${process.env.WEB_DOMAIN}/order/${_id}">đây</a>.</p>`,
+        html: `<p>Cảm ơn bạn đã đặt hàng.</p>`,
     };
 }
 

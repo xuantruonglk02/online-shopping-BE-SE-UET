@@ -1,6 +1,9 @@
 const { connection, commitTransaction } = require('../models/database');
 const { getUserId } = require('../controllers/user.controller');
-const { orderEmailOptions } = require('../config/nodemailer.config');
+const {
+    transporter,
+    orderEmailOptions,
+} = require('../config/nodemailer.config');
 
 /**
  * userName : body
@@ -106,12 +109,15 @@ function checkout(req, res, next) {
                             });
                         }
 
-                        commitTransaction(connection, res);
-
+                        console.log(req.loggedUser.email, billId);
                         transporter.sendMail(
                             orderEmailOptions(req.loggedUser.email, billId),
-                            (err, info) => {}
+                            (err, info) => {
+                                console.log(err, info);
+                            }
                         );
+
+                        commitTransaction(connection, res);
                     });
                 }
             );

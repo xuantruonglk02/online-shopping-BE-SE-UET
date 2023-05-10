@@ -27,7 +27,7 @@ function verifyTokenPOST(req, res, next) {
                 .status(401)
                 .json({ success: 0, redirect: '/auth/login' });
         }
-
+        req.loggedUser = decoded;
         next();
     });
 }

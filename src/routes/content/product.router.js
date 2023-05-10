@@ -38,7 +38,6 @@ router.get('/:productId', (req, res, next) => {
                     style: 'currency',
                     currency: 'VND',
                 }).format(result.price);
-                console.log(result);
                 res.render('product', {
                     title: result.name,
                     product: result,
