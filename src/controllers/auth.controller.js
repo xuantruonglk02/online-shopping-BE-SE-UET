@@ -20,7 +20,7 @@ function login(req, res, next) {
     }
 
     connection.query(
-        'SELECT user_id, cart_id, password, admin FROM users WHERE ? IN (phone, email)',
+        'SELECT user_id, cart_id, email, password, admin FROM users WHERE ? IN (phone, email)',
         [req.body.username],
         async (err, results) => {
             if (err) {
@@ -43,6 +43,7 @@ function login(req, res, next) {
                 {
                     userId: results[0].user_id,
                     cartId: results[0].cart_id,
+                    email: results[0].email,
                     admin: results[0].admin,
                 },
                 process.env.JWT_SECRET,
@@ -204,6 +205,7 @@ function createAccount(req, res, next) {
                                         {
                                             userId: results.insertId,
                                             cartId: cartId,
+                                            email: req.body.email,
                                             admin: 0,
                                         },
                                         process.env.JWT_SECRET,
