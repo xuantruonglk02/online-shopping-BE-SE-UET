@@ -92,6 +92,7 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
+    console.log(err);
     if (req.url.slice(0, 5) === '/api/') {
         return res.json(InternalServerErrorResponse());
     }
